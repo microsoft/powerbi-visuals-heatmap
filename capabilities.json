@@ -1,0 +1,96 @@
+{
+  "dataRoles": [
+    {
+      "name": "Category",
+      "kind": "Grouping",
+      "displayName": "Category"
+    },
+    {
+      "name": "Y",
+      "kind": "Measure",
+      "displayName": "Y"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "categorical": {
+        "categories": {
+          "for": {
+            "in": "Category"
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "bind": {
+                "to": "Y"
+              }
+            }
+          ]
+        }
+      },
+      "conditions": [
+        {
+          "Category": {
+            "max": 1
+          }
+        }
+      ]
+    }
+  ],
+  "objects": {
+    "general": {
+      "displayName": "General",
+      "properties": {
+        "colorbrewer": {
+          "type": {
+            "enumeration": [
+              { "value": "YlGn", "displayName": "YlGn" },
+              { "value": "YlGnBu", "displayName": "YlGnBu" },
+              { "value": "GnBu", "displayName": "GnBu" },
+              { "value": "BuGn", "displayName": "BuGn" },
+              { "value": "PuBuGn", "displayName": "PuBuGn" },
+              { "value": "PuBu", "displayName": "PuBu" },
+              { "value": "BuPu", "displayName": "BuPu" },
+              { "value": "RdPu", "displayName": "RdPu" },
+              { "value": "PuRd", "displayName": "PuRd" },
+              { "value": "OrRd", "displayName": "OrRd" },
+              { "value": "YlOrRd", "displayName": "YlOrRd" },
+              { "value": "YlOrBr", "displayName": "YlOrBr" },
+              { "value": "Purples", "displayName": "Purples" },
+              { "value": "Blues", "displayName": "Blues" },
+              { "value": "Greens", "displayName": "Greens" },
+              { "value": "Oranges", "displayName": "Oranges" },
+              { "value": "Reds", "displayName": "Reds" },
+              { "value": "Greys", "displayName": "Greys" },
+              { "value": "PuOr", "displayName": "PuOr" },
+              { "value": "BrBG", "displayName": "BrBG" },
+              { "value": "PRGn", "displayName": "PRGn" },
+              { "value": "PiYG", "displayName": "PiYG" },
+              { "value": "RdBu", "displayName": "RdBu" },
+              { "value": "RdGy", "displayName": "RdGy" },
+              { "value": "RdYlBu", "displayName": "RdYlBu" },
+              { "value": "Spectral", "displayName": "Spectral" },
+              { "value": "RdYlGn", "displayName": "RdYlGn" },
+              { "value": "Accent", "displayName": "Accent" },
+              { "value": "Dark2", "displayName": "Dark2" },
+              { "value": "Paired", "displayName": "Paired" },
+              { "value": "Pastel1", "displayName": "Paired1" },
+              { "value": "Pastel2", "displayName": "Paired2" },
+              { "value": "Set1", "displayName": "Set1" },
+              { "value": "Set2", "displayName": "Set2" },
+              { "value": "Set3", "displayName": "Set3" }
+            ]
+          },
+          "displayName": "Colorbrewer"
+        },
+        "buckets": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Buckets"
+        }
+      }
+    }
+  }
+}

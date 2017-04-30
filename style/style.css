@@ -1,0 +1,8 @@
+.svgTableHeatMap rect.bordered {
+  stroke: #E6E6E6;
+  stroke-width: 2px;
+}
+.svgTableHeatMap text.mono {
+  font-size: 12px;
+  fill: #aaa;
+}
