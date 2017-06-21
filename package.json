@@ -6,10 +6,7 @@
   "name": "TableHeatmap",
   "dependencies": {
     "d3": "3.5.5",
-    "jquery": "3.2.0",
-    "powerbi-visuals-utils-formattingutils": "0.4.0",
-    "powerbi-visuals-utils-tooltiputils": "0.3.0",
-    "powerbi-visuals-utils-svgutils": "1.0.0"
+    "jquery": "3.2.0"
   },
   "devDependencies": {
     "@types/d3": "3.5.37",
@@ -18,6 +15,7 @@
     "@types/jasmine": "2.2.30",
     "@types/jasmine-jquery": "1.5.27",
     "@types/lodash": "4.14.50",
+    "coveralls": "2.11.15",
     "jasmine": "2.5.3",
     "jasmine-core": "2.5.2",
     "jasmine-jquery": "2.1.1",
@@ -32,7 +30,13 @@
     "powerbi-visuals-tools": "1.5.0",
     "lodash": "4.16.2",
     "tslint": "4.4.2",
-    "tslint-microsoft-contrib": "4.0.0"
+    "tslint-microsoft-contrib": "4.0.0",
+    "powerbi-visuals-utils-formattingutils": "0.4.0",
+    "powerbi-visuals-utils-tooltiputils": "0.3.0",
+    "powerbi-visuals-utils-svgutils": "1.0.0",
+    "powerbi-visuals-utils-chartutils": "1.1.0",
+    "powerbi-visuals-utils-interactivityutils": "1.0.0",
+    "powerbi-visuals-utils-testutils": "1.0.1"
   },
   "scripts": {
     "postinstall": "pbiviz update 1.5.0",
