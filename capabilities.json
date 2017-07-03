@@ -41,6 +41,7 @@
   "objects": {
     "general": {
       "displayName": "General",
+      "displayNameKey": "Visual_General",
       "properties": {
         "colorbrewer": {
           "type": {
@@ -82,13 +83,15 @@
               { "value": "Set3", "displayName": "Set3" }
             ]
           },
-          "displayName": "Colorbrewer"
+          "displayName": "Colorbrewer",
+          "displayNameKey": "Visual_General_Colorbrewer"
         },
         "buckets": {
           "type": {
             "numeric": true
           },
-          "displayName": "Buckets"
+          "displayName": "Buckets",
+          "displayNameKey": "Visual_General_Buckets"
         }
       }
     }
