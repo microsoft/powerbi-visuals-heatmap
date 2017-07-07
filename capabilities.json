@@ -3,12 +3,14 @@
     {
       "name": "Category",
       "kind": "Grouping",
-      "displayName": "Category"
+      "displayName": "Category",
+      "displayNameKey": "Visual_Category"
     },
     {
       "name": "Y",
       "kind": "Measure",
-      "displayName": "Y"
+      "displayName": "Y",
+      "displayNameKey": "Visual_Y"
     }
   ],
   "dataViewMappings": [

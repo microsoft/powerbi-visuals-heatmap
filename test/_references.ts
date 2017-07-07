@@ -4,7 +4,7 @@
 /// <reference path="../node_modules/@types/jquery/index.d.ts" />
 
 // Power BI API
-/// <reference path="../.api/v1.5.0/PowerBI-visuals.d.ts" />
+/// <reference path="../.api/v1.7.0/PowerBI-visuals.d.ts" />
 
 // Power BI Extensibility
 /// <reference path="../node_modules/powerbi-visuals-utils-dataviewutils/lib/index.d.ts" />
