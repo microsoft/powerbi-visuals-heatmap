@@ -32,6 +32,7 @@
     "tslint": "4.4.2",
     "tslint-microsoft-contrib": "4.0.0",
     "powerbi-visuals-tools": "1.7.1",
+    "powerbi-visuals-utils-dataviewutils": "1.2.0",
     "powerbi-visuals-utils-formattingutils": "0.4.0",
     "powerbi-visuals-utils-tooltiputils": "0.3.0",
     "powerbi-visuals-utils-svgutils": "1.0.0",
@@ -40,7 +41,7 @@
     "powerbi-visuals-utils-testutils": "1.0.1"
   },
   "scripts": {
-    "postinstall": "pbiviz update 1.7.0",
+    "postinstall": "pbiviz update 1.6.0",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
