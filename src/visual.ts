@@ -71,6 +71,7 @@ module powerbi.extensibility.visual {
         private static ClsAll: string = "*";
         private static ClsCategoryX: string = "categoryX";
         private static ClsMono: string = "mono";
+        public static CLsHeatMapDataLabels = "heatMapDataLabels";
         private static ClsCategoryYLabel: string = "categoryYLabel";
         private static ClsCategoryXLabel: string = "categoryXLabel";
         private static ClsAxis: string = "axis";
@@ -336,14 +337,14 @@ module powerbi.extensibility.visual {
                     text: "123"
                 };
                 let textHeight: number = TextMeasurementService.estimateSvgTextHeight(textProperties);
-                let heatMapDataLables: d3.Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + "heatMapDataLabels");
+                let heatMapDataLables: d3.Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
                 let heatMapDataLablesData: d3.selection.Update<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight < gridSizeHeight && chartData.dataPoints);
 
                 heatMapDataLablesData
                     .enter()
                     .append("text")
-                    .classed("." + "heatMapDataLabels", true)
+                    .classed("." + TableHeatMap.CLsHeatMapDataLabels, true)
                     .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                         return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
                     })
