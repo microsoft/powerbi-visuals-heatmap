@@ -81,5 +81,29 @@ module powerbi.extensibility.visual.test {
                 }, DefaultTimeout);
             });
         });
+
+        it("data labels created", () => {
+            dataView.metadata.objects = {
+                labels: {
+                    show: true
+                }
+            };
+
+            visualBuilder.updateRenderTimeout(dataView, (done) => {
+                expect($(visualBuilder.mainElement.children(".heatMapDataLabels"))).toBeInDOM();
+                done();
+            }, DefaultTimeout);
+
+            dataView.metadata.objects = {
+                labels: {
+                    show: false
+                }
+            };
+
+            visualBuilder.updateRenderTimeout(dataView, (done) => {
+                expect($(visualBuilder.mainElement.children(".heatMapDataLabels"))).not.toBeInDOM();
+                done();
+            }, DefaultTimeout);
+        });
     });
 }

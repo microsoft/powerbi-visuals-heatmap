@@ -96,6 +96,47 @@
           "displayNameKey": "Visual_General_Buckets"
         }
       }
+    },
+    "labels": {
+      "displayName": "Data labels",
+      "displayNameKey": "Visual_DataPointsLabels",
+      "properties": {
+          "show": {
+              "displayName": "Show",
+              "displayNameKey": "Visual_Show",
+              "type": {
+                  "bool": true
+              }
+          },
+          "fill": {
+              "displayName": "Color",
+              "displayNameKey": "Visual_LabelsFill",
+              "type": {
+                  "fill": {
+                      "solid": {
+                          "color": true
+                      }
+                  }
+              }
+          },
+          "fontSize": {
+              "displayName": "Text Size",
+              "displayNameKey": "Visual_TextSize",
+              "type": {
+                  "formatting": {
+                      "fontSize": true
+                  }
+              }
+          },
+          "forceDisplay": {
+              "displayName": "Force display",
+              "displayNameKey": "Visual_Force_Display",
+              "description": "Display all labels anyway",
+              "type": {
+                  "bool": true
+              }
+          }
+      }
     }
   }
 }

@@ -1,15 +1,15 @@
 {
   "visual": {
     "name": "TableHeatMap",
-    "displayName": "Table Heatmap",
+    "displayName": "Table Heatmap 1.0.1",
     "guid": "TableHeatMap1443716069308",
     "visualClassName": "TableHeatMap",
-    "version": "0.2.6",
+    "version": "1.0.1",
     "description": "You can use this custom visual to build a table heat map that can be used to visualise and compare data values in an easy and intuitive way. You have a built-in option within this visual to specify the number of buckets used for splitting your data. Additionally, you can also customise it by choosing a colour scheme in line with your brand colours",
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-heatmap"
   },
-  "apiVersion": "1.7.0",
+  "apiVersion": "1.6.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
@@ -22,6 +22,7 @@
     "node_modules/globalize/lib/globalize.js",
     "node_modules/jquery/dist/jquery.min.js",
     "external/init.jquery.js",
+    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
     "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
     "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
     "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
