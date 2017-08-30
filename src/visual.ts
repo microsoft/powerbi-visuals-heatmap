@@ -33,8 +33,17 @@ module powerbi.extensibility.visual {
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import translate = powerbi.extensibility.utils.svg.translate;
+    import createLinearColorScale = powerbi.extensibility.utils.color.createLinearColorScale;
+    import LinearColorScale = powerbi.extensibility.utils.color.LinearColorScale;
     import Quantile = d3.scale.Quantile;
     import Update = d3.selection.Update;
+    import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
+
+    // powerbi.extensibility.utils.tooltip
+    import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
+    import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
+    import TooltipEnabledDataPoint = powerbi.extensibility.utils.tooltip.TooltipEnabledDataPoint;
+    import createTooltipServiceWrapper = powerbi.extensibility.utils.tooltip.createTooltipServiceWrapper;
 
     type D3Element =
         d3.selection.Update<any> |
@@ -59,13 +68,13 @@ module powerbi.extensibility.visual {
         };
 
         private host: IVisualHost;
-
+        private tooltipServiceWrapper: ITooltipServiceWrapper;
         private svg: d3.Selection<any>;
         private mainGraphics: d3.Selection<any>;
         private colors: IColorPalette;
         private dataView: DataView;
         private viewport: IViewport;
-        private margin: IMargin = {left: 10, right: 10, bottom: 15, top: 15};
+        private margin: IMargin = {left: 5, right: 10, bottom: 15, top: 10};
         private animationDuration: number = 1000;
 
         private static ClsAll: string = "*";
@@ -98,6 +107,7 @@ module powerbi.extensibility.visual {
         private static StTextAnchor: string = "text-anchor";
 
         private static ConstEnd: string = "end";
+        private static ConstBegin: string = "begin";
         private static ConstMiddle: string = "middle";
         private static Const0em: string = "0em";
         private static Const071em: string = ".71em";
@@ -162,8 +172,8 @@ module powerbi.extensibility.visual {
                     if (catMetaData.columns[j].isMeasure) {
                         let value: any = catTable.rows[i][j];
                         let valueStr: string;
+                        categoryY = catY[j] = catMetaData.columns[j].displayName;
                         if (value) {
-                            categoryY = catY[j] = catMetaData.columns[j].displayName;
                             if (catMetaData.columns[j].groupName) {
                                 categoryY += ": " + catMetaData.columns[j].groupName;
                                 catY[j] += ": " + catMetaData.columns[j].groupName;
@@ -189,7 +199,19 @@ module powerbi.extensibility.visual {
                         categoryX: categoryX,
                         categoryY: element.categoryY,
                         value: element.value,
-                        valueStr: element.valueStr
+                        valueStr: element.valueStr,
+                        tooltipInfo: [{
+                            displayName: `Category`,
+                            value: (categoryX || "null").toString()
+                        },
+                        {
+                            displayName: `Y`,
+                            value: (element.categoryY || "null").toString()
+                        },
+                        {
+                            displayName: `Value`,
+                            value: (element.value || "null").toString()
+                        }]
                     });
                 });
             }
@@ -212,6 +234,10 @@ module powerbi.extensibility.visual {
             this.svg = d3.select(options.element)
                 .append(TableHeatMap.HtmlObjSvg)
                 .classed(TableHeatMap.ClsNameSvgTableHeatMap, true);
+
+            this.tooltipServiceWrapper = createTooltipServiceWrapper(
+                this.host.tooltipService,
+                options.element);
         }
 
         public update(options: VisualUpdateOptions): void {
@@ -226,6 +252,8 @@ module powerbi.extensibility.visual {
             let width: number = options.viewport.width;
             let height: number = options.viewport.height;
 
+            // todo recalculate height depends on rows count on data set
+            // todo add overflow-x: scroll
             this.svg.attr({
                 width: width,
                 height: height
@@ -238,8 +266,67 @@ module powerbi.extensibility.visual {
             this.updateInternal(options);
         }
 
+        private getYAxisWidth(chartData: TableHeatMapChartData): number {
+            let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
+            maxLengthText = TableHeatMap.textLimit(maxLengthText, this.settings.yAxisLabels.maxTextSymbol);
+            return TextMeasurementService.measureSvgTextWidth({
+                fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
+                text: maxLengthText.trim(),
+                fontFamily: this.mainGraphics.style("font-family")
+            });
+        }
+
+        private getXAxisHeight(chartData: TableHeatMapChartData): number {
+            let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
+            return TextMeasurementService.measureSvgTextHeight({
+                fontSize: PixelConverter.toString(this.settings.xAxisLabels.fontSize),
+                text: maxLengthText.trim(),
+                fontFamily: this.mainGraphics.style("font-family")
+            });
+        }
+
+        private getYAxisHeight(chartData: TableHeatMapChartData): number {
+            let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
+            return TextMeasurementService.measureSvgTextHeight({
+                fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
+                text: maxLengthText.trim(),
+                fontFamily: this.mainGraphics.style("font-family")
+            });
+        }
+
         private static parseSettings(dataView: DataView): TableHeatmapSettings {
-            return TableHeatmapSettings.parse<TableHeatmapSettings>(dataView);
+            let settings: TableHeatmapSettings = TableHeatmapSettings.parse<TableHeatmapSettings>(dataView);
+            if (!settings.general.enableColorbrewer) {
+                if (settings.general.buckets > 18) {
+                    settings.general.buckets = 18;
+                }
+                if (settings.general.buckets < 1) {
+                    settings.general.buckets = 1;
+                }
+            } else {
+                if (settings.general.colorbrewer === "") {
+                    settings.general.colorbrewer = "Reds";
+                }
+                let colorbrewerArray: IColorArray = colorbrewer[settings.general.colorbrewer];
+                let  minBucketNum: number = 0;
+                let  maxBucketNum: number = 0;
+                for (let bucketIndex: number = 1; bucketIndex < 14; bucketIndex++) {
+                    if (minBucketNum === 0 && (colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString()) ) {
+                        minBucketNum = bucketIndex;
+                    }
+                    if ((colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString()) ) {
+                        maxBucketNum = bucketIndex;
+                    }
+                }
+
+                if (settings.general.buckets > maxBucketNum) {
+                    settings.general.buckets = maxBucketNum;
+                }
+                if (settings.general.buckets < minBucketNum) {
+                    settings.general.buckets = minBucketNum;
+                }
+            }
+            return settings;
         }
 
         private updateInternal(options: VisualUpdateOptions): void {
@@ -256,64 +343,101 @@ module powerbi.extensibility.visual {
 
                 let numBuckets: number = this.settings.general.buckets;
                 let colorbrewerScale: string = this.settings.general.colorbrewer;
+                let colorbrewerEnable: boolean = this.settings.general.enableColorbrewer;
                 let colors: Array<string>;
-                if (colorbrewerScale) {
-                    let currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                    colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
-                }
-                else {
-                    colors = colorbrewer.Reds[numBuckets];	// default color scheme
+                if (colorbrewerEnable) {
+                    if (colorbrewerScale) {
+                        let currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
+                        colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
+                    }
+                    else {
+                        colors = colorbrewer.Reds[numBuckets];	// default color scheme
+                    }
+                } else {
+                    let startColor: string = this.settings.general.gradientStart;
+                    let endColor: string = this.settings.general.gradientEnd;
+                    let colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
+                    colors = [];
+
+                    for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
+                        colors.push(colorScale(bucketIndex));
+                    }
                 }
 
                 let colorScale: Quantile<string> = d3.scale.quantile<string>()
                     .domain([minDataValue, maxDataValue])
                     .range(colors);
 
-                let gridSizeWidth: number = Math.floor(this.viewport.width / (chartData.categoryX.length + 1));
-                gridSizeWidth = gridSizeWidth > TableHeatMap.ConstGridSizeWidthLimit ? TableHeatMap.ConstGridSizeWidthLimit : gridSizeWidth;
+                let xAxisHeight = this.getXAxisHeight(chartData);
+                let yAxisWidth = this.getYAxisWidth(chartData);
+                let yAxisHeight = this.getYAxisHeight(chartData);
+
+                if (!this.settings.yAxisLabels.show) {
+                    yAxisWidth = 0;
+                }
+
+                if (!this.settings.xAxisLabels.show) {
+                    xAxisHeight = 0;
+                }
+
+                let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
+                // gridSizeWidth = gridSizeWidth > TableHeatMap.ConstGridSizeWidthLimit ? TableHeatMap.ConstGridSizeWidthLimit : gridSizeWidth;
                 let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
 
-                let legendElementWidth: number = gridSizeWidth * TableHeatMap.ConstGridLegendWidthRaito;
-                let legendElementHeight: number = gridSizeHeight * TableHeatMap.ConstGridHeightWidthRaito;
+                let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
+                let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x categoru labels height
 
-                let xOffset: number = gridSizeWidth + this.margin.left;
-                let yOffset: number = this.margin.top;
+                let legendElementWidth: number = (this.viewport.width * 2 / 3 - xOffset) / numBuckets;
+                let legendElementHeight: number = gridSizeHeight;
 
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
-                    .data(chartData.categoryY)
-                    .enter().append(TableHeatMap.HtmlObjText)
-                    .text((d: string) => {
-                        return d;
-                    })
-                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
-                    .attr(TableHeatMap.AttrX, xOffset)
-                    .attr(TableHeatMap.AttrY, function (d, i) {
-                        return i * gridSizeHeight;
-                    })
-                    .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstEnd)
-                    .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
-                    .classed(TableHeatMap.ClsCategoryYLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true);
+                if (this.settings.yAxisLabels.show) {
+                    this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
+                        .data(chartData.categoryY)
+                        .enter().append(TableHeatMap.HtmlObjText)
+                        .text((d: string) => {
+                            return TableHeatMap.textLimit(d, this.settings.yAxisLabels.maxTextSymbol);
+                        })
+                        .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
+                        .attr(TableHeatMap.AttrX, this.margin.left)
+                        .attr(TableHeatMap.AttrY, function (d, i) {
+                            return i * gridSizeHeight - (gridSizeHeight / 2) + yOffset - yAxisHeight / 3;
+                        })
+                        .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
+                        .style({
+                            "font-size": this.settings.yAxisLabels.fontSize,
+                            "fill": this.settings.yAxisLabels.fill
+                        })
+                        .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
+                        .classed(TableHeatMap.ClsCategoryYLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true);
 
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
-                    .call(this.wrap, gridSizeWidth);
+                    this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
+                        .call(this.wrap, gridSizeWidth + xOffset);
 
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel)
-                    .data(chartData.categoryX)
-                    .enter().append(TableHeatMap.HtmlObjText)
-                    .text(function (d: string) {
-                        return chartData.categoryValueFormatter.format(d);
-                    })
-                    .attr(TableHeatMap.AttrX, function (d: string, i: number) {
-                        return i * gridSizeWidth + xOffset;
-                    })
-                    .attr(TableHeatMap.AttrY, this.margin.top)
-                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const0em)
-                    .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
-                    .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
-                    .attr(TableHeatMap.AttrTransform, translate(gridSizeHeight, TableHeatMap.ConstShiftLabelFromGrid));
+                    this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel), gridSizeWidth + xOffset);
+                }
 
-                this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
-                this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel), gridSizeWidth);
+                if (this.settings.xAxisLabels.show) {
+                    this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel)
+                        .data(chartData.categoryX)
+                        .enter().append(TableHeatMap.HtmlObjText)
+                        .text(function (d: string) {
+                            return chartData.categoryValueFormatter.format(d);
+                        })
+                        .attr(TableHeatMap.AttrX, function (d: string, i: number) {
+                            return i * gridSizeWidth + xOffset;
+                        })
+                        .attr(TableHeatMap.AttrY, xAxisHeight / 2)
+                        .attr(TableHeatMap.AttrDY, TableHeatMap.Const0em)
+                        .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
+                        .style({
+                            "font-size": this.settings.xAxisLabels.fontSize,
+                            "fill": this.settings.xAxisLabels.fill
+                        })
+                        .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
+                        .attr(TableHeatMap.AttrTransform, translate(gridSizeHeight, TableHeatMap.ConstShiftLabelFromGrid));
+
+                    this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
+                }
 
                 let heatMap: d3.Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX)
                     .data(chartData.dataPoints)
@@ -322,7 +446,7 @@ module powerbi.extensibility.visual {
                     .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                         return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset;
                     })
-                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
+                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint, index: number) {
                         return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset;
                     })
                     .classed(TableHeatMap.ClsCategoryX + " " + TableHeatMap.ClsBordered, true)
@@ -332,7 +456,7 @@ module powerbi.extensibility.visual {
 
                 // add data labels
                 let textProperties: TextProperties = {
-                    fontSize: this.settings.labels.fontSize + "px",
+                    fontSize: PixelConverter.toString(this.settings.labels.fontSize),
                     fontFamily: this.mainGraphics.style("font-family"),
                     text: "123"
                 };
@@ -357,7 +481,7 @@ module powerbi.extensibility.visual {
                         "fill": this.settings.labels.fill
                     })
                     .text( (dataPoint: TableHeatMapDataPoint) => {
-                        let textValue: string = dataPoint.value.toString();
+                        let textValue: string = (dataPoint.value || "null").toString();
                         textProperties.text = textValue;
                         textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeHeight);
                         return textValue;
@@ -370,27 +494,35 @@ module powerbi.extensibility.visual {
                     return <string>colorScale(d.value);
                 });
 
-                heatMap.append(TableHeatMap.HtmlObjTitle).text((d: TableHeatMapDataPoint) => {
-                    if (d.valueStr !== undefined) {
-                        return d.categoryX + ": " + d.valueStr;
-                    }
-                    else {
-                        return d.categoryX + ": " + d.value;
-                    }
+                this.tooltipServiceWrapper.addTooltip(heatMap, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
+                    return tooltipEvent.data.tooltipInfo;
                 });
 
                 // legend
+                let legendDataValues = [0].concat(colorScale.quantiles());
+                let legendData = legendDataValues.map((value, index) => {
+                    return {
+                        value: value,
+                        tooltipInfo: [{
+                            displayName: `Min value`,
+                            value: value.toFixed(0)
+                        },
+                        {
+                            displayName: `Max value`,
+                            value: (legendDataValues[index + 1] || maxDataValue).toFixed(0)
+                        }]
+                    };
+                });
+
                 let legend: Update<any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend)
-                    .data([0].concat(colorScale.quantiles()), function (d: any) {
-                        return d;
-                    });
+                    .data(legendData);
 
                 legend.enter().append(TableHeatMap.HtmlObjG)
                     .classed(TableHeatMap.ClsLegend, true);
 
                 let legendOffsetX: number = xOffset;
-                let legendOffsetCellsY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY);
-                let legendOffsetTextY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + legendElementHeight * 2;
+                let legendOffsetCellsY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + xAxisHeight;
+                let legendOffsetTextY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + legendElementHeight * 2 + xAxisHeight;
 
                 legend.append(TableHeatMap.HtmlObjRect)
                     .attr(TableHeatMap.AttrX, function (d, i) {
@@ -411,7 +543,7 @@ module powerbi.extensibility.visual {
                     })
                     .attr(TableHeatMap.AttrY, legendOffsetTextY)
                     .text(function (d) {
-                        return chartData.valueFormatter.format(d);
+                        return chartData.valueFormatter.format(d.value);
                     });
 
                 this.mainGraphics.select("." + TableHeatMap.ClsLegend)
@@ -423,8 +555,19 @@ module powerbi.extensibility.visual {
                     .classed(TableHeatMap.ClsLegend, true)
                     .classed(TableHeatMap.ClsMono, true);
 
+                this.tooltipServiceWrapper.addTooltip(legend, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
+                    return tooltipEvent.data.tooltipInfo;
+                });
                 legend.exit().remove();
             }
+        }
+
+        private static textLimit(text: string, limit: number) {
+            if (text.length > limit) {
+                return ((text || "").substring(0, limit - 3).trim()) + "..." ;
+            }
+
+            return text;
         }
 
         private setSize(viewport: IViewport): void {

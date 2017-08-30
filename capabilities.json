@@ -45,6 +45,13 @@
       "displayName": "General",
       "displayNameKey": "Visual_General",
       "properties": {
+        "enableColorbrewer": {
+          "displayName": "Enable colorbrewer",
+          "displayNameKey": "Visual_EnableColorbrewer",
+          "type": {
+              "bool": true
+          }
+        },
         "colorbrewer": {
           "type": {
             "enumeration": [
@@ -87,6 +94,28 @@
           },
           "displayName": "Colorbrewer",
           "displayNameKey": "Visual_General_Colorbrewer"
+        },
+        "gradientStart": {
+          "displayName": "Gradient start",
+          "displayNameKey": "Visual_GradientStart",
+          "type": {
+              "fill": {
+                  "solid": {
+                      "color": true
+                  }
+              }
+          }
+        },
+        "gradientEnd": {
+          "displayName": "Gradient end",
+          "displayNameKey": "Visual_GradientEnd",
+          "type": {
+              "fill": {
+                  "solid": {
+                      "color": true
+                  }
+              }
+          }
         },
         "buckets": {
           "type": {
@@ -134,6 +163,80 @@
               "description": "Display all labels anyway",
               "type": {
                   "bool": true
+              }
+          }
+      }
+    },
+    "xAxisLabels": {
+      "displayName": "X axis data labels",
+      "displayNameKey": "Visual_XAxis",
+      "properties": {
+          "show": {
+              "displayName": "Show",
+              "displayNameKey": "Visual_Show",
+              "type": {
+                  "bool": true
+              }
+          },
+          "fill": {
+              "displayName": "Color",
+              "displayNameKey": "Visual_LabelsFill",
+              "type": {
+                  "fill": {
+                      "solid": {
+                          "color": true
+                      }
+                  }
+              }
+          },
+          "fontSize": {
+              "displayName": "Text Size",
+              "displayNameKey": "Visual_TextSize",
+              "type": {
+                  "formatting": {
+                      "fontSize": true
+                  }
+              }
+          }
+      }
+    }
+    ,
+    "yAxisLabels": {
+      "displayName": "Y axis data labels",
+      "displayNameKey": "Visual_YAxis",
+      "properties": {
+          "show": {
+              "displayName": "Show",
+              "displayNameKey": "Visual_Show",
+              "type": {
+                  "bool": true
+              }
+          },
+          "fill": {
+              "displayName": "Color",
+              "displayNameKey": "Visual_LabelsFill",
+              "type": {
+                  "fill": {
+                      "solid": {
+                          "color": true
+                      }
+                  }
+              }
+          },
+          "fontSize": {
+              "displayName": "Text Size",
+              "displayNameKey": "Visual_TextSize",
+              "type": {
+                  "formatting": {
+                      "fontSize": true
+                  }
+              }
+          },
+          "maxTextSymbol": {
+              "displayName": "Max text symbold",
+              "displayNameKey": "Visual_MaxTextSymbols",
+              "type": {
+                  "numeric": true
               }
           }
       }
