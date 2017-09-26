@@ -70,6 +70,7 @@ module powerbi.extensibility.visual {
         private host: IVisualHost;
         private tooltipServiceWrapper: ITooltipServiceWrapper;
         private svg: d3.Selection<any>;
+        private div: d3.Selection<any>;
         private mainGraphics: d3.Selection<any>;
         private colors: IColorPalette;
         private dataView: DataView;
@@ -87,6 +88,7 @@ module powerbi.extensibility.visual {
         private static ClsLegend: string = "legend";
         private static ClsBordered: string = "bordered";
         private static ClsNameSvgTableHeatMap: string = "svgTableHeatMap";
+        private static ClsNameDivTableHeatMap: string = "divTableHeatMap";
 
         private static AttrTransform: string = "transform";
         private static AttrX: string = "x";
@@ -98,6 +100,7 @@ module powerbi.extensibility.visual {
 
         private static HtmlObjTitle: string = "title";
         private static HtmlObjSvg: string = "svg";
+        private static HtmlObjDiv: string = "div";
         private static HtmlObjG: string = "g";
         private static HtmlObjText: string = "text";
         private static HtmlObjRect: string = "rect";
@@ -119,6 +122,8 @@ module powerbi.extensibility.visual {
         private static ConstLegendOffsetFromChartByY: number = 0.5;
 
         private settings: TableHeatmapSettings;
+
+        private element: HTMLElement;
 
         public converter(dataView: DataView, colors: IColorPalette): TableHeatMapChartData {
             // no category - nothing to display
@@ -230,8 +235,12 @@ module powerbi.extensibility.visual {
 
         constructor(options: VisualConstructorOptions) {
             this.host = options.host;
+            this.element = options.element;
 
-            this.svg = d3.select(options.element)
+            this.div = d3.select(options.element)
+                .append(TableHeatMap.HtmlObjDiv)
+                .classed(TableHeatMap.ClsNameDivTableHeatMap, true);
+            this.svg = this.div
                 .append(TableHeatMap.HtmlObjSvg)
                 .classed(TableHeatMap.ClsNameSvgTableHeatMap, true);
 
@@ -248,12 +257,18 @@ module powerbi.extensibility.visual {
             this.settings = TableHeatMap.parseSettings(options.dataViews[0]);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
+            this.div.attr({
+                widtht: PixelConverter.toString(options.viewport.width + this.margin.left),
+                height: PixelConverter.toString(options.viewport.height + this.margin.left)
+            });
+            this.div.style({
+                widtht: PixelConverter.toString(options.viewport.width + this.margin.left),
+                height: PixelConverter.toString(options.viewport.height + this.margin.left)
+            });
 
             let width: number = options.viewport.width;
             let height: number = options.viewport.height;
 
-            // todo recalculate height depends on rows count on data set
-            // todo add overflow-x: scroll
             this.svg.attr({
                 width: width,
                 height: height
@@ -380,9 +395,29 @@ module powerbi.extensibility.visual {
                     xAxisHeight = 0;
                 }
 
+                let maxDataText: string = chartData.dataPoints[0].valueStr || "";
+                chartData.dataPoints.forEach((value: TableHeatMapDataPoint) => {
+                    if ((value.valueStr || "").length > maxDataText.length) {
+                        maxDataText = value.valueStr || "";
+                    }
+                });
+
+                let textProperties: TextProperties = {
+                    fontSize: PixelConverter.toString(this.settings.labels.fontSize),
+                    fontFamily: this.settings.labels.fontFamily,
+                    text: maxDataText
+                };
+                let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
+
                 let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
-                // gridSizeWidth = gridSizeWidth > TableHeatMap.ConstGridSizeWidthLimit ? TableHeatMap.ConstGridSizeWidthLimit : gridSizeWidth;
                 let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
+
+                if (gridSizeWidth < textRect.width) {
+                    gridSizeWidth = textRect.width;
+                }
+                if (gridSizeHeight < textRect.height) {
+                    gridSizeHeight = textRect.height;
+                }
 
                 let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
                 let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x categoru labels height
@@ -405,6 +440,7 @@ module powerbi.extensibility.visual {
                         .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
                         .style({
                             "font-size": this.settings.yAxisLabels.fontSize,
+                            "font-family": this.settings.yAxisLabels.fontFamily,
                             "fill": this.settings.yAxisLabels.fill
                         })
                         .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
@@ -431,6 +467,7 @@ module powerbi.extensibility.visual {
                         .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
                         .style({
                             "font-size": this.settings.xAxisLabels.fontSize,
+                            "font-family": this.settings.xAxisLabels.fontFamily,
                             "fill": this.settings.xAxisLabels.fill
                         })
                         .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
@@ -454,16 +491,19 @@ module powerbi.extensibility.visual {
                     .attr(TableHeatMap.AttrHeight, gridSizeHeight)
                     .style(TableHeatMap.StFill, colors[0]);
 
+
+                if (chartData.categoryX.length * gridSizeWidth + xOffset > options.viewport.width) {
+                    this.svg.attr({
+                        width: chartData.categoryX.length * gridSizeWidth
+                    });
+                }
+
                 // add data labels
-                let textProperties: TextProperties = {
-                    fontSize: PixelConverter.toString(this.settings.labels.fontSize),
-                    fontFamily: this.mainGraphics.style("font-family"),
-                    text: "123"
-                };
-                let textHeight: number = TextMeasurementService.estimateSvgTextHeight(textProperties);
+                let textHeight: number = textRect.height;
+                let textWidth: number = textRect.width;
                 let heatMapDataLables: d3.Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
-                let heatMapDataLablesData: d3.selection.Update<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight < gridSizeHeight && chartData.dataPoints);
+                let heatMapDataLablesData: d3.selection.Update<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight <= gridSizeHeight && chartData.dataPoints);
 
                 heatMapDataLablesData
                     .enter()
@@ -478,12 +518,13 @@ module powerbi.extensibility.visual {
                     .style({
                         "text-anchor": TableHeatMap.ConstMiddle,
                         "font-size": this.settings.labels.fontSize,
+                        "font-family": this.settings.labels.fontFamily,
                         "fill": this.settings.labels.fill
                     })
                     .text( (dataPoint: TableHeatMapDataPoint) => {
                         let textValue: string = (dataPoint.value || "null").toString();
                         textProperties.text = textValue;
-                        textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeHeight);
+                        textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
                         return textValue;
                     });
 
@@ -559,6 +600,12 @@ module powerbi.extensibility.visual {
                     return tooltipEvent.data.tooltipInfo;
                 });
                 legend.exit().remove();
+
+                if (legendOffsetTextY > options.viewport.height) {
+                    this.svg.attr({
+                        height: legendOffsetTextY
+                    });
+                }
             }
         }
 

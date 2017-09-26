@@ -345,6 +345,7 @@ module powerbi.extensibility.visual {
         public show: boolean = false;
         public fill: string = "black";
         public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+        public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
     }
 
     export class TableHeatmapAxisLabelsSettings {
@@ -354,6 +355,7 @@ module powerbi.extensibility.visual {
         public fill: string = "black";
         public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
         public maxTextSymbol: number = 25;
+        public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
     }
 
     export class TableHeatmapGeneralSettings {

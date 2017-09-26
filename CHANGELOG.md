@@ -1,3 +1,9 @@
+## 1.2.0
+
+* Add fond settings for axis labels and data labels in cells
+* Cells scale depends on text size
+* Add auto-scroll if chart doesn't fit into viewport
+
 ## 1.1.0
 
 * Add gradient color selection feature as alternative for pre defined colorbewers
