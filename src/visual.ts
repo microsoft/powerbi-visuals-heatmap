@@ -121,6 +121,12 @@ module powerbi.extensibility.visual {
         private static ConstGridLegendWidthRaito: number = 0.666;
         private static ConstLegendOffsetFromChartByY: number = 0.5;
 
+        private static BucketCountMaxLimit: number = 18;
+        private static BucketCountMinLimit: number = 1;
+        private static ColorbrewerMaxBucketCount: number = 14;
+
+        private static DefaultColorbrewer: string = "Reds";
+
         private settings: TableHeatmapSettings;
 
         private element: HTMLElement;
@@ -207,15 +213,15 @@ module powerbi.extensibility.visual {
                         valueStr: element.valueStr,
                         tooltipInfo: [{
                             displayName: `Category`,
-                            value: (categoryX || "null").toString()
+                            value: (categoryX || "").toString()
                         },
                         {
                             displayName: `Y`,
-                            value: (element.categoryY || "null").toString()
+                            value: (element.categoryY || "").toString()
                         },
                         {
                             displayName: `Value`,
-                            value: (element.value || "null").toString()
+                            value: (element.value || "").toString()
                         }]
                     });
                 });
@@ -266,12 +272,9 @@ module powerbi.extensibility.visual {
                 height: PixelConverter.toString(options.viewport.height + this.margin.left)
             });
 
-            let width: number = options.viewport.width;
-            let height: number = options.viewport.height;
-
             this.svg.attr({
-                width: width,
-                height: height
+                width: options.viewport.width,
+                height: options.viewport.height
             });
 
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
@@ -287,7 +290,7 @@ module powerbi.extensibility.visual {
             return TextMeasurementService.measureSvgTextWidth({
                 fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
                 text: maxLengthText.trim(),
-                fontFamily: this.mainGraphics.style("font-family")
+                fontFamily: this.settings.yAxisLabels.fontFamily
             });
         }
 
@@ -296,7 +299,7 @@ module powerbi.extensibility.visual {
             return TextMeasurementService.measureSvgTextHeight({
                 fontSize: PixelConverter.toString(this.settings.xAxisLabels.fontSize),
                 text: maxLengthText.trim(),
-                fontFamily: this.mainGraphics.style("font-family")
+                fontFamily: this.settings.xAxisLabels.fontFamily
             });
         }
 
@@ -305,27 +308,27 @@ module powerbi.extensibility.visual {
             return TextMeasurementService.measureSvgTextHeight({
                 fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
                 text: maxLengthText.trim(),
-                fontFamily: this.mainGraphics.style("font-family")
+                fontFamily: this.settings.yAxisLabels.fontFamily
             });
         }
 
         private static parseSettings(dataView: DataView): TableHeatmapSettings {
             let settings: TableHeatmapSettings = TableHeatmapSettings.parse<TableHeatmapSettings>(dataView);
             if (!settings.general.enableColorbrewer) {
-                if (settings.general.buckets > 18) {
-                    settings.general.buckets = 18;
+                if (settings.general.buckets > TableHeatMap.BucketCountMaxLimit) {
+                    settings.general.buckets = TableHeatMap.BucketCountMaxLimit;
                 }
-                if (settings.general.buckets < 1) {
-                    settings.general.buckets = 1;
+                if (settings.general.buckets < TableHeatMap.BucketCountMinLimit) {
+                    settings.general.buckets = TableHeatMap.BucketCountMinLimit;
                 }
             } else {
                 if (settings.general.colorbrewer === "") {
-                    settings.general.colorbrewer = "Reds";
+                    settings.general.colorbrewer = TableHeatMap.DefaultColorbrewer;
                 }
                 let colorbrewerArray: IColorArray = colorbrewer[settings.general.colorbrewer];
-                let  minBucketNum: number = 0;
-                let  maxBucketNum: number = 0;
-                for (let bucketIndex: number = 1; bucketIndex < 14; bucketIndex++) {
+                let minBucketNum: number = 0;
+                let maxBucketNum: number = 0;
+                for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
                     if (minBucketNum === 0 && (colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString()) ) {
                         minBucketNum = bucketIndex;
                     }
@@ -383,9 +386,9 @@ module powerbi.extensibility.visual {
                     .domain([minDataValue, maxDataValue])
                     .range(colors);
 
-                let xAxisHeight = this.getXAxisHeight(chartData);
-                let yAxisWidth = this.getYAxisWidth(chartData);
-                let yAxisHeight = this.getYAxisHeight(chartData);
+                let xAxisHeight: number = this.getXAxisHeight(chartData);
+                let yAxisWidth: number = this.getYAxisWidth(chartData);
+                let yAxisHeight: number = this.getYAxisHeight(chartData);
 
                 if (!this.settings.yAxisLabels.show) {
                     yAxisWidth = 0;
@@ -422,7 +425,8 @@ module powerbi.extensibility.visual {
                 let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
                 let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x categoru labels height
 
-                let legendElementWidth: number = (this.viewport.width * 2 / 3 - xOffset) / numBuckets;
+                const TableHeatMapCellRaito: number = 2 / 3;
+                let legendElementWidth: number = (this.viewport.width * TableHeatMapCellRaito - xOffset) / numBuckets;
                 let legendElementHeight: number = gridSizeHeight;
 
                 if (this.settings.yAxisLabels.show) {
@@ -444,7 +448,9 @@ module powerbi.extensibility.visual {
                             "fill": this.settings.yAxisLabels.fill
                         })
                         .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
-                        .classed(TableHeatMap.ClsCategoryYLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true);
+                        .classed(TableHeatMap.ClsCategoryYLabel, true)
+                        .classed(TableHeatMap.ClsMono, true)
+                        .classed(TableHeatMap.ClsAxis, true);
 
                     this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
                         .call(this.wrap, gridSizeWidth + xOffset);
@@ -483,7 +489,7 @@ module powerbi.extensibility.visual {
                     .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                         return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset;
                     })
-                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint, index: number) {
+                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
                         return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset;
                     })
                     .classed(TableHeatMap.ClsCategoryX + " " + TableHeatMap.ClsBordered, true)
@@ -611,7 +617,7 @@ module powerbi.extensibility.visual {
 
         private static textLimit(text: string, limit: number) {
             if (text.length > limit) {
-                return ((text || "").substring(0, limit - 3).trim()) + "..." ;
+                return ((text || "").substring(0, limit - 3).trim()) + "…" ;
             }
 
             return text;
