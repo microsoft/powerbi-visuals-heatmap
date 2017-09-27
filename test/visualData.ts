@@ -43,7 +43,7 @@ module powerbi.extensibility.visual.test {
 
         public constructor() {
             super();
-            this.dataCategory = _.range(0, 30).map(d => d + "");
+            this.dataCategory = _.range(0, 15).map(d => d + "");
             this.dataMeasure = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
         }
 

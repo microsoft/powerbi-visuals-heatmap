@@ -31,7 +31,10 @@ module powerbi.extensibility.visual.test {
     import TableHeatMapBuilder = powerbi.extensibility.visual.test.TableHeatMapBuilder;
     import TableHeatMap = powerbi.extensibility.visual.TableHeatMap1443716069308;
     import TableHeatMapData = powerbi.extensibility.visual.test.TableHeatMapData;
-    const DefaultTimeout: number = 300;
+    import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
+    import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
+    import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
+    const DefaultTimeout: number = 3000;
 
     describe("TableHeatmap", () => {
         let visualBuilder: TableHeatMapBuilder;
@@ -44,8 +47,8 @@ module powerbi.extensibility.visual.test {
             dataView = defaultDataViewBuilder.getDataView();
         });
 
-        it("main DOM created", () => {
-            visualBuilder.updateRenderTimeout(dataView, (done) => {
+        it("main DOM created", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
                 expect($(visualBuilder.mainElement)).toBeInDOM();
                 done();
             }, DefaultTimeout);
@@ -56,8 +59,8 @@ module powerbi.extensibility.visual.test {
                 visualBuilder = new TableHeatMapBuilder(100, 100);
             });
 
-            it("main DOM created", () => {
-                visualBuilder.updateRenderTimeout(dataView, (done) => {
+            it("main DOM created", (done) => {
+                visualBuilder.updateRenderTimeout(dataView, () => {
                     expect($(visualBuilder.mainElement)).toBeInDOM();
                     done();
                 }, DefaultTimeout);
@@ -74,36 +77,213 @@ module powerbi.extensibility.visual.test {
                 };
             });
 
-            it("main DOM created", () => {
-                visualBuilder.updateRenderTimeout(dataView, (done) => {
+            it("main DOM created", (done) => {
+                visualBuilder.updateRenderTimeout(dataView, () => {
                     expect($(visualBuilder.mainElement)).toBeInDOM();
                     done();
                 }, DefaultTimeout);
             });
         });
 
-        it("data labels created", () => {
+        it("data labels created", (done) => {
             dataView.metadata.objects = {
                 labels: {
                     show: true
                 }
             };
 
-            visualBuilder.updateRenderTimeout(dataView, (done) => {
-                expect($(visualBuilder.mainElement.children(".heatMapDataLabels"))).toBeInDOM();
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                expect($(".heatMapDataLabels")).toBeInDOM();
                 done();
             }, DefaultTimeout);
+        });
 
+        it("data labels didin't created", (done) => {
             dataView.metadata.objects = {
                 labels: {
                     show: false
                 }
             };
 
-            visualBuilder.updateRenderTimeout(dataView, (done) => {
-                expect($(visualBuilder.mainElement.children(".heatMapDataLabels"))).not.toBeInDOM();
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                expect($(".heatMapDataLabels")).not.toBeInDOM();
                 done();
             }, DefaultTimeout);
+        });
+
+        describe("x axis label font", () => {
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    xAxisLabels: {
+                        show: true,
+                        fontSize: 12
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryXLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("12px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    xAxisLabels: {
+                        show: true,
+                        fontSize: 40
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryXLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("40px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("family must change", (done) => {
+                dataView.metadata.objects = {
+                    xAxisLabels: {
+                        show: true,
+                        fontFamily: "Arial"
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryXLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-family")).toBe("Arial");
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("y axis label font", () => {
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    yAxisLabels: {
+                        show: true,
+                        fontSize: 12
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryYLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("12px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    yAxisLabels: {
+                        show: true,
+                        fontSize: 40
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryYLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("40px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("family must change", (done) => {
+                dataView.metadata.objects = {
+                    yAxisLabels: {
+                        show: true,
+                        fontFamily: "Arial"
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".categoryYLabel");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-family")).toBe("Arial");
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("data label font", () => {
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fontSize: 12
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".heatMapDataLabels");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("12px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("must resize", (done) => {
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fontSize: 40
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".heatMapDataLabels");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-size")).toBe("40px");
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("family must change", (done) => {
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fontFamily: "Arial"
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let labelDOMItems = $(".heatMapDataLabels");
+                    expect($(labelDOMItems)).toBeInDOM();
+                    expect(labelDOMItems.css("font-family")).toBe("Arial");
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("cell size", () => {
+            it("must resize with big font size of cell data labels", (done) => {
+                const fontSize: number = 40;
+                const fontFamily: string = "Arial";
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fontFamily: fontFamily,
+                        fontSize: fontSize
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let textProperties: TextProperties = {
+                        fontSize: PixelConverter.toString(fontSize),
+                        fontFamily: fontFamily,
+                        text: "00"
+                    };
+                    let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
+                    expect(+$(".categoryX").attr("width")).toBeGreaterThan(textRect.width);
+                    done();
+                }, DefaultTimeout);
+            });
         });
     });
 }

@@ -508,7 +508,7 @@ module powerbi.extensibility.visual {
                 heatMapDataLablesData
                     .enter()
                     .append("text")
-                    .classed("." + TableHeatMap.CLsHeatMapDataLabels, true)
+                    .classed(TableHeatMap.CLsHeatMapDataLabels, true)
                     .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                         return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
                     })
