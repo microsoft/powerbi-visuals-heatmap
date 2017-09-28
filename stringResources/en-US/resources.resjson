@@ -1,7 +1,9 @@
 {
   "Visual_General": "General",
-  "Visual_General_Colorbrewer": "Colorbrewer",
-  "Visual_General_Buckets": "Buckets",
+  "Visual_GeneralColorbrewer": "Colorbrewer",
+  "Visual_GeneralBuckets": "Buckets",
   "Visual_Category": "Category",
-  "Visual_Y": "Y"
+  "Visual_Y": "Y",
+  "Visual_ForceDisplay": "Force display",
+  "Visual_EnableColorbrewer": "Enable colorbrewer"
 }

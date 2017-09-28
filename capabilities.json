@@ -93,7 +93,7 @@
             ]
           },
           "displayName": "Colorbrewer",
-          "displayNameKey": "Visual_General_Colorbrewer"
+          "displayNameKey": "Visual_GeneralColorbrewer"
         },
         "gradientStart": {
           "displayName": "Gradient start",
@@ -122,7 +122,7 @@
             "numeric": true
           },
           "displayName": "Buckets",
-          "displayNameKey": "Visual_General_Buckets"
+          "displayNameKey": "Visual_GeneralBuckets"
         }
       }
     },
@@ -159,7 +159,7 @@
           },
           "forceDisplay": {
               "displayName": "Force display",
-              "displayNameKey": "Visual_Force_Display",
+              "displayNameKey": "Visual_ForceDisplay",
               "description": "Display all labels anyway",
               "type": {
                   "bool": true
@@ -167,7 +167,7 @@
           },
           "fontFamily": {
             "displayName": "Font family",
-            "displayNameKey": "Visual_Force_Display",
+            "displayNameKey": "Visual_ForceDisplay",
             "description": "Font family",
             "type": {
                 "enumeration": [
@@ -301,7 +301,7 @@
           },
           "fontFamily": {
             "displayName": "Font family",
-            "displayNameKey": "Visual_Force_Display",
+            "displayNameKey": "Visual_ForceDisplay",
             "description": "Font family",
             "type": {
                 "enumeration": [
@@ -443,7 +443,7 @@
           },
           "fontFamily": {
             "displayName": "Font family",
-            "displayNameKey": "Visual_Force_Display",
+            "displayNameKey": "Visual_ForceDisplay",
             "description": "Font family",
             "type": {
                 "enumeration": [
