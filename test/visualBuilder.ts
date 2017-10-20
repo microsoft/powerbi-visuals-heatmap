@@ -40,7 +40,7 @@ module powerbi.extensibility.visual.test {
         }
 
         public get mainElement(): JQuery {
-            return this.element.children("div.svgTableHeatMap");
+            return this.element.children("div.divTableHeatMap");
         }
     }
 }

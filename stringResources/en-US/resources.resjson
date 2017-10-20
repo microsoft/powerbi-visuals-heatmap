@@ -1,12 +1,14 @@
 {
-	"Visual_General": "General",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
-	"Visual_Category": "Category",
-	"Visual_Y": "Y",
-	"Visual_DataPointsLabels": "Data labels",
-	"Visual_Show": "Show",
-	"Visual_LabelsFill": "Color",
-	"Visual_TextSize": "Text Size",
-	"Visual_Force_Display": "Force display"
+    "Visual_General": "General",
+    "Visual_General_Colorbrewer": "Colorbrewer",
+    "Visual_General_Buckets": "Buckets",
+    "Visual_Category": "Category",
+    "Visual_Y": "Y",
+    "Visual_DataPointsLabels": "Data labels",
+    "Visual_Show": "Show",
+    "Visual_LabelsFill": "Color",
+    "Visual_TextSize": "Text Size",
+    "Visual_Force_Display": "Force display",
+    "Visual_EnableColorbrewer": "Enable colorbrewer",
+    "Visual_FontFamily": "Font family"
 }

@@ -345,16 +345,31 @@ module powerbi.extensibility.visual {
         public show: boolean = false;
         public fill: string = "black";
         public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
-        public forceDisplay: boolean = false;
+        public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
+    }
+
+    export class TableHeatmapAxisLabelsSettings {
+        public static DefaultFontSize: number = 12;
+
+        public show: boolean = true;
+        public fill: string = "black";
+        public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+        public maxTextSymbol: number = 25;
+        public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
     }
 
     export class TableHeatmapGeneralSettings {
+        public enableColorbrewer: boolean = true;
         public colorbrewer: string = "Reds";
         public buckets: number = 5;
+        public gradientStart: string = "#FFFFFF";
+        public gradientEnd: string = "#000000";
     }
 
     export class TableHeatmapSettings extends DataViewObjectsParser {
         public labels: TableHeatmapLabelsSettings = new TableHeatmapLabelsSettings();
+        public xAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
+        public yAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
         public general: TableHeatmapGeneralSettings = new TableHeatmapGeneralSettings();
     }
 }

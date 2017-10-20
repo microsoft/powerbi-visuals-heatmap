@@ -5,6 +5,7 @@ module powerbi.extensibility.visual {
         categoryY: string;
         value: number;
         valueStr: string;
+        tooltipInfo?: VisualTooltipDataItem[];
     }
 
     export interface TableHeatMapChartData {
