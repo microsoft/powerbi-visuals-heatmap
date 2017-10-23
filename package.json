@@ -4,7 +4,7 @@
     "email": "pbicvsupport@microsoft.com"
   },
   "name": "TableHeatmap",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "dependencies": {
     "d3": "3.5.5",
     "jquery": "3.2.0"
@@ -31,7 +31,7 @@
     "lodash": "4.16.2",
     "tslint": "4.4.2",
     "tslint-microsoft-contrib": "4.0.0",
-    "powerbi-visuals-tools": "1.7.1",
+    "powerbi-visuals-tools": "1.7.5",
     "powerbi-visuals-utils-typeutils": "1.1.0",
     "powerbi-visuals-utils-colorutils": "1.0.0",
     "powerbi-visuals-utils-dataviewutils": "1.2.0",
@@ -43,7 +43,7 @@
     "powerbi-visuals-utils-testutils": "1.0.1"
   },
   "scripts": {
-    "postinstall": "pbiviz update 1.6.0",
+    "postinstall": "pbiviz update 1.7.0",
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
