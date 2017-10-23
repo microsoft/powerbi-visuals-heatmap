@@ -1,3 +1,7 @@
+## 1.2.1
+
+* UPD: API was updated to 1.7.0
+
 ## 1.2.0
 
 * Add fond settings for axis labels and data labels in cells
