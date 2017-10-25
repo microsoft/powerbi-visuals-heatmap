@@ -1,3 +1,8 @@
+## 1.2.2
+
+* Default axis label colors changed to grey
+* Fixed minimal size of SVG in the visual to display legend labels
+
 ## 1.2.1
 
 * UPD: API was updated to 1.7.0

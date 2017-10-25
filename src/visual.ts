@@ -569,7 +569,7 @@ module powerbi.extensibility.visual {
 
                 let legendOffsetX: number = xOffset;
                 let legendOffsetCellsY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + xAxisHeight;
-                let legendOffsetTextY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + legendElementHeight * 2 + xAxisHeight;
+                let legendOffsetTextY: number = this.margin.top - gridSizeHeight / 2 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + legendElementHeight * 2 + xAxisHeight;
 
                 legend.append(TableHeatMap.HtmlObjRect)
                     .attr(TableHeatMap.AttrX, function (d, i) {
@@ -609,7 +609,7 @@ module powerbi.extensibility.visual {
 
                 if (legendOffsetTextY > options.viewport.height) {
                     this.svg.attr({
-                        height: legendOffsetTextY
+                        height: legendOffsetTextY + gridSizeHeight
                     });
                 }
             }
