@@ -343,7 +343,7 @@ module powerbi.extensibility.visual {
         public static DefaultFontSize: number = 12;
 
         public show: boolean = false;
-        public fill: string = "black";
+        public fill: string = "#aaa";
         public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
         public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
     }
@@ -352,7 +352,7 @@ module powerbi.extensibility.visual {
         public static DefaultFontSize: number = 12;
 
         public show: boolean = true;
-        public fill: string = "black";
+        public fill: string = "#aaa";
         public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
         public maxTextSymbol: number = 25;
         public fontFamily: string = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
