@@ -125,6 +125,9 @@ module powerbi.extensibility.visual {
         private static BucketCountMinLimit: number = 1;
         private static ColorbrewerMaxBucketCount: number = 14;
 
+        private static CellMaxHeightLimit: number = 60;
+        private static CellMaxWidthFactorLimit: number = 3;
+
         private static DefaultColorbrewer: string = "Reds";
 
         private settings: TableHeatmapSettings;
@@ -415,11 +418,17 @@ module powerbi.extensibility.visual {
                 let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
                 let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
 
-                if (gridSizeWidth < textRect.width) {
+                if (gridSizeWidth < textRect.width && this.settings.labels.show) {
                     gridSizeWidth = textRect.width;
                 }
-                if (gridSizeHeight < textRect.height) {
+                if (gridSizeHeight < textRect.height && this.settings.labels.show) {
                     gridSizeHeight = textRect.height;
+                }
+                if (gridSizeHeight > TableHeatMap.CellMaxHeightLimit) {
+                    gridSizeHeight = TableHeatMap.CellMaxHeightLimit;
+                }
+                if (gridSizeWidth > gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit) {
+                    gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
                 }
 
                 let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
@@ -607,7 +616,7 @@ module powerbi.extensibility.visual {
                 });
                 legend.exit().remove();
 
-                if (legendOffsetTextY > options.viewport.height) {
+                if (legendOffsetTextY + gridSizeHeight > options.viewport.height) {
                     this.svg.attr({
                         height: legendOffsetTextY + gridSizeHeight
                     });

@@ -87,5 +87,46 @@ module powerbi.extensibility.visual.test {
                     }
                 ], columnNames, customizeColumns).build();
         }
+
+        public getDataViewWithOneCategory(columnNames?: string[], customizeColumns?: CustomizeColumnFn): DataView {
+            return this.createCategoricalDataViewBuilder(
+                [
+                    {
+                        source: {
+                            displayName: TableHeatMapData.CategoryColumn,
+                            roles: {
+                                Values: true,
+                                Y: true
+                            },
+                            type: ValueType.fromDescriptor({text: true})
+                        },
+                        values: [this.dataCategory[0]]
+                    }
+                ],
+                [
+                    {
+                        source: {
+                            displayName: TableHeatMapData.CategoryColumn,
+                            roles: {
+                                Values: true,
+                                Y: true
+                            },
+                            type: ValueType.fromDescriptor({text: true})
+                        },
+                        values: this.dataCategory
+                    },
+                    {
+                        source: {
+                            displayName: TableHeatMapData.MeasureColumn,
+                            isMeasure: true,
+                            roles: {
+                                value: true
+                            },
+                            type: ValueType.fromDescriptor({numeric: true})
+                        },
+                        values: this.dataMeasure
+                    }
+                ], columnNames, customizeColumns).build();
+        }
     }
 }
