@@ -284,6 +284,15 @@ module powerbi.extensibility.visual.test {
                     done();
                 }, DefaultTimeout);
             });
+
+            it("height must be limited by 60px", (done) => {
+                dataView = defaultDataViewBuilder.getDataViewWithOneCategory();
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const CellMaxHeightLimit: number = 61;
+                    expect(+$(".categoryX").attr("height")).toBeLessThan(CellMaxHeightLimit);
+                    done();
+                }, DefaultTimeout);
+            });
         });
     });
 }
