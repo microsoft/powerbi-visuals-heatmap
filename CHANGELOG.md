@@ -1,3 +1,7 @@
+## 1.2.3
+
+* Table cell max height limited by 60px
+
 ## 1.2.2
 
 * Default axis label colors changed to grey
