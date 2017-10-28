@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Общи",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Цветова гама",
+	"Visual_General_Buckets": "Кофи",
 	"Visual_Category": "Категория",
-	"Visual_Y": "Д"
+	"Visual_Y": "Д",
+	"Visual_DataPointsLabels": "Етикети на данни",
+	"Visual_Show": "Показване",
+	"Visual_LabelsFill": "Цвят",
+	"Visual_TextSize": "Размер на текста",
+	"Visual_Force_Display": "Принудително показване"
 }

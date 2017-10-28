@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Všeobecné",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Farebná paleta",
+	"Visual_General_Buckets": "Sektory",
 	"Visual_Category": "Kategória",
-	"Visual_Y": "A"
+	"Visual_Y": "A",
+	"Visual_DataPointsLabels": "Označenia údajov",
+	"Visual_Show": "Zobraziť",
+	"Visual_LabelsFill": "Farba",
+	"Visual_TextSize": "Veľkosť textu",
+	"Visual_Force_Display": "Vynútiť zobrazenie"
 }

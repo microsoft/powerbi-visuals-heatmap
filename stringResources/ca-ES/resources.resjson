@@ -1,7 +1,12 @@
 {
 	"Visual_General": "General",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Paleta de colors",
+	"Visual_General_Buckets": "Dipòsits",
 	"Visual_Category": "Categoria",
-	"Visual_Y": "S"
+	"Visual_Y": "S",
+	"Visual_DataPointsLabels": "Etiquetes de dades",
+	"Visual_Show": "Mostra",
+	"Visual_LabelsFill": "Color",
+	"Visual_TextSize": "Mida del text",
+	"Visual_Force_Display": "Força la visualització"
 }

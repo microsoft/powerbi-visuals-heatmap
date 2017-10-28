@@ -1,7 +1,12 @@
 {
 	"Visual_General": "General",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Paletă de culori",
+	"Visual_General_Buckets": "Bucketuri",
 	"Visual_Category": "Categorie",
-	"Visual_Y": "D"
+	"Visual_Y": "D",
+	"Visual_DataPointsLabels": "Etichete de date",
+	"Visual_Show": "Afişare",
+	"Visual_LabelsFill": "Culoare",
+	"Visual_TextSize": "Dimensiune text",
+	"Visual_Force_Display": "Impunere afișare"
 }

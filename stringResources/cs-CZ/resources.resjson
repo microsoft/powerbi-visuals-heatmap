@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Obecné",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Výběr palety",
 	"Visual_General_Buckets": "Intervaly",
 	"Visual_Category": "Kategorie",
-	"Visual_Y": "A"
+	"Visual_Y": "A",
+	"Visual_DataPointsLabels": "Popisky dat",
+	"Visual_Show": "Zobrazení",
+	"Visual_LabelsFill": "Barva",
+	"Visual_TextSize": "Velikost textu",
+	"Visual_Force_Display": "Vynutit zobrazení"
 }

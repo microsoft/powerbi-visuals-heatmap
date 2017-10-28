@@ -1,7 +1,12 @@
 {
 	"Visual_General": "सामान्य",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "कलरब्रूअर",
+	"Visual_General_Buckets": "बकेट",
 	"Visual_Category": "श्रेणी",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "डेटा लेबल",
+	"Visual_Show": "दिखाएँ",
+	"Visual_LabelsFill": "रंग",
+	"Visual_TextSize": "पाठ आकार",
+	"Visual_Force_Display": "बाध्य प्रदर्शन"
 }

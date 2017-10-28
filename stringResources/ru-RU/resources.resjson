@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Общие",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Палитра",
 	"Visual_General_Buckets": "Сегменты",
 	"Visual_Category": "Категория",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "Метки данных",
+	"Visual_Show": "Показать",
+	"Visual_LabelsFill": "Цвет",
+	"Visual_TextSize": "Размер текста",
+	"Visual_Force_Display": "Принудительное отображение"
 }

@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Yleinen",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Värinsekoitin",
 	"Visual_General_Buckets": "Jakaumat",
 	"Visual_Category": "Luokka",
-	"Visual_Y": "K"
+	"Visual_Y": "K",
+	"Visual_DataPointsLabels": "Arvopisteiden otsikot",
+	"Visual_Show": "Näytä",
+	"Visual_LabelsFill": "Väri",
+	"Visual_TextSize": "Tekstin koko",
+	"Visual_Force_Display": "Pakota näyttö"
 }

@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Generale",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Combinazione colori",
 	"Visual_General_Buckets": "Bucket",
 	"Visual_Category": "Categoria",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "Etichette dati",
+	"Visual_Show": "Mostra",
+	"Visual_LabelsFill": "Colore",
+	"Visual_TextSize": "Dimensioni testo",
+	"Visual_Force_Display": "Forza la visualizzazione"
 }

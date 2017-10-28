@@ -3,5 +3,10 @@
 	"Visual_General_Colorbrewer": "Colorbrewer",
 	"Visual_General_Buckets": "버킷",
 	"Visual_Category": "범주",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "데이터 레이블",
+	"Visual_Show": "표시",
+	"Visual_LabelsFill": "색",
+	"Visual_TextSize": "텍스트 크기",
+	"Visual_Force_Display": "강제 표시"
 }

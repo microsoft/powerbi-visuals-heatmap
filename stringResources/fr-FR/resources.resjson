@@ -3,5 +3,10 @@
 	"Visual_General_Colorbrewer": "Colorbrewer",
 	"Visual_General_Buckets": "Paquets",
 	"Visual_Category": "Catégorie",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "Étiquettes de données",
+	"Visual_Show": "Afficher",
+	"Visual_LabelsFill": "Couleur",
+	"Visual_TextSize": "Taille du texte",
+	"Visual_Force_Display": "Forcer l'affichage"
 }

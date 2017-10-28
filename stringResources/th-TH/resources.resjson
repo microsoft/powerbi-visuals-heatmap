@@ -1,7 +1,12 @@
 {
 	"Visual_General": "ทั่วไป",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "เครื่องมือผสมสี",
+	"Visual_General_Buckets": "บักเก็ต",
 	"Visual_Category": "ประเภท",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "ป้ายชื่อข้อมูล",
+	"Visual_Show": "แสดง",
+	"Visual_LabelsFill": "สี",
+	"Visual_TextSize": "ขนาดแบบอักษร",
+	"Visual_Force_Display": "บังคับให้แสดง"
 }

@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Γενικά",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Παλέτα χρωμάτων",
 	"Visual_General_Buckets": "Κάδοι",
 	"Visual_Category": "Κατηγορία",
-	"Visual_Y": "Ν"
+	"Visual_Y": "Ν",
+	"Visual_DataPointsLabels": "Ετικέτες δεδομένων",
+	"Visual_Show": "Εμφάνιση",
+	"Visual_LabelsFill": "Χρώμα",
+	"Visual_TextSize": "Μέγεθος κειμένου",
+	"Visual_Force_Display": "Επιβολή εμφάνισης"
 }

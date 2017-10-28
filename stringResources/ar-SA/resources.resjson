@@ -1,7 +1,12 @@
 {
 	"Visual_General": "عام",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "درجات الألوان",
+	"Visual_General_Buckets": "المستودعات",
 	"Visual_Category": "الفئة",
-	"Visual_Y": "نعم"
+	"Visual_Y": "نعم",
+	"Visual_DataPointsLabels": "بطاقات البيانات",
+	"Visual_Show": "‏‏إظهار",
+	"Visual_LabelsFill": "اللون",
+	"Visual_TextSize": "حجم النص",
+	"Visual_Force_Display": "فرض العرض"
 }

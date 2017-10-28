@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Általános",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Palettaválasztó",
 	"Visual_General_Buckets": "Gyűjtők",
 	"Visual_Category": "Kategória",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "Adatfeliratok",
+	"Visual_Show": "Megjelenítés",
+	"Visual_LabelsFill": "Szín",
+	"Visual_TextSize": "Szöveg mérete",
+	"Visual_Force_Display": "Megjelenítés kényszerítése"
 }

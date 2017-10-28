@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Generelt",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Farvebygger",
 	"Visual_General_Buckets": "Inddelingsenhed",
 	"Visual_Category": "Kategori",
-	"Visual_Y": "J"
+	"Visual_Y": "J",
+	"Visual_DataPointsLabels": "Datanavne",
+	"Visual_Show": "Vis",
+	"Visual_LabelsFill": "Farve",
+	"Visual_TextSize": "Tekststørrelse",
+	"Visual_Force_Display": "Gennemtving visning"
 }

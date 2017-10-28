@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Općenito",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Raspon boja",
+	"Visual_General_Buckets": "Kante",
 	"Visual_Category": "Kategorija",
-	"Visual_Y": "D"
+	"Visual_Y": "D",
+	"Visual_DataPointsLabels": "Oznake podataka",
+	"Visual_Show": "Pokaži",
+	"Visual_LabelsFill": "Boja",
+	"Visual_TextSize": "Veličina teksta",
+	"Visual_Force_Display": "Nametni prikaz"
 }

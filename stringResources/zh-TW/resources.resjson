@@ -1,7 +1,12 @@
 {
 	"Visual_General": "一般",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "配色",
 	"Visual_General_Buckets": "值區",
 	"Visual_Category": "類別",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "資料標籤",
+	"Visual_Show": "顯示",
+	"Visual_LabelsFill": "色彩",
+	"Visual_TextSize": "文字大小",
+	"Visual_Force_Display": "強制顯示"
 }

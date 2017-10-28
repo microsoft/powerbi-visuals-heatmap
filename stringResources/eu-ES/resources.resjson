@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Orokorra",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Kolore-erakustegia",
+	"Visual_General_Buckets": "Edukiontziak",
 	"Visual_Category": "Kategoria",
-	"Visual_Y": "B"
+	"Visual_Y": "B",
+	"Visual_DataPointsLabels": "Datuen etiketak",
+	"Visual_Show": "Erakutsi",
+	"Visual_LabelsFill": "Kolorea",
+	"Visual_TextSize": "Testu-tamaina",
+	"Visual_Force_Display": "Behartu bistaratzera"
 }

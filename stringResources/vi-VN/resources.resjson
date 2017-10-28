@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Chung",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Bảng màu",
+	"Visual_General_Buckets": "Nhóm",
 	"Visual_Category": "Danh mục",
-	"Visual_Y": "C"
+	"Visual_Y": "C",
+	"Visual_DataPointsLabels": "Các nhãn dữ liệu",
+	"Visual_Show": "Hiện",
+	"Visual_LabelsFill": "Màu",
+	"Visual_TextSize": "Kích thước Văn bản",
+	"Visual_Force_Display": "Buộc hiển thị"
 }

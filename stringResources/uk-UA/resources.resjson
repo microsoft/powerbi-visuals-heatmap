@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Загальні",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Палітра",
+	"Visual_General_Buckets": "Сегменти",
 	"Visual_Category": "Категорія",
-	"Visual_Y": "Т"
+	"Visual_Y": "Т",
+	"Visual_DataPointsLabels": "Мітки даних",
+	"Visual_Show": "Відображення",
+	"Visual_LabelsFill": "Колір",
+	"Visual_TextSize": "Розмір тексту",
+	"Visual_Force_Display": "Відображати примусово"
 }

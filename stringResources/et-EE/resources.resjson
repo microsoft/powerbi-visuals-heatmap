@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Üldine",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Värviskeemivalits",
+	"Visual_General_Buckets": "Salved",
 	"Visual_Category": "Kategooria",
-	"Visual_Y": "J"
+	"Visual_Y": "J",
+	"Visual_DataPointsLabels": "Andmesildid",
+	"Visual_Show": "Kuva",
+	"Visual_LabelsFill": "Värv",
+	"Visual_TextSize": "Teksti suurus",
+	"Visual_Force_Display": "Sundkuvamine"
 }

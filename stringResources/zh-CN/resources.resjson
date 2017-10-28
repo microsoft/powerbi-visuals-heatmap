@@ -1,7 +1,12 @@
 {
 	"Visual_General": "常规",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "配色工具",
 	"Visual_General_Buckets": "存储桶",
 	"Visual_Category": "类别",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "数据标签",
+	"Visual_Show": "显示",
+	"Visual_LabelsFill": "颜色",
+	"Visual_TextSize": "文本大小",
+	"Visual_Force_Display": "强制显示"
 }

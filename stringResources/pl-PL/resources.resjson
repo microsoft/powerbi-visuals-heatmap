@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Ogólne",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Paleta kolorów",
 	"Visual_General_Buckets": "Przedziały",
 	"Visual_Category": "Kategoria",
-	"Visual_Y": "T"
+	"Visual_Y": "T",
+	"Visual_DataPointsLabels": "Etykiety danych",
+	"Visual_Show": "Pokaż",
+	"Visual_LabelsFill": "Kolor",
+	"Visual_TextSize": "Rozmiar tekstu",
+	"Visual_Force_Display": "Wymuś wyświetlanie"
 }

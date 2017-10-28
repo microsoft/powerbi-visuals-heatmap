@@ -3,5 +3,10 @@
 	"Visual_General_Colorbrewer": "Colorbrewer",
 	"Visual_General_Buckets": "バケット",
 	"Visual_Category": "カテゴリ",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "データ ラベル",
+	"Visual_Show": "表示",
+	"Visual_LabelsFill": "色",
+	"Visual_TextSize": "テキスト サイズ",
+	"Visual_Force_Display": "強制的に表示"
 }

@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Genel",
-	"Visual_General_Colorbrewer": "Colorbrewer",
+	"Visual_General_Colorbrewer": "Renk paleti",
 	"Visual_General_Buckets": "Demetler",
 	"Visual_Category": "Kategori",
-	"Visual_Y": "Y"
+	"Visual_Y": "Y",
+	"Visual_DataPointsLabels": "Veri etiketleri",
+	"Visual_Show": "Göster",
+	"Visual_LabelsFill": "Renk",
+	"Visual_TextSize": "Metin Boyutu",
+	"Visual_Force_Display": "Görüntülemeye zorla"
 }

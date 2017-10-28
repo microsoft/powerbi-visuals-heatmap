@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Опште",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Избор боја",
+	"Visual_General_Buckets": "Контејнери",
 	"Visual_Category": "Категорија",
-	"Visual_Y": "Д"
+	"Visual_Y": "Д",
+	"Visual_DataPointsLabels": "Ознаке података",
+	"Visual_Show": "Прикажи",
+	"Visual_LabelsFill": "Боја",
+	"Visual_TextSize": "Величина текста",
+	"Visual_Force_Display": "Наметање приказа"
 }

@@ -1,7 +1,12 @@
 {
 	"Visual_General": "Жалпы",
-	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Colorbrewer": "Түс таңдағыш",
+	"Visual_General_Buckets": "Контейнерлер",
 	"Visual_Category": "Санат",
-	"Visual_Y": "И"
+	"Visual_Y": "И",
+	"Visual_DataPointsLabels": "Деректер белгілері",
+	"Visual_Show": "Көрсету",
+	"Visual_LabelsFill": "Түс",
+	"Visual_TextSize": "Мәтін өлшемі",
+	"Visual_Force_Display": "Мәжбүрлі түрде көрсету"
 }
