@@ -117,6 +117,13 @@
               }
           }
         },
+        "fillNullValuesCells": {
+            "displayName": "Fill by color cells with null value",
+            "displayNameKey": "Visual_FillNullValCell",
+            "type": {
+                "bool": true
+            }
+        },        
         "buckets": {
           "type": {
             "numeric": true

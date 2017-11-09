@@ -107,6 +107,7 @@ module powerbi.extensibility.visual {
         private static HtmlObjTspan: string = "tspan";
 
         private static StFill: string = "fill";
+        private static StOpacity: string = "opacity";
         private static StTextAnchor: string = "text-anchor";
 
         private static ConstEnd: string = "end";
@@ -546,6 +547,11 @@ module powerbi.extensibility.visual {
                 heatMapDataLablesData.exit().remove();
 
                 let elementAnimation: d3.Selection<D3Element> = <d3.Selection<D3Element>> this.getAnimationMode(heatMap, suppressAnimations);
+                if (!this.settings.general.fillNullValuesCells) {
+                    heatMap.style(TableHeatMap.StOpacity, function (d: any) {
+                        return d.value === null ? 0 : 1;
+                    });
+                }
                 elementAnimation.style(TableHeatMap.StFill, function (d: any) {
                     return <string>colorScale(d.value);
                 });

@@ -364,6 +364,7 @@ module powerbi.extensibility.visual {
         public buckets: number = 5;
         public gradientStart: string = "#FFFFFF";
         public gradientEnd: string = "#000000";
+        public fillNullValuesCells: boolean = true;
     }
 
     export class TableHeatmapSettings extends DataViewObjectsParser {

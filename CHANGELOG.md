@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Option to configure displaying of cells with null values
+
 ## 1.2.3
 
 * Table cell max height limited by 60px

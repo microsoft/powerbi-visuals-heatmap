@@ -10,5 +10,6 @@
     "Visual_TextSize": "Text Size",
     "Visual_Force_Display": "Force display",
     "Visual_EnableColorbrewer": "Enable colorbrewer",
-    "Visual_FontFamily": "Font family"
+    "Visual_FontFamily": "Font family",
+    "Visual_FillNullValCell": "Fill by color cells with null value"
 }
