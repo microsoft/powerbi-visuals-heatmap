@@ -34,7 +34,7 @@ module powerbi.extensibility.visual.test {
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
-    const DefaultTimeout: number = 3000;
+    const DefaultTimeout: number = 300;
 
     describe("TableHeatmap", () => {
         let visualBuilder: TableHeatMapBuilder;
@@ -256,6 +256,63 @@ module powerbi.extensibility.visual.test {
                     let labelDOMItems = $(".heatMapDataLabels");
                     expect($(labelDOMItems)).toBeInDOM();
                     expect(labelDOMItems.css("font-family")).toBe("Arial");
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("data with null", () => {
+            it("must be transparent", (done) => {
+                dataView.metadata.objects = {
+                    general: {
+                        fillNullValuesCells: false
+                    },
+                    labels: {
+                        show: true,
+                        fontSize: 12
+                    }
+                };
+
+                // set some values of Y as null;
+                const yRoleIndex: number = 1;
+                const valueColIndex: number = 2;
+                const transparentElementsCount: number = 2;
+                dataView.categorical.values[yRoleIndex].values[0] = null;
+                dataView.categorical.values[yRoleIndex].values[2] = null;
+                dataView.table.rows[0][valueColIndex] = null;
+                dataView.table.rows[2][valueColIndex] = null;
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let transparentElements: number = 0;
+                    let rects: JQuery = $("rect.categoryX");
+                    rects.each((index: number, el: HTMLElement) => {
+                        if (+(el.style.opacity || 1) === 0) {
+                            transparentElements++;
+                        }
+                    });
+
+                    expect(transparentElements).toBe(transparentElementsCount);
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("must be colored", (done) => {
+                dataView.metadata.objects = {
+                    general: {
+                        fillNullValuesCells: true
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let transparentElements: number = 0;
+                    const transparentElementsCount: number = 0;
+                    let rects: JQuery = $("rect.categoryX");
+                    rects.each((index: number, el: HTMLElement) => {
+                        if (+(el.style.opacity || 1) === 0) {
+                            transparentElements++;
+                        }
+                    });
+
+                    expect(transparentElements).toBe(transparentElementsCount);
                     done();
                 }, DefaultTimeout);
             });
