@@ -318,6 +318,27 @@ module powerbi.extensibility.visual.test {
             });
         });
 
+        describe("data with zero", () => {
+            it("must be 0 (not null)", (done) => {
+                dataView = defaultDataViewBuilder.getDataViewWithNullAndZero();
+                dataView.metadata.objects = {
+                    general: {
+                        fillNullValuesCells: false
+                    },
+                    labels: {
+                        show: true
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    let texts: JQuery = $("text.categoryXLabel");
+                    let text: HTMLElement = texts[0];
+                    expect(text.textContent).toBe("0");
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
         describe("cell size", () => {
             it("must resize with big font size of cell data labels", (done) => {
                 const fontSize: number = 40;

@@ -541,7 +541,7 @@ module powerbi.extensibility.visual {
                         let textValue: string = (dataPoint.value || "null").toString();
                         textProperties.text = textValue;
                         textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
-                        return textValue;
+                        return dataPoint.value === 0 ? 0 : textValue;
                     });
 
                 heatMapDataLablesData.exit().remove();
