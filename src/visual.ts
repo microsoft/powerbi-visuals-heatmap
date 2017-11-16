@@ -541,7 +541,7 @@ module powerbi.extensibility.visual {
                         let textValue: string = (dataPoint.value || "null").toString();
                         textProperties.text = textValue;
                         textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
-                        return textValue;
+                        return dataPoint.value === 0 ? 0 : textValue;
                     });
 
                 heatMapDataLablesData.exit().remove();
@@ -601,7 +601,7 @@ module powerbi.extensibility.visual {
                 legend.append(TableHeatMap.HtmlObjText)
                     .classed(TableHeatMap.ClsMono, true)
                     .attr(TableHeatMap.AttrX, function (d, i) {
-                        return legendElementWidth * i + legendOffsetX - legendElementWidth / 4;
+                        return legendElementWidth * i + legendOffsetX ;
                     })
                     .attr(TableHeatMap.AttrY, legendOffsetTextY)
                     .text(function (d) {
@@ -612,7 +612,7 @@ module powerbi.extensibility.visual {
                     .data([0].concat(maxDataValue))
                     .append(TableHeatMap.HtmlObjText)
                     .text(chartData.valueFormatter.format(maxDataValue))
-                    .attr(TableHeatMap.AttrX, legendElementWidth * colors.length + legendOffsetX - legendElementWidth / 4)
+                    .attr(TableHeatMap.AttrX, legendElementWidth * colors.length + legendOffsetX)
                     .attr(TableHeatMap.AttrY, legendOffsetTextY)
                     .classed(TableHeatMap.ClsLegend, true)
                     .classed(TableHeatMap.ClsMono, true);

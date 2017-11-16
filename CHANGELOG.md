@@ -1,3 +1,7 @@
+## 1.3.1
+
+* Fix issue when zero value displays as null
+
 ## 1.3.0
 
 * Option to configure displaying of cells with null values
