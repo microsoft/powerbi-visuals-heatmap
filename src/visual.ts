@@ -561,7 +561,7 @@ module powerbi.extensibility.visual {
                 });
 
                 // legend
-                let legendDataValues = [0].concat(colorScale.quantiles());
+                let legendDataValues = [minDataValue].concat(colorScale.quantiles());
                 let legendData = legendDataValues.map((value, index) => {
                     return {
                         value: value,

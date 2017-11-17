@@ -1,3 +1,7 @@
+## 1.3.2
+
+* Fix displaying min negative value in legend
+
 ## 1.3.1
 
 * Fix issue when zero value displays as null
