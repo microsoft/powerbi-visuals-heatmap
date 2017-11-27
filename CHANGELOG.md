@@ -1,3 +1,7 @@
+## 1.3.3
+
+* Fix issue when cells overlap Y axis labels in reading view.
+
 ## 1.3.2
 
 * Fix displaying min negative value in legend

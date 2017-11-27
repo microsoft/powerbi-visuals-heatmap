@@ -76,6 +76,8 @@ module powerbi.extensibility.visual {
         private dataView: DataView;
         private viewport: IViewport;
         private margin: IMargin = {left: 5, right: 10, bottom: 15, top: 10};
+
+        private static YAxisAdditinalMargin: number = 5;
         private animationDuration: number = 1000;
 
         private static ClsAll: string = "*";
@@ -295,7 +297,7 @@ module powerbi.extensibility.visual {
                 fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
                 text: maxLengthText.trim(),
                 fontFamily: this.settings.yAxisLabels.fontFamily
-            });
+            }) + TableHeatMap.YAxisAdditinalMargin;
         }
 
         private getXAxisHeight(chartData: TableHeatMapChartData): number {
