@@ -1,3 +1,8 @@
+## 1.3.4
+
+* Segoe UI font families were removed from properties
+* Default font family changed to Arial
+
 ## 1.3.3
 
 * Fix issue when cells overlap Y axis labels in reading view.

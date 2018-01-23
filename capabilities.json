@@ -235,18 +235,6 @@
                         "value": "Lucida Sans Unicode"
                     },
                     {
-                        "displayName": "Segoe (Bold)",
-                        "value": "'Segoe UI Bold', wf_segoe-ui_bold, helvetica, arial, sans-serif"
-                    },
-                    {
-                        "displayName": "Segoe UI",
-                        "value": "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;"
-                    },
-                    {
-                        "displayName": "Segoe UI Light",
-                        "value": "'Segoe UI Light', wf_segoe-ui_light, helvetica, arial, sans-serif;"
-                    },
-                    {
                         "displayName": "Symbol",
                         "value": "Symbol"
                     },
@@ -367,18 +355,6 @@
                     {
                         "displayName": "Lucida Sans Unicode",
                         "value": "Lucida Sans Unicode"
-                    },
-                    {
-                        "displayName": "Segoe (Bold)",
-                        "value": "'Segoe UI Bold', wf_segoe-ui_bold, helvetica, arial, sans-serif"
-                    },
-                    {
-                        "displayName": "Segoe UI",
-                        "value": "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;"
-                    },
-                    {
-                        "displayName": "Segoe UI Light",
-                        "value": "'Segoe UI Light', wf_segoe-ui_light, helvetica, arial, sans-serif;"
                     },
                     {
                         "displayName": "Symbol",
