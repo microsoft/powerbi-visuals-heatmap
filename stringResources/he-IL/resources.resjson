@@ -8,5 +8,8 @@
 	"Visual_Show": "‏‏הצג",
 	"Visual_LabelsFill": "צבע",
 	"Visual_TextSize": "גודל טקסט",
-	"Visual_Force_Display": "הכרח תצוגה"
+	"Visual_Force_Display": "הכרח תצוגה",
+	"Visual_EnableColorbrewer": "הפוך את דפדפן הצבעים לזמין",
+	"Visual_FontFamily": "משפחת גופנים",
+	"Visual_FillNullValCell": "מילוי לפי תאי צבע עם ערך Null"
 }

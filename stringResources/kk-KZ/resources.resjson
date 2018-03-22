@@ -8,5 +8,8 @@
 	"Visual_Show": "Көрсету",
 	"Visual_LabelsFill": "Түс",
 	"Visual_TextSize": "Мәтін өлшемі",
-	"Visual_Force_Display": "Мәжбүрлі түрде көрсету"
+	"Visual_Force_Display": "Мәжбүрлі түрде көрсету",
+	"Visual_EnableColorbrewer": "Түс таңдағышты қосу",
+	"Visual_FontFamily": "Қаріптер тобы",
+	"Visual_FillNullValCell": "Бос мәнді ұяшықтарды түспен бояу"
 }

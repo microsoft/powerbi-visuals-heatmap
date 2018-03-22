@@ -8,5 +8,8 @@
 	"Visual_Show": "Відображення",
 	"Visual_LabelsFill": "Колір",
 	"Visual_TextSize": "Розмір тексту",
-	"Visual_Force_Display": "Відображати примусово"
+	"Visual_Force_Display": "Відображати примусово",
+	"Visual_EnableColorbrewer": "Увімкнути палітру",
+	"Visual_FontFamily": "Сімейство шрифтів",
+	"Visual_FillNullValCell": "Заповнити кольором клітинки з Null-значенням"
 }

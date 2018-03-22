@@ -8,5 +8,8 @@
 	"Visual_Show": "Afficher",
 	"Visual_LabelsFill": "Couleur",
 	"Visual_TextSize": "Taille du texte",
-	"Visual_Force_Display": "Forcer l'affichage"
+	"Visual_Force_Display": "Forcer l'affichage",
+	"Visual_EnableColorbrewer": "Activer colorbrewer",
+	"Visual_FontFamily": "Famille de polices",
+	"Visual_FillNullValCell": "Mettre en couleur les cellules avec une valeur null"
 }

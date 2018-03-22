@@ -8,5 +8,8 @@
 	"Visual_Show": "‏‏إظهار",
 	"Visual_LabelsFill": "اللون",
 	"Visual_TextSize": "حجم النص",
-	"Visual_Force_Display": "فرض العرض"
+	"Visual_Force_Display": "فرض العرض",
+	"Visual_EnableColorbrewer": "تمكين درجات الألوان",
+	"Visual_FontFamily": "عائلة الخطوط",
+	"Visual_FillNullValCell": "تعبئة بلون الخلايا التي تحتوي على قيمة فارغة"
 }

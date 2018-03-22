@@ -8,5 +8,8 @@
 	"Visual_Show": "Afişare",
 	"Visual_LabelsFill": "Culoare",
 	"Visual_TextSize": "Dimensiune text",
-	"Visual_Force_Display": "Impunere afișare"
+	"Visual_Force_Display": "Impunere afișare",
+	"Visual_EnableColorbrewer": "Activați colorbrewer",
+	"Visual_FontFamily": "Familie de fonturi",
+	"Visual_FillNullValCell": "Umpleți cu culoare celulele cu valoare nulă"
 }

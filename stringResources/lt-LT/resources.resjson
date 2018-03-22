@@ -8,5 +8,8 @@
 	"Visual_Show": "Rodyti",
 	"Visual_LabelsFill": "Spalva",
 	"Visual_TextSize": "Teksto dydis",
-	"Visual_Force_Display": "Priverstinis rodymas"
+	"Visual_Force_Display": "Priverstinis rodymas",
+	"Visual_EnableColorbrewer": "Įjungti spalvų paletes",
+	"Visual_FontFamily": "Šriftų šeima",
+	"Visual_FillNullValCell": "Užpildyti pagal spalvą langelius su „null“ reikšme"
 }

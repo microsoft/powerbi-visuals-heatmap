@@ -8,5 +8,8 @@
 	"Visual_Show": "顯示",
 	"Visual_LabelsFill": "色彩",
 	"Visual_TextSize": "文字大小",
-	"Visual_Force_Display": "強制顯示"
+	"Visual_Force_Display": "強制顯示",
+	"Visual_EnableColorbrewer": "啟用配色",
+	"Visual_FontFamily": "字型家族",
+	"Visual_FillNullValCell": "以值為 null 的色彩儲存格填滿"
 }

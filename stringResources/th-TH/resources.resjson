@@ -8,5 +8,8 @@
 	"Visual_Show": "แสดง",
 	"Visual_LabelsFill": "สี",
 	"Visual_TextSize": "ขนาดแบบอักษร",
-	"Visual_Force_Display": "บังคับให้แสดง"
+	"Visual_Force_Display": "บังคับให้แสดง",
+	"Visual_EnableColorbrewer": "เปิดใช้งานเครื่องมือผสมสี",
+	"Visual_FontFamily": "ตระกูลแบบอักษร",
+	"Visual_FillNullValCell": "เติมด้วยเซลล์สีที่มีค่าเป็น null"
 }

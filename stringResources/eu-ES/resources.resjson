@@ -8,5 +8,8 @@
 	"Visual_Show": "Erakutsi",
 	"Visual_LabelsFill": "Kolorea",
 	"Visual_TextSize": "Testu-tamaina",
-	"Visual_Force_Display": "Behartu bistaratzera"
+	"Visual_Force_Display": "Behartu bistaratzera",
+	"Visual_EnableColorbrewer": "Gaitu kolore-erakustegia",
+	"Visual_FontFamily": "Letra-tipoaren familia",
+	"Visual_FillNullValCell": "Gorde balio nulua duten gelaxka koloreztatuen arabera"
 }

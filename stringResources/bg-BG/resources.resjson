@@ -8,5 +8,8 @@
 	"Visual_Show": "Показване",
 	"Visual_LabelsFill": "Цвят",
 	"Visual_TextSize": "Размер на текста",
-	"Visual_Force_Display": "Принудително показване"
+	"Visual_Force_Display": "Принудително показване",
+	"Visual_EnableColorbrewer": "Разрешаване на цветова гама",
+	"Visual_FontFamily": "Семейство шрифтове",
+	"Visual_FillNullValCell": "Запълване по цвят на клетки със стойност null"
 }

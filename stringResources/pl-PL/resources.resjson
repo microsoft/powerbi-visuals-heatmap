@@ -8,5 +8,8 @@
 	"Visual_Show": "Pokaż",
 	"Visual_LabelsFill": "Kolor",
 	"Visual_TextSize": "Rozmiar tekstu",
-	"Visual_Force_Display": "Wymuś wyświetlanie"
+	"Visual_Force_Display": "Wymuś wyświetlanie",
+	"Visual_EnableColorbrewer": "Włącz paletę kolorów",
+	"Visual_FontFamily": "Rodzina czcionek",
+	"Visual_FillNullValCell": "Wypełnij według kolorów komórek z wartością null"
 }

@@ -8,5 +8,8 @@
 	"Visual_Show": "Tampilkan",
 	"Visual_LabelsFill": "Warna",
 	"Visual_TextSize": "Ukuran Teks",
-	"Visual_Force_Display": "Tampilan penjualan"
+	"Visual_Force_Display": "Tampilan penjualan",
+	"Visual_EnableColorbrewer": "Aktifkan pencampur warna",
+	"Visual_FontFamily": "Kelompok Font",
+	"Visual_FillNullValCell": "Isi dengan sel warna dengan nilai null"
 }

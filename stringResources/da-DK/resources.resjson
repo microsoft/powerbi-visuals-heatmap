@@ -8,5 +8,8 @@
 	"Visual_Show": "Vis",
 	"Visual_LabelsFill": "Farve",
 	"Visual_TextSize": "Tekststørrelse",
-	"Visual_Force_Display": "Gennemtving visning"
+	"Visual_Force_Display": "Gennemtving visning",
+	"Visual_EnableColorbrewer": "Aktivér farvebygger",
+	"Visual_FontFamily": "Skrifttypefamilie",
+	"Visual_FillNullValCell": "Udfyld efter farveceller med værdien null"
 }

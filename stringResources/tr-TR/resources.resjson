@@ -8,5 +8,8 @@
 	"Visual_Show": "Göster",
 	"Visual_LabelsFill": "Renk",
 	"Visual_TextSize": "Metin Boyutu",
-	"Visual_Force_Display": "Görüntülemeye zorla"
+	"Visual_Force_Display": "Görüntülemeye zorla",
+	"Visual_EnableColorbrewer": "Renk paletini etkinleştir",
+	"Visual_FontFamily": "Yazı tipi ailesi",
+	"Visual_FillNullValCell": "Null değerine sahip renkli hücrelerle doldurun"
 }

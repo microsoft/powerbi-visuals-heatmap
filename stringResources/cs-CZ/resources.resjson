@@ -8,5 +8,8 @@
 	"Visual_Show": "Zobrazení",
 	"Visual_LabelsFill": "Barva",
 	"Visual_TextSize": "Velikost textu",
-	"Visual_Force_Display": "Vynutit zobrazení"
+	"Visual_Force_Display": "Vynutit zobrazení",
+	"Visual_EnableColorbrewer": "Povolit výběr palety",
+	"Visual_FontFamily": "Rodina písem",
+	"Visual_FillNullValCell": "Vyplnit barvou buňky s hodnotou null"
 }

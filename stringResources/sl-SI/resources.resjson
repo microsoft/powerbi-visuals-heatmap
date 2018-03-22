@@ -8,5 +8,8 @@
 	"Visual_Show": "Pokaži",
 	"Visual_LabelsFill": "Barva",
 	"Visual_TextSize": "Velikost besedila",
-	"Visual_Force_Display": "Vsili prikaz"
+	"Visual_Force_Display": "Vsili prikaz",
+	"Visual_EnableColorbrewer": "Omogoči izbirnik barv",
+	"Visual_FontFamily": "Družina pisav",
+	"Visual_FillNullValCell": "Zapolni z barvnimi celicami z ničelno vrednostjo"
 }

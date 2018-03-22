@@ -8,5 +8,8 @@
 	"Visual_Show": "Kuva",
 	"Visual_LabelsFill": "Värv",
 	"Visual_TextSize": "Teksti suurus",
-	"Visual_Force_Display": "Sundkuvamine"
+	"Visual_Force_Display": "Sundkuvamine",
+	"Visual_EnableColorbrewer": "Luba programm Colorbrewer",
+	"Visual_FontFamily": "Fondipere",
+	"Visual_FillNullValCell": "Täida värvilised lahtrid tühjade väärtustega"
 }

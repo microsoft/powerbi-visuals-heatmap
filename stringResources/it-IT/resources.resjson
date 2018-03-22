@@ -8,5 +8,8 @@
 	"Visual_Show": "Mostra",
 	"Visual_LabelsFill": "Colore",
 	"Visual_TextSize": "Dimensioni testo",
-	"Visual_Force_Display": "Forza la visualizzazione"
+	"Visual_Force_Display": "Forza la visualizzazione",
+	"Visual_EnableColorbrewer": "Abilita combinazione colori",
+	"Visual_FontFamily": "Famiglia di caratteri",
+	"Visual_FillNullValCell": "Riempi celle per colore con valore Null"
 }

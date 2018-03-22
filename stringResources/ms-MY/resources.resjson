@@ -8,5 +8,8 @@
 	"Visual_Show": "Tunjukkan",
 	"Visual_LabelsFill": "Warna",
 	"Visual_TextSize": "Saiz Teks",
-	"Visual_Force_Display": "Paksa paparan"
+	"Visual_Force_Display": "Paksa paparan",
+	"Visual_EnableColorbrewer": "Dayakan colorbrewer",
+	"Visual_FontFamily": "Keluarga fon",
+	"Visual_FillNullValCell": "Isi mengikut sel warna dengan nilai nol"
 }

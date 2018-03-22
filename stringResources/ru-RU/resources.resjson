@@ -8,5 +8,8 @@
 	"Visual_Show": "Показать",
 	"Visual_LabelsFill": "Цвет",
 	"Visual_TextSize": "Размер текста",
-	"Visual_Force_Display": "Принудительное отображение"
+	"Visual_Force_Display": "Принудительное отображение",
+	"Visual_EnableColorbrewer": "Включить палитру",
+	"Visual_FontFamily": "Семейство шрифтов",
+	"Visual_FillNullValCell": "Заполнить по цвету ячейки со значением NULL"
 }

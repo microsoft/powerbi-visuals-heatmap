@@ -8,5 +8,8 @@
 	"Visual_Show": "Mostra",
 	"Visual_LabelsFill": "Color",
 	"Visual_TextSize": "Mida del text",
-	"Visual_Force_Display": "Força la visualització"
+	"Visual_Force_Display": "Força la visualització",
+	"Visual_EnableColorbrewer": "Habilita la paleta de colors",
+	"Visual_FontFamily": "Família de tipus de lletra",
+	"Visual_FillNullValCell": "Emplena per cel·les de color amb valor nul"
 }

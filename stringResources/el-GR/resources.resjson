@@ -8,5 +8,8 @@
 	"Visual_Show": "Εμφάνιση",
 	"Visual_LabelsFill": "Χρώμα",
 	"Visual_TextSize": "Μέγεθος κειμένου",
-	"Visual_Force_Display": "Επιβολή εμφάνισης"
+	"Visual_Force_Display": "Επιβολή εμφάνισης",
+	"Visual_EnableColorbrewer": "Ενεργοποίηση παλέτας χρωμάτων",
+	"Visual_FontFamily": "Οικογένεια γραμματοσειράς",
+	"Visual_FillNullValCell": "Γέμισμα με χρώμα των κελιών με τιμή null"
 }

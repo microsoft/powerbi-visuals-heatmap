@@ -8,5 +8,8 @@
 	"Visual_Show": "दिखाएँ",
 	"Visual_LabelsFill": "रंग",
 	"Visual_TextSize": "पाठ आकार",
-	"Visual_Force_Display": "बाध्य प्रदर्शन"
+	"Visual_Force_Display": "बाध्य प्रदर्शन",
+	"Visual_EnableColorbrewer": "कलरब्रूअर सक्षम करें",
+	"Visual_FontFamily": "फ़ॉन्ट फ़ेमिली",
+	"Visual_FillNullValCell": "नल मान वाले रंग कक्षों द्वारा भरें"
 }

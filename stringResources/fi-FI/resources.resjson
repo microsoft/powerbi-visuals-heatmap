@@ -8,5 +8,8 @@
 	"Visual_Show": "Näytä",
 	"Visual_LabelsFill": "Väri",
 	"Visual_TextSize": "Tekstin koko",
-	"Visual_Force_Display": "Pakota näyttö"
+	"Visual_Force_Display": "Pakota näyttö",
+	"Visual_EnableColorbrewer": "Ota käyttöön värinsekoitin",
+	"Visual_FontFamily": "Fonttiperhe",
+	"Visual_FillNullValCell": "Täytä tyhjäarvon sisältävät solut värin mukaan"
 }

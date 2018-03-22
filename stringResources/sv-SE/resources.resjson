@@ -8,5 +8,8 @@
 	"Visual_Show": "Visa",
 	"Visual_LabelsFill": "Färg",
 	"Visual_TextSize": "Textstorlek",
-	"Visual_Force_Display": "Framtvinga visning"
+	"Visual_Force_Display": "Framtvinga visning",
+	"Visual_EnableColorbrewer": "Aktivera Färgarkitekten",
+	"Visual_FontFamily": "Teckensnittsfamilj",
+	"Visual_FillNullValCell": "Fyll efter färgceller med nullvärde"
 }

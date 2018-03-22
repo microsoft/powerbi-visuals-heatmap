@@ -8,5 +8,8 @@
 	"Visual_Show": "Weergeven",
 	"Visual_LabelsFill": "Kleur",
 	"Visual_TextSize": "Tekengrootte",
-	"Visual_Force_Display": "Weergave afdwingen"
+	"Visual_Force_Display": "Weergave afdwingen",
+	"Visual_EnableColorbrewer": "Kleuren mengen inschakelen",
+	"Visual_FontFamily": "Lettertypefamilie",
+	"Visual_FillNullValCell": "Vulkleur voor cellen met nulwaarde"
 }

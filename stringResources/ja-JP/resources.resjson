@@ -8,5 +8,8 @@
 	"Visual_Show": "表示",
 	"Visual_LabelsFill": "色",
 	"Visual_TextSize": "テキスト サイズ",
-	"Visual_Force_Display": "強制的に表示"
+	"Visual_Force_Display": "強制的に表示",
+	"Visual_EnableColorbrewer": "Colorbrewer を有効にする",
+	"Visual_FontFamily": "フォント ファミリ",
+	"Visual_FillNullValCell": "null 値のセルを色で塗りつぶす"
 }

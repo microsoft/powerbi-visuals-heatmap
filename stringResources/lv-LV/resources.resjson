@@ -8,5 +8,8 @@
 	"Visual_Show": "Rādīt",
 	"Visual_LabelsFill": "Krāsa",
 	"Visual_TextSize": "Teksta lielums",
-	"Visual_Force_Display": "Uzspiest rādīšanu"
+	"Visual_Force_Display": "Uzspiest rādīšanu",
+	"Visual_EnableColorbrewer": "Iespējot krāsu veidotāju",
+	"Visual_FontFamily": "Fontu saime",
+	"Visual_FillNullValCell": "Krāsu aizpildījums šūnām ar vērtību Null"
 }

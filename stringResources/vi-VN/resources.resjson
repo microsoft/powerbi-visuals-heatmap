@@ -8,5 +8,8 @@
 	"Visual_Show": "Hiện",
 	"Visual_LabelsFill": "Màu",
 	"Visual_TextSize": "Kích thước Văn bản",
-	"Visual_Force_Display": "Buộc hiển thị"
+	"Visual_Force_Display": "Buộc hiển thị",
+	"Visual_EnableColorbrewer": "Bật bảng màu",
+	"Visual_FontFamily": "Nhóm phông chữ",
+	"Visual_FillNullValCell": "Điền theo ô màu có giá trị rỗng"
 }

@@ -8,5 +8,8 @@
 	"Visual_Show": "Прикажи",
 	"Visual_LabelsFill": "Боја",
 	"Visual_TextSize": "Величина текста",
-	"Visual_Force_Display": "Наметање приказа"
+	"Visual_Force_Display": "Наметање приказа",
+	"Visual_EnableColorbrewer": "Омогући избор боја",
+	"Visual_FontFamily": "Породица фонтова",
+	"Visual_FillNullValCell": "Попуни по ћелијама у боји које су без вредности"
 }

@@ -8,5 +8,8 @@
 	"Visual_Show": "Zobraziť",
 	"Visual_LabelsFill": "Farba",
 	"Visual_TextSize": "Veľkosť textu",
-	"Visual_Force_Display": "Vynútiť zobrazenie"
+	"Visual_Force_Display": "Vynútiť zobrazenie",
+	"Visual_EnableColorbrewer": "Povoliť farebnú paletu",
+	"Visual_FontFamily": "Skupina písem",
+	"Visual_FillNullValCell": "Vyplniť farbou bunky s hodnotu null"
 }

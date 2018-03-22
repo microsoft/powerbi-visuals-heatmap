@@ -8,5 +8,8 @@
 	"Visual_Show": "Megjelenítés",
 	"Visual_LabelsFill": "Szín",
 	"Visual_TextSize": "Szöveg mérete",
-	"Visual_Force_Display": "Megjelenítés kényszerítése"
+	"Visual_Force_Display": "Megjelenítés kényszerítése",
+	"Visual_EnableColorbrewer": "Palettaválasztó engedélyezése",
+	"Visual_FontFamily": "Betűcsalád",
+	"Visual_FillNullValCell": "Nullértékű cellák kitöltése szín szerint"
 }
