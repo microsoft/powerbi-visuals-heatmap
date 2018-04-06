@@ -99,7 +99,7 @@
           "displayName": "Gradient start",
           "displayNameKey": "Visual_GradientStart",
           "type": {
-              "fill": {
+              "fill": { 
                   "solid": {
                       "color": true
                   }
@@ -168,6 +168,7 @@
               "displayName": "Force display",
               "displayNameKey": "Visual_ForceDisplay",
               "description": "Display all labels anyway",
+              "descriptionKey": "Visual_Description_DisplayAllLabelsAnyway",
               "type": {
                   "bool": true
               }
@@ -176,6 +177,7 @@
             "displayName": "Font family",
             "displayNameKey": "Visual_FontFamily",
             "description": "Font family",
+            "descriptionKey": "Visual_FontFamily",
             "type": {
                 "enumeration": [
                     {
@@ -298,6 +300,7 @@
             "displayName": "Font family",
             "displayNameKey": "Visual_FontFamily",
             "description": "Font family",
+            "descriptionKey": "Visual_FontFamily",
             "type": {
                 "enumeration": [
                     {
@@ -428,6 +431,7 @@
             "displayName": "Font family",
             "displayNameKey": "Visual_FontFamily",
             "description": "Font family",
+            "descriptionKey": "Visual_FontFamily",
             "type": {
                 "enumeration": [
                     {
