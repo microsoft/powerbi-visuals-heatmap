@@ -68,6 +68,7 @@ module powerbi.extensibility.visual {
         };
 
         private host: IVisualHost;
+        private localizationManager: ILocalizationManager;
         private tooltipServiceWrapper: ITooltipServiceWrapper;
         private svg: d3.Selection<any>;
         private div: d3.Selection<any>;
@@ -218,15 +219,15 @@ module powerbi.extensibility.visual {
                         value: element.value,
                         valueStr: element.valueStr,
                         tooltipInfo: [{
-                            displayName: `Category`,
+                            displayName: this.localizationManager.getDisplayName("Visual_Category"),
                             value: (categoryX || "").toString()
                         },
                         {
-                            displayName: `Y`,
+                            displayName: this.localizationManager.getDisplayName("Visual_Y"),
                             value: (element.categoryY || "").toString()
                         },
                         {
-                            displayName: `Value`,
+                            displayName: this.localizationManager.getDisplayName("Visual_Value"),
                             value: (element.value || "").toString()
                         }]
                     });
@@ -247,6 +248,7 @@ module powerbi.extensibility.visual {
 
         constructor(options: VisualConstructorOptions) {
             this.host = options.host;
+            this.localizationManager = this.host.createLocalizationManager();
             this.element = options.element;
 
             this.div = d3.select(options.element)
@@ -568,11 +570,11 @@ module powerbi.extensibility.visual {
                     return {
                         value: value,
                         tooltipInfo: [{
-                            displayName: `Min value`,
+                            displayName: this.localizationManager.getDisplayName("Visual_MinValue"),
                             value: value.toFixed(0)
                         },
                         {
-                            displayName: `Max value`,
+                            displayName: this.localizationManager.getDisplayName("Visual_MaxValue"),
                             value: (legendDataValues[index + 1] || maxDataValue).toFixed(0)
                         }]
                     };
