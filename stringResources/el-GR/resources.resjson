@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Επιβολή εμφάνισης",
 	"Visual_EnableColorbrewer": "Ενεργοποίηση παλέτας χρωμάτων",
 	"Visual_FontFamily": "Οικογένεια γραμματοσειράς",
-	"Visual_FillNullValCell": "Γέμισμα με χρώμα των κελιών με τιμή null"
+	"Visual_FillNullValCell": "Γέμισμα με χρώμα των κελιών με τιμή null",
+	"Visual_Value": "Τιμή",
+	"Visual_MinValue": "Ελάχιστη τιμή",
+	"Visual_MaxValue": "Μέγιστη τιμή",
+	"Visual_ForceDisplay": "Επιβολή εμφάνισης",
+	"Visual_GradientStart": "Αρχή διαβάθμισης",
+	"Visual_GradientEnd": "Τέλος διαβάθμισης",
+	"Visual_XAxis": "Ετικέτες δεδομένων άξονα x",
+	"Visual_YAxis": "Ετικέτες δεδομένων άξονα y",
+	"Visual_MaxTextSymbols": "Μέγιστος αριθμός συμβόλων κειμένου",
+	"Visual_Description_DisplayAllLabelsAnyway": "Εμφάνιση όλων των ετικετών ούτως ή άλλως"
 }

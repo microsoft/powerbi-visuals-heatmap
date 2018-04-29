@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Принудително показване",
 	"Visual_EnableColorbrewer": "Разрешаване на цветова гама",
 	"Visual_FontFamily": "Семейство шрифтове",
-	"Visual_FillNullValCell": "Запълване по цвят на клетки със стойност null"
+	"Visual_FillNullValCell": "Запълване по цвят на клетки със стойност null",
+	"Visual_Value": "Стойност",
+	"Visual_MinValue": "Минимална стойност",
+	"Visual_MaxValue": "Максимална стойност",
+	"Visual_ForceDisplay": "Принудително показване",
+	"Visual_GradientStart": "Начало на преливането",
+	"Visual_GradientEnd": "Край на преливането",
+	"Visual_XAxis": "Етикети на данни на ос X",
+	"Visual_YAxis": "Етикети на данни на ос Y",
+	"Visual_MaxTextSymbols": "Максимални текстови символи",
+	"Visual_Description_DisplayAllLabelsAnyway": "Въпреки това показване на всички етикети"
 }

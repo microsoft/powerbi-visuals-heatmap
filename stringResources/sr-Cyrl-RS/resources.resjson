@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Наметање приказа",
 	"Visual_EnableColorbrewer": "Омогући избор боја",
 	"Visual_FontFamily": "Породица фонтова",
-	"Visual_FillNullValCell": "Попуни по ћелијама у боји које су без вредности"
+	"Visual_FillNullValCell": "Попуни по ћелијама у боји које су без вредности",
+	"Visual_Value": "Вредност",
+	"Visual_MinValue": "Минимална вредност",
+	"Visual_MaxValue": "Максимална вредност",
+	"Visual_ForceDisplay": "Наметање приказа",
+	"Visual_GradientStart": "Почетак прелива",
+	"Visual_GradientEnd": "Крај прелива",
+	"Visual_XAxis": "Ознаке података X осе",
+	"Visual_YAxis": "Ознаке података Y осе",
+	"Visual_MaxTextSymbols": "Максимални број симбола у тексту",
+	"Visual_Description_DisplayAllLabelsAnyway": "Ипак прикажи све ознаке"
 }

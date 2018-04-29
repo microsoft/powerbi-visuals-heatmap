@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Sundkuvamine",
 	"Visual_EnableColorbrewer": "Luba programm Colorbrewer",
 	"Visual_FontFamily": "Fondipere",
-	"Visual_FillNullValCell": "Täida värvilised lahtrid tühjade väärtustega"
+	"Visual_FillNullValCell": "Täida värvilised lahtrid tühjade väärtustega",
+	"Visual_Value": "Väärtus",
+	"Visual_MinValue": "Min väärtus",
+	"Visual_MaxValue": "Max väärtus",
+	"Visual_ForceDisplay": "Sundkuvamine",
+	"Visual_GradientStart": "Astmiku algus",
+	"Visual_GradientEnd": "Astmiku lõpp",
+	"Visual_XAxis": "X-telje andmesildid",
+	"Visual_YAxis": "Y-telje andmesildid",
+	"Visual_MaxTextSymbols": "Max tekstisümbolid",
+	"Visual_Description_DisplayAllLabelsAnyway": "Kuva siiski kõik sildid"
 }

@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Paksa paparan",
 	"Visual_EnableColorbrewer": "Dayakan colorbrewer",
 	"Visual_FontFamily": "Keluarga fon",
-	"Visual_FillNullValCell": "Isi mengikut sel warna dengan nilai nol"
+	"Visual_FillNullValCell": "Isi mengikut sel warna dengan nilai nol",
+	"Visual_Value": "Nilai",
+	"Visual_MinValue": "Nilai min",
+	"Visual_MaxValue": "Nilai maks",
+	"Visual_ForceDisplay": "Paksa paparan",
+	"Visual_GradientStart": "Permulaan gradien",
+	"Visual_GradientEnd": "Hujung gradien",
+	"Visual_XAxis": "Label data paksi X",
+	"Visual_YAxis": "Label data paksi Y",
+	"Visual_MaxTextSymbols": "Simbol teks maksimum",
+	"Visual_Description_DisplayAllLabelsAnyway": "Paparkan juga semua label"
 }

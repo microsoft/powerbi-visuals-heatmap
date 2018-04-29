@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Принудительное отображение",
 	"Visual_EnableColorbrewer": "Включить палитру",
 	"Visual_FontFamily": "Семейство шрифтов",
-	"Visual_FillNullValCell": "Заполнить по цвету ячейки со значением NULL"
+	"Visual_FillNullValCell": "Заполнить по цвету ячейки со значением NULL",
+	"Visual_Value": "Значение",
+	"Visual_MinValue": "Минимальное значение",
+	"Visual_MaxValue": "Максимальное значение",
+	"Visual_ForceDisplay": "Принудительное отображение",
+	"Visual_GradientStart": "Начало градиента",
+	"Visual_GradientEnd": "Конец градиента",
+	"Visual_XAxis": "Метки данных по оси X",
+	"Visual_YAxis": "Метки данных по оси Y",
+	"Visual_MaxTextSymbols": "Максимальный symbold в тексте",
+	"Visual_Description_DisplayAllLabelsAnyway": "Показывать все метки"
 }

@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "فرض العرض",
 	"Visual_EnableColorbrewer": "تمكين درجات الألوان",
 	"Visual_FontFamily": "عائلة الخطوط",
-	"Visual_FillNullValCell": "تعبئة بلون الخلايا التي تحتوي على قيمة فارغة"
+	"Visual_FillNullValCell": "تعبئة بلون الخلايا التي تحتوي على قيمة فارغة",
+	"Visual_Value": "القيمة",
+	"Visual_MinValue": "أدنى قيمة",
+	"Visual_MaxValue": "أقصى قيمة",
+	"Visual_ForceDisplay": "فرض العرض",
+	"Visual_GradientStart": "بداية التدرج",
+	"Visual_GradientEnd": "نهاية التدرج",
+	"Visual_XAxis": "تسميات بيانات المحور س",
+	"Visual_YAxis": "تسميات بيانات المحور ص",
+	"Visual_MaxTextSymbols": "الحد الأقصى لرموز النص",
+	"Visual_Description_DisplayAllLabelsAnyway": "عرض كل التسميات على أية حال"
 }

@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Nametni prikaz",
 	"Visual_EnableColorbrewer": "Omogući raspon boja",
 	"Visual_FontFamily": "Obitelj fontova",
-	"Visual_FillNullValCell": "Ispuni prema boji ćelija s vrijednosti null"
+	"Visual_FillNullValCell": "Ispuni prema boji ćelija s vrijednosti null",
+	"Visual_Value": "Vrijednost",
+	"Visual_MinValue": "Minimalna vrijednost",
+	"Visual_MaxValue": "Maksimalna vrijednost",
+	"Visual_ForceDisplay": "Nametni prikaz",
+	"Visual_GradientStart": "Početak s prijelazom",
+	"Visual_GradientEnd": "Završetak s prijelazom",
+	"Visual_XAxis": "Oznake podataka na osi x",
+	"Visual_YAxis": "Oznake podataka na osi y",
+	"Visual_MaxTextSymbols": "Simboli maks. teksta",
+	"Visual_Description_DisplayAllLabelsAnyway": "Ipak prikaži sve oznake"
 }

@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "บังคับให้แสดง",
 	"Visual_EnableColorbrewer": "เปิดใช้งานเครื่องมือผสมสี",
 	"Visual_FontFamily": "ตระกูลแบบอักษร",
-	"Visual_FillNullValCell": "เติมด้วยเซลล์สีที่มีค่าเป็น null"
+	"Visual_FillNullValCell": "เติมด้วยเซลล์สีที่มีค่าเป็น null",
+	"Visual_Value": "ค่า",
+	"Visual_MinValue": "ค่าต่ำสุด",
+	"Visual_MaxValue": "ค่าสูงสุด",
+	"Visual_ForceDisplay": "บังคับให้แสดง",
+	"Visual_GradientStart": "เริ่มต้นการไล่ระดับสี",
+	"Visual_GradientEnd": "สิ้นสุดการไล่ระดับสี",
+	"Visual_XAxis": "ป้ายชื่อข้อมูลแกน X",
+	"Visual_YAxis": "ป้ายชื่อข้อมูลแกน Y",
+	"Visual_MaxTextSymbols": "สัญลักษณ์ข้อความสูงสุด",
+	"Visual_Description_DisplayAllLabelsAnyway": "แสดงป้ายชื่อทั้งหมด"
 }

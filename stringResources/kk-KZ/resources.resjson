@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Мәжбүрлі түрде көрсету",
 	"Visual_EnableColorbrewer": "Түс таңдағышты қосу",
 	"Visual_FontFamily": "Қаріптер тобы",
-	"Visual_FillNullValCell": "Бос мәнді ұяшықтарды түспен бояу"
+	"Visual_FillNullValCell": "Бос мәнді ұяшықтарды түспен бояу",
+	"Visual_Value": "Мәні",
+	"Visual_MinValue": "Минималды мән",
+	"Visual_MaxValue": "Максималды мән",
+	"Visual_ForceDisplay": "Мәжбүрлі түрде көрсету",
+	"Visual_GradientStart": "Градиент басы",
+	"Visual_GradientEnd": "Градиент соңы",
+	"Visual_XAxis": "X осі деректерінің белгілері",
+	"Visual_YAxis": "Y осі деректерінің белгілері",
+	"Visual_MaxTextSymbols": "Мәтіннің ең көп таңбасы",
+	"Visual_Description_DisplayAllLabelsAnyway": "Бәрібір барлық белгілерді көрсету"
 }

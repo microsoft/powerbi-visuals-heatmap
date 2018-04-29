@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Megjelenítés kényszerítése",
 	"Visual_EnableColorbrewer": "Palettaválasztó engedélyezése",
 	"Visual_FontFamily": "Betűcsalád",
-	"Visual_FillNullValCell": "Nullértékű cellák kitöltése szín szerint"
+	"Visual_FillNullValCell": "Nullértékű cellák kitöltése szín szerint",
+	"Visual_Value": "Érték",
+	"Visual_MinValue": "Minimális érték",
+	"Visual_MaxValue": "Maximális érték",
+	"Visual_ForceDisplay": "Megjelenítés kényszerítése",
+	"Visual_GradientStart": "Színátmenet kezdete",
+	"Visual_GradientEnd": "Színátmenet vége",
+	"Visual_XAxis": "X tengely adatfeliratai",
+	"Visual_YAxis": "Y tengely adatfeliratai",
+	"Visual_MaxTextSymbols": "Max. szöveges szimbólum",
+	"Visual_Description_DisplayAllLabelsAnyway": "Ennek ellenére az összes felirat megjelenítése"
 }

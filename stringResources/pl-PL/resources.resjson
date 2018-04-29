@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Wymuś wyświetlanie",
 	"Visual_EnableColorbrewer": "Włącz paletę kolorów",
 	"Visual_FontFamily": "Rodzina czcionek",
-	"Visual_FillNullValCell": "Wypełnij według kolorów komórek z wartością null"
+	"Visual_FillNullValCell": "Wypełnij według kolorów komórek z wartością null",
+	"Visual_Value": "Wartość",
+	"Visual_MinValue": "Wartość minimalna",
+	"Visual_MaxValue": "Wartość maksymalna",
+	"Visual_ForceDisplay": "Wymuś wyświetlanie",
+	"Visual_GradientStart": "Początek gradientu",
+	"Visual_GradientEnd": "Koniec gradientu",
+	"Visual_XAxis": "Etykiety danych osi X",
+	"Visual_YAxis": "Etykiety danych osi Y",
+	"Visual_MaxTextSymbols": "Maksymalna liczba symboli tekstu",
+	"Visual_Description_DisplayAllLabelsAnyway": "Wyświetl wszystkie etykiety mimo wszystko"
 }

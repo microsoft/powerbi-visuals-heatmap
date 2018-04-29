@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "強制的に表示",
 	"Visual_EnableColorbrewer": "Colorbrewer を有効にする",
 	"Visual_FontFamily": "フォント ファミリ",
-	"Visual_FillNullValCell": "null 値のセルを色で塗りつぶす"
+	"Visual_FillNullValCell": "null 値のセルを色で塗りつぶす",
+	"Visual_Value": "値",
+	"Visual_MinValue": "最小値",
+	"Visual_MaxValue": "最大値",
+	"Visual_ForceDisplay": "強制的に表示",
+	"Visual_GradientStart": "グラデーションの開始",
+	"Visual_GradientEnd": "グラデーションの終了",
+	"Visual_XAxis": "X 軸データ ラベル",
+	"Visual_YAxis": "Y 軸データ ラベル",
+	"Visual_MaxTextSymbols": "テキスト シンボルの最大数",
+	"Visual_Description_DisplayAllLabelsAnyway": "すべてのラベルを常に表示します"
 }

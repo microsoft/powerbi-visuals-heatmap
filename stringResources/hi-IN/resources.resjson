@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "बाध्य प्रदर्शन",
 	"Visual_EnableColorbrewer": "कलरब्रूअर सक्षम करें",
 	"Visual_FontFamily": "फ़ॉन्ट फ़ेमिली",
-	"Visual_FillNullValCell": "नल मान वाले रंग कक्षों द्वारा भरें"
+	"Visual_FillNullValCell": "नल मान वाले रंग कक्षों द्वारा भरें",
+	"Visual_Value": "मान",
+	"Visual_MinValue": "न्‍यूनतम मान",
+	"Visual_MaxValue": "अधिकतम मान",
+	"Visual_ForceDisplay": "बाध्य प्रदर्शन",
+	"Visual_GradientStart": "ग्रेडिएंट प्रारंभ",
+	"Visual_GradientEnd": "ग्रेडिएंट समाप्ति",
+	"Visual_XAxis": "X अक्ष डेटा लेबल्स",
+	"Visual_YAxis": "Y अक्ष डेटा लेबल्स",
+	"Visual_MaxTextSymbols": "अधिकतम पाठ symbold",
+	"Visual_Description_DisplayAllLabelsAnyway": "किसी भी तरह सभी लेबल प्रदर्शित करें"
 }

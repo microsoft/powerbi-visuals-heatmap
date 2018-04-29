@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "強制顯示",
 	"Visual_EnableColorbrewer": "啟用配色",
 	"Visual_FontFamily": "字型家族",
-	"Visual_FillNullValCell": "以值為 null 的色彩儲存格填滿"
+	"Visual_FillNullValCell": "以值為 null 的色彩儲存格填滿",
+	"Visual_Value": "值",
+	"Visual_MinValue": "最小值",
+	"Visual_MaxValue": "最大值",
+	"Visual_ForceDisplay": "強制顯示",
+	"Visual_GradientStart": "漸層開始",
+	"Visual_GradientEnd": "漸層結束",
+	"Visual_XAxis": "X 軸資料標籤",
+	"Visual_YAxis": "Y 軸資料標籤",
+	"Visual_MaxTextSymbols": "最大文字符號",
+	"Visual_Description_DisplayAllLabelsAnyway": "一律顯示所有標籤"
 }

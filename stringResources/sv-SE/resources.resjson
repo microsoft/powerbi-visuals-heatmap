@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Framtvinga visning",
 	"Visual_EnableColorbrewer": "Aktivera Färgarkitekten",
 	"Visual_FontFamily": "Teckensnittsfamilj",
-	"Visual_FillNullValCell": "Fyll efter färgceller med nullvärde"
+	"Visual_FillNullValCell": "Fyll efter färgceller med nullvärde",
+	"Visual_Value": "Värde",
+	"Visual_MinValue": "Minvärde",
+	"Visual_MaxValue": "Maxvärde",
+	"Visual_ForceDisplay": "Framtvinga visning",
+	"Visual_GradientStart": "Start på toning",
+	"Visual_GradientEnd": "Slut på toning",
+	"Visual_XAxis": "X-axelns dataetiketter",
+	"Visual_YAxis": "Y-axelns dataetiketter",
+	"Visual_MaxTextSymbols": "Max text symbold",
+	"Visual_Description_DisplayAllLabelsAnyway": "Visa alla etiketter ändå"
 }

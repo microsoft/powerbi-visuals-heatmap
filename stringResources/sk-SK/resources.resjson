@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Vynútiť zobrazenie",
 	"Visual_EnableColorbrewer": "Povoliť farebnú paletu",
 	"Visual_FontFamily": "Skupina písem",
-	"Visual_FillNullValCell": "Vyplniť farbou bunky s hodnotu null"
+	"Visual_FillNullValCell": "Vyplniť farbou bunky s hodnotu null",
+	"Visual_Value": "Hodnota",
+	"Visual_MinValue": "Minimálna hodnota",
+	"Visual_MaxValue": "Maximálna hodnota",
+	"Visual_ForceDisplay": "Vynútiť zobrazenie",
+	"Visual_GradientStart": "Začiatok prechodu",
+	"Visual_GradientEnd": "Koniec prechodu",
+	"Visual_XAxis": "Označenia údajov osi X",
+	"Visual_YAxis": "Označenia údajov osi Y",
+	"Visual_MaxTextSymbols": "Maximálny počet symbolov v texte",
+	"Visual_Description_DisplayAllLabelsAnyway": "Napriek tomu zobraziť všetky označenia"
 }

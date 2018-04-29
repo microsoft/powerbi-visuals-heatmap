@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Weergave afdwingen",
 	"Visual_EnableColorbrewer": "Kleuren mengen inschakelen",
 	"Visual_FontFamily": "Lettertypefamilie",
-	"Visual_FillNullValCell": "Vulkleur voor cellen met nulwaarde"
+	"Visual_FillNullValCell": "Vulkleur voor cellen met nulwaarde",
+	"Visual_Value": "Waarde",
+	"Visual_MinValue": "Minimumwaarde",
+	"Visual_MaxValue": "Maximumwaarde",
+	"Visual_ForceDisplay": "Weergave afdwingen",
+	"Visual_GradientStart": "Kleurovergang starten",
+	"Visual_GradientEnd": "Eindkleur van kleurovergang",
+	"Visual_XAxis": "Gegevenslabels voor de X-as",
+	"Visual_YAxis": "Gegevenslabels voor de Y-as",
+	"Visual_MaxTextSymbols": "Maximaal aantal tekstsymbolen",
+	"Visual_Description_DisplayAllLabelsAnyway": "Alle labels toch weergeven"
 }

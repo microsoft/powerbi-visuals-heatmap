@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Forzar mostra",
 	"Visual_EnableColorbrewer": "Activar paleta de cores",
 	"Visual_FontFamily": "Familia de tipo de letra",
-	"Visual_FillNullValCell": "Encher con cor as celas con valor nulo"
+	"Visual_FillNullValCell": "Encher con cor as celas con valor nulo",
+	"Visual_Value": "Valor",
+	"Visual_MinValue": "Valor mínimo",
+	"Visual_MaxValue": "Valor máximo",
+	"Visual_ForceDisplay": "Forzar mostra",
+	"Visual_GradientStart": "Inicio da gradación",
+	"Visual_GradientEnd": "Fin da gradación",
+	"Visual_XAxis": "Etiquetas de datos do eixe X",
+	"Visual_YAxis": "Etiquetas de datos do eixe Y",
+	"Visual_MaxTextSymbols": "Símbolo de texto máximo",
+	"Visual_Description_DisplayAllLabelsAnyway": "Mostrar etiquetas de todas formas"
 }

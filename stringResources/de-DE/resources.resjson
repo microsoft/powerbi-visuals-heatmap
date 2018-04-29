@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Anzeige erzwingen",
 	"Visual_EnableColorbrewer": "Colorbrewer aktivieren",
 	"Visual_FontFamily": "Schriftfamilie",
-	"Visual_FillNullValCell": "Nach Farbzellen mit NULL-Wert füllen"
+	"Visual_FillNullValCell": "Nach Farbzellen mit NULL-Wert füllen",
+	"Visual_Value": "Wert",
+	"Visual_MinValue": "Mindestwert",
+	"Visual_MaxValue": "Maximalwert",
+	"Visual_ForceDisplay": "Anzeige erzwingen",
+	"Visual_GradientStart": "Start des Farbverlaufs",
+	"Visual_GradientEnd": "Ende des Farbverlaufs",
+	"Visual_XAxis": "Bezeichnungen für X-Achsendaten",
+	"Visual_YAxis": "Bezeichnungen für Y-Achsendaten",
+	"Visual_MaxTextSymbols": "Max. Textsymbole",
+	"Visual_Description_DisplayAllLabelsAnyway": "Dennoch alle Bezeichnungen anzeigen"
 }

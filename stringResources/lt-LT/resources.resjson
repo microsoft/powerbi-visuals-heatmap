@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Priverstinis rodymas",
 	"Visual_EnableColorbrewer": "Įjungti spalvų paletes",
 	"Visual_FontFamily": "Šriftų šeima",
-	"Visual_FillNullValCell": "Užpildyti pagal spalvą langelius su „null“ reikšme"
+	"Visual_FillNullValCell": "Užpildyti pagal spalvą langelius su „null“ reikšme",
+	"Visual_Value": "Reikšmė",
+	"Visual_MinValue": "Mažiausia reikšmė",
+	"Visual_MaxValue": "Didžiausia reikšmė",
+	"Visual_ForceDisplay": "Priverstinis rodymas",
+	"Visual_GradientStart": "Gradiento pradžia",
+	"Visual_GradientEnd": "Gradiento pabaiga",
+	"Visual_XAxis": "X ašies duomenų žymos",
+	"Visual_YAxis": "Y ašies duomenų žymos",
+	"Visual_MaxTextSymbols": "Didžiausias teksto simbolių skaičius",
+	"Visual_Description_DisplayAllLabelsAnyway": "Vis tiek rodyti visas žymas"
 }

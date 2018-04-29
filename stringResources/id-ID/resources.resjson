@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Tampilan penjualan",
 	"Visual_EnableColorbrewer": "Aktifkan pencampur warna",
 	"Visual_FontFamily": "Kelompok Font",
-	"Visual_FillNullValCell": "Isi dengan sel warna dengan nilai null"
+	"Visual_FillNullValCell": "Isi dengan sel warna dengan nilai null",
+	"Visual_Value": "Nilai",
+	"Visual_MinValue": "Nilai min",
+	"Visual_MaxValue": "Nilai maks",
+	"Visual_ForceDisplay": "Tampilan penjualan",
+	"Visual_GradientStart": "Awal gradien",
+	"Visual_GradientEnd": "Akhir gradien",
+	"Visual_XAxis": "Label data sumbu x",
+	"Visual_YAxis": "Label data sumbu y",
+	"Visual_MaxTextSymbols": "Maks simbol teks",
+	"Visual_Description_DisplayAllLabelsAnyway": "Tetap tampilkan semua label"
 }

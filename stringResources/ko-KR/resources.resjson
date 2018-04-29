@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "강제 표시",
 	"Visual_EnableColorbrewer": "Colorbrewer 사용",
 	"Visual_FontFamily": "글꼴 패밀리",
-	"Visual_FillNullValCell": "Null 값이 있는 셀 색으로 채우기"
+	"Visual_FillNullValCell": "Null 값이 있는 셀 색으로 채우기",
+	"Visual_Value": "값",
+	"Visual_MinValue": "최소값",
+	"Visual_MaxValue": "최대값",
+	"Visual_ForceDisplay": "강제 표시",
+	"Visual_GradientStart": "그라데이션 시작",
+	"Visual_GradientEnd": "그라데이션 끝",
+	"Visual_XAxis": "X 축 데이터 레이블",
+	"Visual_YAxis": "Y 축 데이터 레이블",
+	"Visual_MaxTextSymbols": "최대 텍스트 symbold",
+	"Visual_Description_DisplayAllLabelsAnyway": "모든 레이블 표시"
 }

@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Vynutit zobrazení",
 	"Visual_EnableColorbrewer": "Povolit výběr palety",
 	"Visual_FontFamily": "Rodina písem",
-	"Visual_FillNullValCell": "Vyplnit barvou buňky s hodnotou null"
+	"Visual_FillNullValCell": "Vyplnit barvou buňky s hodnotou null",
+	"Visual_Value": "Hodnota",
+	"Visual_MinValue": "Min. hodnota",
+	"Visual_MaxValue": "Max. hodnota",
+	"Visual_ForceDisplay": "Vynutit zobrazení",
+	"Visual_GradientStart": "Začátek gradientu",
+	"Visual_GradientEnd": "Konec gradientu",
+	"Visual_XAxis": "Popisky dat osy x",
+	"Visual_YAxis": "Popisky dat osy y",
+	"Visual_MaxTextSymbols": "Max. počet symbolů v textu",
+	"Visual_Description_DisplayAllLabelsAnyway": "Přesto zobrazit všechny popisky"
 }

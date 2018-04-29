@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Görüntülemeye zorla",
 	"Visual_EnableColorbrewer": "Renk paletini etkinleştir",
 	"Visual_FontFamily": "Yazı tipi ailesi",
-	"Visual_FillNullValCell": "Null değerine sahip renkli hücrelerle doldurun"
+	"Visual_FillNullValCell": "Null değerine sahip renkli hücrelerle doldurun",
+	"Visual_Value": "Değer",
+	"Visual_MinValue": "En düşük değer",
+	"Visual_MaxValue": "En yüksek değer",
+	"Visual_ForceDisplay": "Görüntülemeye zorla",
+	"Visual_GradientStart": "Gradyan başlangıç",
+	"Visual_GradientEnd": "Gradyan bitiş",
+	"Visual_XAxis": "X ekseni veri etiketleri",
+	"Visual_YAxis": "Y ekseni veri etiketleri",
+	"Visual_MaxTextSymbols": "En fazla metin sembolü",
+	"Visual_Description_DisplayAllLabelsAnyway": "Tüm etiketleri yine de görüntüle"
 }

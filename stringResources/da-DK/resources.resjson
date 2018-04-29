@@ -11,5 +11,15 @@
 	"Visual_Force_Display": "Gennemtving visning",
 	"Visual_EnableColorbrewer": "Aktivér farvebygger",
 	"Visual_FontFamily": "Skrifttypefamilie",
-	"Visual_FillNullValCell": "Udfyld efter farveceller med værdien null"
+	"Visual_FillNullValCell": "Udfyld efter farveceller med værdien null",
+	"Visual_Value": "Værdi",
+	"Visual_MinValue": "Minimumværdi",
+	"Visual_MaxValue": "Maksimumværdi",
+	"Visual_ForceDisplay": "Gennemtving visning",
+	"Visual_GradientStart": "Gradueringsstart",
+	"Visual_GradientEnd": "Gradueringsafslutning",
+	"Visual_XAxis": "Dataetiketter for X-akse",
+	"Visual_YAxis": "Dataetiketter for Y-akse",
+	"Visual_MaxTextSymbols": "Maks. tekstsymboler",
+	"Visual_Description_DisplayAllLabelsAnyway": "Vis alle etiketter alligevel"
 }
