@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Added localization for all supported languages
+
 ## 1.3.4
 
 * Segoe UI font families were removed from properties
