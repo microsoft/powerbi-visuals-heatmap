@@ -32,7 +32,7 @@ module powerbi.extensibility.visual.test {
 
     export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
         constructor(width: number, height: number) {
-            super(width, height, "PBI_CV_F8245BAE_FD3C_4553_91B7_DA42511A53BA");
+            super(width, height, "TableHeatMap1443716069308");
         }
 
         protected build(options: VisualConstructorOptions): VisualClass {
@@ -41,6 +41,10 @@ module powerbi.extensibility.visual.test {
 
         public get mainElement(): JQuery {
             return this.element.children("div.divTableHeatMap");
+        }
+
+        public get rects(): JQuery {
+            return this.mainElement.find(".categoryX");
         }
     }
 }
