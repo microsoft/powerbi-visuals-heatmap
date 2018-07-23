@@ -36,6 +36,7 @@
     "karma-typescript": "2.1.7",
     "karma-typescript-preprocessor": "0.3.1",
     "lodash": "4.16.2",
+    "powerbi-models": "^1.0.8",
     "powerbi-visuals-tools": "1.13.1",
     "powerbi-visuals-utils-testutils": "1.2.1",
     "puppeteer": "^1.6.0",
