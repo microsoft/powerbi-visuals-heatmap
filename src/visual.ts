@@ -104,7 +104,7 @@ module powerbi.extensibility.visual {
         private static Const071em: string = ".71em";
 
         private static ConstShiftLabelFromGrid: number = -6;
-        private static ConstGridHeightWidthRaito: number = 0.5;
+        private static ConstGridHeightWidthRatio: number = 0.5;
         private static ConstLegendOffsetFromChartByY: number = 0.5;
 
         private static BucketCountMaxLimit: number = 18;
@@ -434,7 +434,7 @@ module powerbi.extensibility.visual {
                 let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
 
                 let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
-                let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
+                let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio;
 
                 if (gridSizeWidth < textRect.width && settings.labels.show) {
                     gridSizeWidth = textRect.width;
