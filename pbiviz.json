@@ -4,12 +4,12 @@
     "displayName": "Table Heatmap 1.4.0",
     "guid": "TableHeatMap1443716069308",
     "visualClassName": "TableHeatMap",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "You can use this custom visual to build a table heat map that can be used to visualise and compare data values in an easy and intuitive way. You have a built-in option within this visual to specify the number of buckets used for splitting your data. Additionally, you can also customise it by choosing a colour scheme in line with your brand colours",
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-heatmap"
   },
-  "apiVersion": "1.11.0",
+  "apiVersion": "1.13.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"

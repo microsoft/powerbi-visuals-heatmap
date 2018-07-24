@@ -27,13 +27,18 @@
 /// <reference path="_references.ts"/>
 
 module powerbi.extensibility.visual.test {
-
-    import TableHeatMapBuilder = powerbi.extensibility.visual.test.TableHeatMapBuilder;
-    import TableHeatMap = powerbi.extensibility.visual.TableHeatMap1443716069308;
-    import TableHeatMapData = powerbi.extensibility.visual.test.TableHeatMapData;
+    // powerbi.extensibility.utils.formatting
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
+
+    // powerbi.extensibility.utils.type
     import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
+
+    // powerbi.extensibility.visual.test
+    import TableHeatMapData = powerbi.extensibility.visual.test.TableHeatMapData;
+    import areColorsEqual = powerbi.extensibility.visual.test.helpers.areColorsEqual;
+    import TableHeatMapBuilder = powerbi.extensibility.visual.test.TableHeatMapBuilder;
+
     const DefaultTimeout: number = 300;
 
     describe("TableHeatmap", () => {
@@ -343,6 +348,7 @@ module powerbi.extensibility.visual.test {
             it("must resize with big font size of cell data labels", (done) => {
                 const fontSize: number = 40;
                 const fontFamily: string = "Arial";
+
                 dataView.metadata.objects = {
                     labels: {
                         show: true,
@@ -357,8 +363,11 @@ module powerbi.extensibility.visual.test {
                         fontFamily: fontFamily,
                         text: "00"
                     };
+
                     let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
+
                     expect(+$(".categoryX").attr("width")).toBeGreaterThan(textRect.width);
+
                     done();
                 }, DefaultTimeout);
             });
@@ -398,6 +407,56 @@ module powerbi.extensibility.visual.test {
                 };
 
                 objectsChecker(jsonData);
+            });
+        });
+
+        describe("Accessibility", () => {
+            describe("High contrast mode", () => {
+                const backgroundColor: string = "#000000";
+                const foregroundColor: string = "#ffff00";
+
+                beforeEach(() => {
+                    visualBuilder.visualHost.colorPalette.isHighContrast = true;
+
+                    visualBuilder.visualHost.colorPalette.background = { value: backgroundColor };
+                    visualBuilder.visualHost.colorPalette.foreground = { value: foregroundColor };
+                });
+
+                it("should use background theme color as fill", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+
+                        expect(isColorAppliedToElements(rects, backgroundColor, "fill"));
+
+                        done();
+                    });
+                });
+
+                it("should use foreground theme color as stroke", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+
+                        expect(isColorAppliedToElements(rects, foregroundColor, "stroke"));
+
+                        done();
+                    });
+                });
+
+                function isColorAppliedToElements(
+                    elements: JQuery[],
+                    color?: string,
+                    colorStyleName: string = "fill"
+                ): boolean {
+                    return elements.some((element: JQuery) => {
+                        const currentColor: string = element.css(colorStyleName);
+
+                        if (!currentColor || !color) {
+                            return currentColor === color;
+                        }
+
+                        return areColorsEqual(currentColor, color);
+                    });
+                }
             });
         });
     });

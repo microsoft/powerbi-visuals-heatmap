@@ -29,23 +29,14 @@
 module powerbi.extensibility.visual.test {
     import CustomizeColumnFn = powerbi.extensibility.utils.test.dataViewBuilder.CustomizeColumnFn;
     import TestDataViewBuilder = powerbi.extensibility.utils.test.dataViewBuilder.TestDataViewBuilder;
-    import GetRandomDate = powerbi.extensibility.visual.test.helpers.GetRandomDate;
-    import getRandomNumbers = powerbi.extensibility.utils.test.helpers.getRandomNumbers;
-    import ParseCSV = powerbi.extensibility.visual.test.helpers.ParseCSV;
     import ValueType = powerbi.extensibility.utils.type.ValueType;
 
     export class TableHeatMapData extends TestDataViewBuilder {
         public static CategoryColumn: string = "Category";
         public static MeasureColumn: string = "Y";
 
-        public dataCategory: string[];
-        public dataMeasure: number[];
-
-        public constructor() {
-            super();
-            this.dataCategory = _.range(0, 15).map(d => d + "");
-            this.dataMeasure = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
-        }
+        public dataCategory: string[] = _.range(0, 15).map(d => d + "");
+        public dataMeasure: number[] = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
 
         public getDataView(columnNames?: string[], customizeColumns?: CustomizeColumnFn): DataView {
             return this.createCategoricalDataViewBuilder(

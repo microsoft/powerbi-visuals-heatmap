@@ -339,38 +339,38 @@ module powerbi.extensibility.visual {
         }
     };
 
-    export class TableHeatmapLabelsSettings {
-        public static DefaultFontSize: number = 12;
-
+    export class LabelsSettings {
         public show: boolean = false;
         public fill: string = "#aaa";
-        public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+        public fontSize: number = 12;
         public fontFamily: string = "Arial";
     }
 
-    export class TableHeatmapAxisLabelsSettings {
+    export class AxisLabelsSettings {
         public static DefaultFontSize: number = 12;
 
         public show: boolean = true;
         public fill: string = "#aaa";
-        public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+        public fontSize: number = 12;
         public maxTextSymbol: number = 25;
         public fontFamily: string = "Arial";
     }
 
-    export class TableHeatmapGeneralSettings {
+    export class GeneralSettings {
         public enableColorbrewer: boolean = true;
         public colorbrewer: string = "Reds";
         public buckets: number = 5;
         public gradientStart: string = "#FFFFFF";
         public gradientEnd: string = "#000000";
         public fillNullValuesCells: boolean = true;
+        public stroke: string = "#E6E6E6";
+        public textColor: string = "#AAAAAA";
     }
 
-    export class TableHeatmapSettings extends DataViewObjectsParser {
-        public labels: TableHeatmapLabelsSettings = new TableHeatmapLabelsSettings();
-        public xAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
-        public yAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
-        public general: TableHeatmapGeneralSettings = new TableHeatmapGeneralSettings();
+    export class Settings extends DataViewObjectsParser {
+        public labels: LabelsSettings = new LabelsSettings();
+        public xAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
+        public yAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
+        public general: GeneralSettings = new GeneralSettings();
     }
 }
