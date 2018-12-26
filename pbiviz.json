@@ -9,7 +9,7 @@
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-heatmap"
   },
-  "apiVersion": "1.7.0",
+  "apiVersion": "2.3.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
@@ -17,23 +17,7 @@
   "assets": {
     "icon": "assets/icon.png"
   },
-  "externalJS": [
-    "node_modules/d3/d3.min.js",
-    "node_modules/globalize/lib/globalize.js",
-    "node_modules/jquery/dist/jquery.min.js",
-    "node_modules/lodash/lodash.min.js",
-    "external/init.jquery.js",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
-  ],
+  "externalJS": [],
   "style": "style/style.less",
   "capabilities": "capabilities.json"
 }
