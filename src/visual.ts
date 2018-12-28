@@ -24,6 +24,8 @@
 *  THE SOFTWARE.
 */
 import powerbi from "powerbi-visuals-api";
+import "../style/style.less";
+
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
 
@@ -46,7 +48,7 @@ import * as d3 from "d3";
 
 import * as _ from "lodash-es";
 
-import { pixelConverter as PixelConverter} from "powerbi-visuals-utils-typeutils";
+import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
 
 import IColorPalette = powerbi.extensibility.IColorPalette;
 import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
@@ -82,12 +84,12 @@ import {
 } from "powerbi-visuals-utils-tooltiputils";
 
 type D3Element =
-        Selection<any>
+    Selection<any>
 
 export class TableHeatMap implements IVisual {
     private static Properties: any = {
         dataPoint: {
-            fill: <DataViewObjectPropertyIdentifier> {
+            fill: <DataViewObjectPropertyIdentifier>{
                 objectName: "dataPoint",
                 propertyName: "fill"
             }
@@ -108,7 +110,7 @@ export class TableHeatMap implements IVisual {
     private colors: IColorPalette;
     private dataView: DataView;
     private viewport: IViewport;
-    private margin: IMargin = {left: 5, right: 10, bottom: 15, top: 10};
+    private margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
 
     private static YAxisAdditinalMargin: number = 5;
     private animationDuration: number = 1000;
@@ -171,28 +173,15 @@ export class TableHeatMap implements IVisual {
     private element: HTMLElement;
 
     public converter(dataView: DataView, colors: IColorPalette): TableHeatMapChartData {
-        // no category - nothing to display
-        if (!dataView || !dataView.categorical || !dataView.categorical.categories || !dataView.categorical.categories[0] || !dataView.categorical.categories[0].values || !dataView.categorical.categories[0].values.length) {
-            return <TableHeatMapChartData>{
-                dataPoints: null
-            };
-        }
-        // no values - nothing to display
-        if (!dataView.categorical.values || !dataView.categorical.values[0] || !dataView.categorical.values[0].values || !dataView.categorical.values[0].values.length) {
-            return <TableHeatMapChartData>{
-                dataPoints: null
-            };
-        }
-
         let categoryValueFormatter: IValueFormatter;
         let valueFormatter: IValueFormatter;
         let dataPoints: TableHeatMapDataPoint[] = [];
-        let catMetaData: DataViewMetadata = dataView.metadata;
-        let catTable: DataViewTable = dataView.table;
-        let catX: string[] = [];
-        let catY: string[] = [];
+        // let catMetaData: DataViewMetadata = dataView.metadata;
+        // let catTable: DataViewTable = dataView.table;
+        // let catX: string[] = [];
+        // let catY: string[] = [];
 
-        let categoryX: string, categoryY: string;
+        // let categoryX: string, categoryY: string;
 
         categoryValueFormatter = ValueFormatter.create({
             format: ValueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
@@ -204,73 +193,40 @@ export class TableHeatMap implements IVisual {
             value: dataView.categorical.values[0].values[0]
         });
 
-        for (let i in dataView.table.rows) {
-            let values: TableHeatMapDataPoint[] = [];
-            let k: number = 0;
-
-            for (let j in dataView.table.columns) {
-                let columnValFormatter: IValueFormatter;
-                if (catMetaData.columns[j].format) {
-                    columnValFormatter = ValueFormatter.create({
-                        format: catMetaData.columns[j].format
-                    });
-                }
-
-                if (!catMetaData.columns[j].isMeasure) {
-                    categoryX = catX[i] = <string>catTable.rows[i][j];
-                }
-                if (catMetaData.columns[j].isMeasure) {
-                    let value: any = catTable.rows[i][j];
-                    let valueStr: string;
-                    categoryY = catY[j] = catMetaData.columns[j].displayName;
-                    if (value) {
-                        if (catMetaData.columns[j].groupName) {
-                            categoryY += ": " + catMetaData.columns[j].groupName;
-                            catY[j] += ": " + catMetaData.columns[j].groupName;
-                        }
-
-                        if (value !== parseInt(<string>value, 10))
-                            value = (<number>value).toFixed(2);
-                        if (catMetaData.columns[j].format) {
-                            valueStr = columnValFormatter.format(value);
-                        }
-                    }
-                    values[k] = <TableHeatMapDataPoint>{
-                        value: value,
-                        valueStr: valueStr,
-                        categoryY: categoryY
-                    };
-                    k++;
-                }
-            }
-
-            values.forEach((element) => {
+        // dataView.categorical.categories
+        dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
+            dataView.categorical.values.forEach((categoryY, indexY) => {
+                let categoryYFormatter = ValueFormatter.create({
+                    format: categoryY.source.format,
+                    value: dataView.categorical.values[0].values[0]
+                });
+                let value = categoryY.values[indexX];
                 dataPoints.push({
-                    categoryX: categoryX,
-                    categoryY: element.categoryY,
-                    value: element.value,
-                    valueStr: element.valueStr,
+                    categoryX: categoryValueFormatter.format(categoryX),
+                    categoryY: categoryY.source.displayName,
+                    value: +value,
+                    valueStr: categoryYFormatter.format(value),
                     tooltipInfo: [{
                         displayName: `Category`,
                         value: (categoryX || "").toString()
                     },
                     {
                         displayName: `Y`,
-                        value: (element.categoryY || "").toString()
+                        value: (categoryY.source.displayName || "").toString()
                     },
                     {
                         displayName: `Value`,
-                        value: (element.value || "").toString()
+                        value: categoryYFormatter.format(value)
                     }]
                 });
             });
-        }
+        });
         return <TableHeatMapChartData>{
             dataPoints: dataPoints,
-            categoryX: catX.filter((n) => {
+            categoryX: dataView.categorical.categories[0].values.filter((n) => {
                 return n !== undefined;
             }),
-            categoryY: catY.filter((n) => {
+            categoryY: dataView.categorical.values.map(v => v.source.displayName).filter((n) => {
                 return n !== undefined;
             }),
             categoryValueFormatter: categoryValueFormatter,
@@ -360,10 +316,10 @@ export class TableHeatMap implements IVisual {
             let minBucketNum: number = 0;
             let maxBucketNum: number = 0;
             for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
-                if (minBucketNum === 0 && (colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString()) ) {
+                if (minBucketNum === 0 && (colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString())) {
                     minBucketNum = bucketIndex;
                 }
-                if ((colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString()) ) {
+                if ((colorbrewerArray as Object).hasOwnProperty(bucketIndex.toString())) {
                     maxBucketNum = bucketIndex;
                 }
             }
@@ -381,6 +337,7 @@ export class TableHeatMap implements IVisual {
     private updateInternal(options: VisualUpdateOptions): void {
         let dataView: DataView = this.dataView = options.dataViews[0];
         let chartData: TableHeatMapChartData = this.converter(dataView, this.colors);
+        debugger;
         let suppressAnimations: boolean = false;
         if (chartData.dataPoints) {
             let minDataValue: number = d3.min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
@@ -467,9 +424,18 @@ export class TableHeatMap implements IVisual {
             let legendElementHeight: number = gridSizeHeight;
 
             if (this.settings.yAxisLabels.show) {
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
-                    .data(chartData.categoryY)
-                    .enter().append(TableHeatMap.HtmlObjText)
+                let categoryYElements:  d3.Selection<d3.BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
+                let categoryYElementsData = categoryYElements
+                    .data(chartData.categoryY);
+                let categoryYElementsEntered = categoryYElementsData
+                    .enter()
+                    .append(TableHeatMap.HtmlObjText);
+
+                categoryYElementsEntered.exit().remove();
+
+                let categoryYElementsMerged = categoryYElementsEntered.merge(categoryYElements);
+
+                categoryYElementsMerged
                     .text((d: string) => {
                         return TableHeatMap.textLimit(d, this.settings.yAxisLabels.maxTextSymbol);
                     })
@@ -494,9 +460,15 @@ export class TableHeatMap implements IVisual {
             }
 
             if (this.settings.xAxisLabels.show) {
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel)
-                    .data(chartData.categoryX)
-                    .enter().append(TableHeatMap.HtmlObjText)
+                let categoryXElements:  d3.Selection<d3.BaseType, any, any, any> =  this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel);
+                let categoryXElementsData = categoryXElements
+                    .data(chartData.categoryX);
+                categoryXElementsData.exit().remove();
+                let categoryXElementsEntered = categoryXElementsData
+                    .enter().append(TableHeatMap.HtmlObjText);
+                let categoryXElementsMerged = categoryXElementsEntered.merge(categoryXElements);
+
+                categoryXElementsMerged
                     .text(function (d: string) {
                         return chartData.categoryValueFormatter.format(d);
                     })
@@ -515,10 +487,16 @@ export class TableHeatMap implements IVisual {
                 this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
             }
 
-            let heatMap: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX)
-                .data(chartData.dataPoints)
+            debugger;
+            let heatMap: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX);
+            let heatMapData = heatMap
+                .data(chartData.dataPoints);
+            let heatMapEntered = heatMapData
                 .enter()
-                .append(TableHeatMap.HtmlObjRect)
+                .append(TableHeatMap.HtmlObjRect);
+            let heatMapMerged = heatMapEntered.merge(heatMap);
+
+            heatMapMerged
                 .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                     return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset;
                 })
@@ -541,6 +519,7 @@ export class TableHeatMap implements IVisual {
             let heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
             let heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight <= gridSizeHeight && chartData.dataPoints);
+            heatMapDataLablesData.exit().remove();
 
             heatMapDataLablesData
                 .enter()
@@ -556,18 +535,16 @@ export class TableHeatMap implements IVisual {
                 .style("font-size", this.settings.labels.fontSize)
                 .style("font-family", this.settings.labels.fontFamily)
                 .style("fill", this.settings.labels.fill)
-                .text( (dataPoint: TableHeatMapDataPoint) => {
+                .text((dataPoint: TableHeatMapDataPoint) => {
                     let textValue: string = (dataPoint.value || "null").toString();
                     textProperties.text = textValue;
                     textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
                     return dataPoint.value === 0 ? 0 : textValue;
                 });
 
-            heatMapDataLablesData.exit().remove();
-
-            let elementAnimation: Selection<D3Element> = <Selection<D3Element>> this.getAnimationMode(heatMap, suppressAnimations);
+            let elementAnimation: Selection<D3Element> = <Selection<D3Element>>this.getAnimationMode(heatMapMerged, suppressAnimations);
             if (!this.settings.general.fillNullValuesCells) {
-                heatMap.style(TableHeatMap.StOpacity, function (d: any) {
+                heatMapMerged.style(TableHeatMap.StOpacity, function (d: any) {
                     return d.value === null ? 0 : 1;
                 });
             }
@@ -575,7 +552,7 @@ export class TableHeatMap implements IVisual {
                 return <string>colorScale(d.value);
             });
 
-            this.tooltipServiceWrapper.addTooltip(heatMap, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
+            this.tooltipServiceWrapper.addTooltip(heatMapMerged, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
                 return tooltipEvent.data.tooltipInfo;
             });
 
@@ -620,7 +597,7 @@ export class TableHeatMap implements IVisual {
             legend.append(TableHeatMap.HtmlObjText)
                 .classed(TableHeatMap.ClsMono, true)
                 .attr(TableHeatMap.AttrX, function (d, i) {
-                    return legendElementWidth * i + legendOffsetX ;
+                    return legendElementWidth * i + legendOffsetX;
                 })
                 .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .text(function (d) {
@@ -649,7 +626,7 @@ export class TableHeatMap implements IVisual {
 
     private static textLimit(text: string, limit: number) {
         if (text.length > limit) {
-            return ((text || "").substring(0, limit - 3).trim()) + "…" ;
+            return ((text || "").substring(0, limit - 3).trim()) + "…";
         }
 
         return text;
@@ -722,7 +699,7 @@ export class TableHeatMap implements IVisual {
             return element;
         }
 
-        return (<any> element)
+        return (<any>element)
             .transition().duration(this.animationDuration);
     }
 
