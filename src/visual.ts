@@ -503,7 +503,6 @@ export class TableHeatMap implements IVisual {
                 this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
             }
 
-            debugger;
             let heatMap: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX);
             let heatMapData = heatMap
                 .data(chartData.dataPoints);
@@ -531,15 +530,15 @@ export class TableHeatMap implements IVisual {
 
             // add data labels
             let textHeight: number = textRect.height;
-            let textWidth: number = textRect.width;
             let heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
             let heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight <= gridSizeHeight && chartData.dataPoints);
             heatMapDataLablesData.exit().remove();
 
-            heatMapDataLablesData
-                .enter()
-                .append("text")
+            let heatMapDataLablesEntered = heatMapDataLablesData
+                .enter().append("text");
+
+            heatMapDataLablesEntered
                 .classed(TableHeatMap.CLsHeatMapDataLabels, true)
                 .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                     return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
@@ -574,7 +573,7 @@ export class TableHeatMap implements IVisual {
 
             // legend
             let legendDataValues = [minDataValue].concat(colorScale.quantiles());
-            let legendData = legendDataValues.map((value, index) => {
+            let legendData = legendDataValues.concat(maxDataValue).map((value, index) => {
                 return {
                     value: value,
                     tooltipInfo: [{
@@ -588,17 +587,24 @@ export class TableHeatMap implements IVisual {
                 };
             });
 
-            let legend: Selection<any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend)
-                .data(legendData);
+            let legendSelection: Selection<any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend);
+            let legendSelectionData = legendSelection.data(legendData);
 
-            legend.enter().append(TableHeatMap.HtmlObjG)
-                .classed(TableHeatMap.ClsLegend, true);
+            let legendSelectionEntered = legendSelectionData
+                .enter()
+                .append(TableHeatMap.HtmlObjG);
+
+            legendSelectionData.exit().remove();
+
+            let legendSelectionMerged = legendSelectionData.merge(legendSelection);
+            legendSelectionMerged.classed(TableHeatMap.ClsLegend, true);
 
             let legendOffsetX: number = xOffset;
             let legendOffsetCellsY: number = this.margin.top + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + xAxisHeight;
             let legendOffsetTextY: number = this.margin.top - gridSizeHeight / 2 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY) + legendElementHeight * 2 + xAxisHeight;
 
-            legend.append(TableHeatMap.HtmlObjRect)
+            legendSelectionEntered
+                .append(TableHeatMap.HtmlObjRect)
                 .attr(TableHeatMap.AttrX, function (d, i) {
                     return legendElementWidth * i + legendOffsetX;
                 })
@@ -608,9 +614,11 @@ export class TableHeatMap implements IVisual {
                 .style(TableHeatMap.StFill, function (d, i) {
                     return colors[i];
                 })
+                .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
                 .classed(TableHeatMap.ClsBordered, true);
 
-            legend.append(TableHeatMap.HtmlObjText)
+            legendSelectionEntered
+                .append(TableHeatMap.HtmlObjText)
                 .classed(TableHeatMap.ClsMono, true)
                 .attr(TableHeatMap.AttrX, function (d, i) {
                     return legendElementWidth * i + legendOffsetX;
@@ -620,19 +628,9 @@ export class TableHeatMap implements IVisual {
                     return chartData.valueFormatter.format(d.value);
                 });
 
-            this.mainGraphics.select("." + TableHeatMap.ClsLegend)
-                .data([0].concat(maxDataValue))
-                .append(TableHeatMap.HtmlObjText)
-                .text(chartData.valueFormatter.format(maxDataValue))
-                .attr(TableHeatMap.AttrX, legendElementWidth * colors.length + legendOffsetX)
-                .attr(TableHeatMap.AttrY, legendOffsetTextY)
-                .classed(TableHeatMap.ClsLegend, true)
-                .classed(TableHeatMap.ClsMono, true);
-
-            this.tooltipServiceWrapper.addTooltip(legend, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
+            this.tooltipServiceWrapper.addTooltip(legendSelectionEntered, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
                 return tooltipEvent.data.tooltipInfo;
             });
-            legend.exit().remove();
 
             if (legendOffsetTextY + gridSizeHeight > options.viewport.height) {
                 this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
