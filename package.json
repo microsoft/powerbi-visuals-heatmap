@@ -45,7 +45,7 @@
   },
   "scripts": {
     "pbiviz": "pbiviz",
-    "start": "pbiviz start",
+    "start": "pbiviz start --target es6",
     "package": "pbiviz package",
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
     "test": "karma start"

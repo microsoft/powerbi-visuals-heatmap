@@ -2,10 +2,10 @@ import powerbi from "powerbi-visuals-api";
 
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
-import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem
+import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 export interface TableHeatMapDataPoint {
-    categoryX: string;
-    categoryY: string;
+    categoryX: powerbi.PrimitiveValue;
+    categoryY: powerbi.PrimitiveValue;
     value: number;
     valueStr: string;
     tooltipInfo?: VisualTooltipDataItem[];
@@ -13,8 +13,8 @@ export interface TableHeatMapDataPoint {
 
 export interface TableHeatMapChartData {
     dataPoints: TableHeatMapDataPoint[];
-    categoryX: string[];
-    categoryY: string[];
+    categoryX: powerbi.PrimitiveValue[];
+    categoryY: powerbi.PrimitiveValue[];
     categoryValueFormatter: IValueFormatter;
     valueFormatter: IValueFormatter;
 }

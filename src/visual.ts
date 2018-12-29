@@ -173,6 +173,22 @@ export class TableHeatMap implements IVisual {
     private element: HTMLElement;
 
     public converter(dataView: DataView, colors: IColorPalette): TableHeatMapChartData {
+        if (!dataView
+            || !dataView.categorical
+            || !dataView.categorical.categories
+            || !dataView.categorical.categories[0]
+            || !dataView.categorical.categories[0].values
+            || !dataView.categorical.categories[0].values.length
+            || !dataView.categorical.values
+            || !dataView.categorical.values[0]
+            || !dataView.categorical.values[0].values
+            || !dataView.categorical.values[0].values.length
+        ) {
+            return <TableHeatMapChartData>{
+                dataPoints: null
+            };
+        }
+
         let categoryValueFormatter: IValueFormatter;
         let valueFormatter: IValueFormatter;
         let dataPoints: TableHeatMapDataPoint[] = [];
@@ -202,7 +218,7 @@ export class TableHeatMap implements IVisual {
                 });
                 let value = categoryY.values[indexX];
                 dataPoints.push({
-                    categoryX: categoryValueFormatter.format(categoryX),
+                    categoryX: categoryX,
                     categoryY: categoryY.source.displayName,
                     value: +value,
                     valueStr: categoryYFormatter.format(value),
@@ -272,8 +288,8 @@ export class TableHeatMap implements IVisual {
     }
 
     private getYAxisWidth(chartData: TableHeatMapChartData): number {
-        let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
-        maxLengthText = TableHeatMap.textLimit(maxLengthText, this.settings.yAxisLabels.maxTextSymbol);
+        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
+        maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), this.settings.yAxisLabels.maxTextSymbol);
         return TextMeasurementService.measureSvgTextWidth({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
             text: maxLengthText.trim(),
@@ -282,19 +298,19 @@ export class TableHeatMap implements IVisual {
     }
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
-        let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
         return TextMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.xAxisLabels.fontSize),
-            text: maxLengthText.trim(),
+            text: maxLengthText.toString().trim(),
             fontFamily: this.settings.xAxisLabels.fontFamily
         });
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
-        let maxLengthText: string = _.maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
         return TextMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
-            text: maxLengthText.trim(),
+            text: maxLengthText.toString().trim(),
             fontFamily: this.settings.yAxisLabels.fontFamily
         });
     }
