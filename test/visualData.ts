@@ -1,173 +1,177 @@
 /*
- *  Power BI Visualizations
- *
- *  Copyright (c) Microsoft Corporation
- *  All rights reserved.
- *  MIT License
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the ""Software""), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  THE SOFTWARE.
- */
+*  Power BI Visualizations
+*
+*  Copyright (c) Microsoft Corporation
+*  All rights reserved.
+*  MIT License
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy
+*  of this software and associated documentation files (the ""Software""), to deal
+*  in the Software without restriction, including without limitation the rights
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is
+*  furnished to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*  THE SOFTWARE.
+*/
 
-/// <reference path="_references.ts"/>
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
-module powerbi.extensibility.visual.test {
-    import CustomizeColumnFn = powerbi.extensibility.utils.test.dataViewBuilder.CustomizeColumnFn;
-    import TestDataViewBuilder = powerbi.extensibility.utils.test.dataViewBuilder.TestDataViewBuilder;
-    import GetRandomDate = powerbi.extensibility.visual.test.helpers.GetRandomDate;
-    import getRandomNumbers = powerbi.extensibility.utils.test.helpers.getRandomNumbers;
-    import ParseCSV = powerbi.extensibility.visual.test.helpers.ParseCSV;
-    import ValueType = powerbi.extensibility.utils.type.ValueType;
+import {
+    getRandomNumbers,
+    testDataViewBuilder
+} from "powerbi-visuals-utils-testutils";
+import {
+    valueType
+} from "powerbi-visuals-utils-typeutils";
+import * as _ from "lodash-es";
 
-    export class TableHeatMapData extends TestDataViewBuilder {
-        public static CategoryColumn: string = "Category";
-        public static MeasureColumn: string = "Y";
+import TestDataViewBuilder = testDataViewBuilder.TestDataViewBuilder;
+import ValueType = valueType.ValueType;
 
-        public dataCategory: string[];
-        public dataMeasure: number[];
+export class TableHeatMapData extends TestDataViewBuilder {
+    public static CategoryColumn: string = "Category";
+    public static MeasureColumn: string = "Y";
 
-        public constructor() {
-            super();
-            this.dataCategory = _.range(0, 15).map(d => d + "");
-            this.dataMeasure = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
-        }
+    public dataCategory: string[];
+    public dataMeasure: number[];
 
-        public getDataView(columnNames?: string[], customizeColumns?: CustomizeColumnFn): DataView {
-            return this.createCategoricalDataViewBuilder(
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
+    public constructor() {
+        super();
+        this.dataCategory = _.range(0, 15).map(d => d + "");
+        this.dataMeasure = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
+    }
+
+    public getDataView(columnNames?: string[]): DataView {
+        return this.createCategoricalDataViewBuilder(
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
                         },
-                        values: this.dataCategory
-                    }
-                ],
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
-                        },
-                        values: this.dataCategory
+                        type: ValueType.fromDescriptor({text: true})
                     },
-                    {
-                        source: {
-                            displayName: TableHeatMapData.MeasureColumn,
-                            isMeasure: true,
-                            roles: {
-                                value: true
-                            },
-                            type: ValueType.fromDescriptor({numeric: true})
+                    values: this.dataCategory
+                }
+            ],
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
                         },
-                        values: this.dataMeasure
-                    }
-                ], columnNames, customizeColumns).build();
-        }
-
-        public getDataViewWithOneCategory(columnNames?: string[], customizeColumns?: CustomizeColumnFn): DataView {
-            return this.createCategoricalDataViewBuilder(
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
-                        },
-                        values: [this.dataCategory[0]]
-                    }
-                ],
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
-                        },
-                        values: this.dataCategory
+                        type: ValueType.fromDescriptor({text: true})
                     },
-                    {
-                        source: {
-                            displayName: TableHeatMapData.MeasureColumn,
-                            isMeasure: true,
-                            roles: {
-                                value: true
-                            },
-                            type: ValueType.fromDescriptor({numeric: true})
+                    values: this.dataCategory
+                },
+                {
+                    source: {
+                        displayName: TableHeatMapData.MeasureColumn,
+                        isMeasure: true,
+                        roles: {
+                            value: true
                         },
-                        values: this.dataMeasure
-                    }
-                ], columnNames, customizeColumns).build();
-        }
-
-        public getDataViewWithNullAndZero(columnNames?: string[], customizeColumns?: CustomizeColumnFn): DataView {
-            return this.createCategoricalDataViewBuilder(
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
-                        },
-                        values: [this.dataCategory[0]]
-                    }
-                ],
-                [
-                    {
-                        source: {
-                            displayName: TableHeatMapData.CategoryColumn,
-                            roles: {
-                                Values: true,
-                                Y: true
-                            },
-                            type: ValueType.fromDescriptor({text: true})
-                        },
-                        values: [this.dataCategory[0]]
+                        type: ValueType.fromDescriptor({numeric: true})
                     },
-                    {
-                        source: {
-                            displayName: TableHeatMapData.MeasureColumn,
-                            isMeasure: true,
-                            roles: {
-                                value: true
-                            },
-                            type: ValueType.fromDescriptor({numeric: true})
+                    values: this.dataMeasure
+                }
+            ], columnNames).build();
+    }
+
+    public getDataViewWithOneCategory(columnNames?: string[]): DataView {
+        return this.createCategoricalDataViewBuilder(
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
                         },
-                        values: [0, null, 10]
-                    }
-                ], columnNames, customizeColumns).build();
-        }
+                        type: ValueType.fromDescriptor({text: true})
+                    },
+                    values: [this.dataCategory[0]]
+                }
+            ],
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
+                        },
+                        type: ValueType.fromDescriptor({text: true})
+                    },
+                    values: this.dataCategory
+                },
+                {
+                    source: {
+                        displayName: TableHeatMapData.MeasureColumn,
+                        isMeasure: true,
+                        roles: {
+                            value: true
+                        },
+                        type: ValueType.fromDescriptor({numeric: true})
+                    },
+                    values: this.dataMeasure
+                }
+            ], columnNames).build();
+    }
+
+    public getDataViewWithNullAndZero(columnNames?: string[]): DataView {
+        return this.createCategoricalDataViewBuilder(
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
+                        },
+                        type: ValueType.fromDescriptor({text: true})
+                    },
+                    values: [this.dataCategory[0]]
+                }
+            ],
+            [
+                {
+                    source: {
+                        displayName: TableHeatMapData.CategoryColumn,
+                        roles: {
+                            Values: true,
+                            Y: true
+                        },
+                        type: ValueType.fromDescriptor({text: true})
+                    },
+                    values: [this.dataCategory[0]]
+                },
+                {
+                    source: {
+                        displayName: TableHeatMapData.MeasureColumn,
+                        isMeasure: true,
+                        roles: {
+                            value: true
+                        },
+                        type: ValueType.fromDescriptor({numeric: true})
+                    },
+                    values: [0, null, 10]
+                }
+            ], columnNames).build();
     }
 }

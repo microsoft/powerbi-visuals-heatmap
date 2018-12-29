@@ -25,6 +25,7 @@
 */
 import powerbi from "powerbi-visuals-api";
 import "../style/style.less";
+import "@babel/polyfill";
 
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
@@ -353,7 +354,6 @@ export class TableHeatMap implements IVisual {
     private updateInternal(options: VisualUpdateOptions): void {
         let dataView: DataView = this.dataView = options.dataViews[0];
         let chartData: TableHeatMapChartData = this.converter(dataView, this.colors);
-        debugger;
         let suppressAnimations: boolean = false;
         if (chartData.dataPoints) {
             let minDataValue: number = d3.min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
@@ -532,30 +532,32 @@ export class TableHeatMap implements IVisual {
             let textHeight: number = textRect.height;
             let heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
-            let heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(this.settings.labels.show && textHeight <= gridSizeHeight && chartData.dataPoints);
-            heatMapDataLablesData.exit().remove();
+            if (this.settings.labels.show && textHeight <= gridSizeHeight) {
+                let heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(chartData.dataPoints);
+                heatMapDataLables.exit().remove();
 
-            let heatMapDataLablesEntered = heatMapDataLablesData
-                .enter().append("text");
+                let heatMapDataLablesEntered = heatMapDataLablesData
+                    .enter().append("text");
 
-            heatMapDataLablesEntered
-                .classed(TableHeatMap.CLsHeatMapDataLabels, true)
-                .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
-                })
-                .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + textHeight / 2.6;
-                })
-                .style("text-anchor", TableHeatMap.ConstMiddle)
-                .style("font-size", this.settings.labels.fontSize)
-                .style("font-family", this.settings.labels.fontFamily)
-                .style("fill", this.settings.labels.fill)
-                .text((dataPoint: TableHeatMapDataPoint) => {
-                    let textValue: string = (dataPoint.value || "null").toString();
-                    textProperties.text = textValue;
-                    textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
-                    return dataPoint.value === 0 ? 0 : textValue;
-                });
+                heatMapDataLablesEntered
+                    .classed(TableHeatMap.CLsHeatMapDataLabels, true)
+                    .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
+                        return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
+                    })
+                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
+                        return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + textHeight / 2.6;
+                    })
+                    .style("text-anchor", TableHeatMap.ConstMiddle)
+                    .style("font-size", this.settings.labels.fontSize)
+                    .style("font-family", this.settings.labels.fontFamily)
+                    .style("fill", this.settings.labels.fill)
+                    .text((dataPoint: TableHeatMapDataPoint) => {
+                        let textValue: string = (dataPoint.value || "null").toString();
+                        textProperties.text = textValue;
+                        textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
+                        return dataPoint.value === 0 ? 0 : textValue;
+                    });
+            }
 
             let elementAnimation: Selection<D3Element> = <Selection<D3Element>>this.getAnimationMode(heatMapMerged, suppressAnimations);
             if (!this.settings.general.fillNullValuesCells) {
