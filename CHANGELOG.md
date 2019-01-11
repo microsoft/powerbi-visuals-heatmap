@@ -1,3 +1,11 @@
+## 1.5.0
+* High contrast mode
+* API 1.13.0
+
+## 1.4.0
+
+* Added localization for all supported languages
+
 ## 1.3.4
 
 * Segoe UI font families were removed from properties

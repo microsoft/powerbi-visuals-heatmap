@@ -401,5 +401,55 @@ describe("TableHeatmap", () => {
 
             objectsChecker(jsonData);
         });
+
+        describe("Accessibility", () => {
+            describe("High contrast mode", () => {
+                const backgroundColor: string = "#000000";
+                const foregroundColor: string = "#ffff00";
+
+                beforeEach(() => {
+                    visualBuilder.visualHost.colorPalette.isHighContrast = true;
+
+                    visualBuilder.visualHost.colorPalette.background = { value: backgroundColor };
+                    visualBuilder.visualHost.colorPalette.foreground = { value: foregroundColor };
+                });
+
+                it("should use background theme color as fill", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+
+                        expect(isColorAppliedToElements(rects, backgroundColor, "fill"));
+
+                        done();
+                    });
+                });
+
+                it("should use foreground theme color as stroke", (done) => {
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+
+                        expect(isColorAppliedToElements(rects, foregroundColor, "stroke"));
+
+                        done();
+                    });
+                });
+
+                function isColorAppliedToElements(
+                    elements: JQuery[],
+                    color?: string,
+                    colorStyleName: string = "fill"
+                ): boolean {
+                    return elements.some((element: JQuery) => {
+                        const currentColor: string = element.css(colorStyleName);
+
+                        if (!currentColor || !color) {
+                            return currentColor === color;
+                        }
+
+                        return areColorsEqual(currentColor, color);
+                    });
+                }
+            });
+        });
     });
 });
