@@ -193,12 +193,6 @@ export class TableHeatMap implements IVisual {
         let categoryValueFormatter: IValueFormatter;
         let valueFormatter: IValueFormatter;
         let dataPoints: TableHeatMapDataPoint[] = [];
-        // let catMetaData: DataViewMetadata = dataView.metadata;
-        // let catTable: DataViewTable = dataView.table;
-        // let catX: string[] = [];
-        // let catY: string[] = [];
-
-        // let categoryX: string, categoryY: string;
 
         categoryValueFormatter = ValueFormatter.create({
             format: ValueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
@@ -212,7 +206,7 @@ export class TableHeatMap implements IVisual {
 
         // dataView.categorical.categories
         dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
-            dataView.categorical.values.forEach((categoryY, indexY) => {
+            dataView.categorical.values.forEach((categoryY) => {
                 let categoryYFormatter = ValueFormatter.create({
                     format: categoryY.source.format,
                     value: dataView.categorical.values[0].values[0]
@@ -221,7 +215,7 @@ export class TableHeatMap implements IVisual {
                 dataPoints.push({
                     categoryX: categoryX,
                     categoryY: categoryY.source.displayName,
-                    value: +value,
+                    value: value,
                     valueStr: categoryYFormatter.format(value),
                     tooltipInfo: [{
                         displayName: `Category`,
@@ -357,10 +351,10 @@ export class TableHeatMap implements IVisual {
         let suppressAnimations: boolean = false;
         if (chartData.dataPoints) {
             let minDataValue: number = d3.min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
-                return d.value;
+                return d.value as number;
             });
             let maxDataValue: number = d3.max(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
-                return d.value;
+                return d.value as number;
             });
 
             let numBuckets: number = this.settings.general.buckets;
@@ -580,11 +574,11 @@ export class TableHeatMap implements IVisual {
                     value: value,
                     tooltipInfo: [{
                         displayName: `Min value`,
-                        value: value.toFixed(0)
+                        value: value && value.toFixed ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
                     },
                     {
                         displayName: `Max value`,
-                        value: (legendDataValues[index + 1] || maxDataValue).toFixed(0)
+                        value: legendDataValues[index + 1] && legendDataValues[index + 1].toFixed ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
                     }]
                 };
             });

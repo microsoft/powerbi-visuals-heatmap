@@ -6,7 +6,7 @@ import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 export interface TableHeatMapDataPoint {
     categoryX: powerbi.PrimitiveValue;
     categoryY: powerbi.PrimitiveValue;
-    value: number;
+    value: powerbi.PrimitiveValue;
     valueStr: string;
     tooltipInfo?: VisualTooltipDataItem[];
 }
