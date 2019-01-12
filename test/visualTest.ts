@@ -28,6 +28,7 @@ import powerbi from "powerbi-visuals-api";
 import DataView = powerbi.DataView;
 import { TableHeatMapBuilder } from "./visualBuilder";
 import { TableHeatMapData } from "./visualData";
+import { areColorsEqual } from "./helpers";
 
 import {
     pixelConverter as PixelConverter

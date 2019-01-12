@@ -1,3 +1,29 @@
+/*
+ *  Power BI Visualizations
+ *
+ *  Copyright (c) Microsoft Corporation
+ *  All rights reserved.
+ *  MIT License
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the ""Software""), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+
 import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 import {
@@ -342,37 +368,39 @@ export const colorbrewer: IColorBrewer = <IColorBrewer>{
     }
 };
 
-export class TableHeatmapLabelsSettings {
+export class LabelsSettings {
     public static DefaultFontSize: number = 12;
 
     public show: boolean = false;
     public fill: string = "#aaa";
-    public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+    public fontSize: number = LabelsSettings.DefaultFontSize;
     public fontFamily: string = "Arial";
 }
 
-export class TableHeatmapAxisLabelsSettings {
+export class AxisLabelsSettings {
     public static DefaultFontSize: number = 12;
 
     public show: boolean = true;
     public fill: string = "#aaa";
-    public fontSize: number = TableHeatmapLabelsSettings.DefaultFontSize;
+    public fontSize: number = LabelsSettings.DefaultFontSize;
     public maxTextSymbol: number = 25;
     public fontFamily: string = "Arial";
 }
 
-export class TableHeatmapGeneralSettings {
+export class GeneralSettings {
     public enableColorbrewer: boolean = true;
     public colorbrewer: string = "Reds";
     public buckets: number = 5;
     public gradientStart: string = "#FFFFFF";
     public gradientEnd: string = "#000000";
     public fillNullValuesCells: boolean = true;
+    public stroke: string = "#E6E6E6";
+    public textColor: string = "#AAAAAA";
 }
 
-export class TableHeatmapSettings extends DataViewObjectsParser {
-    public labels: TableHeatmapLabelsSettings = new TableHeatmapLabelsSettings();
-    public xAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
-    public yAxisLabels: TableHeatmapAxisLabelsSettings = new TableHeatmapAxisLabelsSettings();
-    public general: TableHeatmapGeneralSettings = new TableHeatmapGeneralSettings();
+export class Settings extends DataViewObjectsParser {
+    public labels: LabelsSettings = new LabelsSettings();
+    public xAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
+    public yAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
+    public general: GeneralSettings = new GeneralSettings();
 }

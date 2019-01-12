@@ -41,4 +41,8 @@ export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
     public get mainElement(): JQuery {
         return this.element.children("div.divTableHeatMap");
     }
+
+    public get rects(): JQuery {
+        return this.mainElement.find(".categoryX");
+    }
 }
