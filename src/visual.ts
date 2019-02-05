@@ -161,6 +161,8 @@ export class TableHeatMap implements IVisual {
     private static ConstGridSizeWidthLimit: number = 80;
     private static ConstShiftLabelFromGrid: number = -6;
     private static ConstGridHeightWidthRaito: number = 0.5;
+    private static ConstGridMinHeight: number = 16;
+    private static ConstGridMinWidth: number = 36;
     private static ConstGridLegendWidthRaito: number = 0.666;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
 
@@ -275,21 +277,28 @@ export class TableHeatMap implements IVisual {
         if (!options.dataViews || !options.dataViews[0]) {
             return;
         }
+        try {
+            this.host.eventService.renderingStarted(options);
 
-        this.settings = TableHeatMap.parseSettings(options.dataViews[0], this.colorHelper);
 
-        this.svg.selectAll(TableHeatMap.ClsAll).remove();
-        this.div.attr("widtht", PixelConverter.toString(options.viewport.width + this.margin.left));
-        this.div.style("height", PixelConverter.toString(options.viewport.height + this.margin.left));
+            this.settings = TableHeatMap.parseSettings(options.dataViews[0], this.colorHelper);
 
-        this.svg.attr("width", options.viewport.width);
-        this.svg.attr("height", options.viewport.height);
+            this.svg.selectAll(TableHeatMap.ClsAll).remove();
+            this.div.attr("widtht", PixelConverter.toString(options.viewport.width + this.margin.left));
+            this.div.style("height", PixelConverter.toString(options.viewport.height + this.margin.left));
 
-        this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
+            this.svg.attr("width", options.viewport.width);
+            this.svg.attr("height", options.viewport.height);
 
-        this.setSize(options.viewport);
+            this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
 
-        this.updateInternal(options, this.settings);
+            this.setSize(options.viewport);
+
+            this.updateInternal(options, this.settings);
+        } catch (ex) {
+            this.host.eventService.renderingFailed(options, JSON.stringify(ex));
+        }
+        this.host.eventService.renderingFinished(options);
     }
 
     private getYAxisWidth(chartData: TableHeatMapChartData): number {
@@ -454,6 +463,13 @@ export class TableHeatMap implements IVisual {
                 gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
             }
 
+            if (gridSizeHeight < TableHeatMap.ConstGridMinHeight) {
+                gridSizeHeight = TableHeatMap.ConstGridMinHeight;
+            }
+            if (gridSizeWidth < TableHeatMap.ConstGridMinWidth) {
+                gridSizeWidth = TableHeatMap.ConstGridMinWidth;
+            }
+
             let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
             let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x categoru labels height
 
@@ -575,7 +591,7 @@ export class TableHeatMap implements IVisual {
                     .style("font-family", this.settings.labels.fontFamily)
                     .style("fill", this.settings.labels.fill)
                     .text((dataPoint: TableHeatMapDataPoint) => {
-                        let textValue: string = (dataPoint.value || "null").toString();
+                        let textValue: string = ValueFormatter.format(dataPoint.value);
                         textProperties.text = textValue;
                         textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
                         return dataPoint.value === 0 ? 0 : textValue;
@@ -603,11 +619,11 @@ export class TableHeatMap implements IVisual {
                     value: value,
                     tooltipInfo: [{
                         displayName: `Min value`,
-                        value: value && value.toFixed ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
+                        value: value && typeof value.toFixed === "function" ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
                     },
                     {
                         displayName: `Max value`,
-                        value: legendDataValues[index + 1] && legendDataValues[index + 1].toFixed ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
+                        value: legendDataValues[index + 1] && typeof legendDataValues[index + 1].toFixed === "function" ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
                     }]
                 };
             });

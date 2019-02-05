@@ -4,11 +4,18 @@
     "email": "pbicvsupport@microsoft.com"
   },
   "name": "TableHeatmap",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "dependencies": {
+    "css-loader": "^2.1.0",
     "d3": "5.7.0",
+    "extra-watch-webpack-plugin": "^1.0.3",
+    "image-to-base64": "^2.0.1",
     "jquery": "3.2.0",
-    "powerbi-visuals-api": "^2.3.1"
+    "json-loader": "^0.5.7",
+    "less-loader": "^4.1.0",
+    "powerbi-visuals-api": "^2.3.1",
+    "powerbi-visuals-webpack-plugin": "^2.0.1",
+    "webpack-visualizer-plugin": "^0.1.11"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.2.5",
@@ -49,13 +56,16 @@
     "tslint": "5.12.0",
     "tslint-microsoft-contrib": "6.0.0",
     "typescript": "3.2.2",
-    "webpack": "4.28.3"
+    "webpack": "^4.28.3",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
   },
   "scripts": {
     "pbiviz": "pbiviz",
     "start": "pbiviz start --target es6",
     "package": "pbiviz package",
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
-    "test": "karma start"
+    "test": "karma start",
+    "start:dev": "webpack-dev-server --mode development"
   }
 }
