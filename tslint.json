@@ -56,7 +56,6 @@
         ],
         "insecure-random": true,
         "no-banned-terms": true,
-        "no-cookies": true,
         "no-delete-expression": true,
         "no-disable-auto-sanitization": true,
         "no-document-domain": true,

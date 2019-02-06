@@ -1,15 +1,15 @@
 {
   "visual": {
     "name": "TableHeatMap",
-    "displayName": "Table Heatmap 1.4.0",
+    "displayName": "Table Heatmap 2.0.1",
     "guid": "TableHeatMap1443716069308",
     "visualClassName": "TableHeatMap",
-    "version": "1.5.0",
+    "version": "2.0.1",
     "description": "You can use this custom visual to build a table heat map that can be used to visualise and compare data values in an easy and intuitive way. You have a built-in option within this visual to specify the number of buckets used for splitting your data. Additionally, you can also customise it by choosing a colour scheme in line with your brand colours",
     "supportUrl": "http://community.powerbi.com",
     "gitHubUrl": "https://github.com/Microsoft/powerbi-visuals-heatmap"
   },
-  "apiVersion": "1.13.0",
+  "apiVersion": "2.3.0",
   "author": {
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
@@ -17,23 +17,7 @@
   "assets": {
     "icon": "assets/icon.png"
   },
-  "externalJS": [
-    "node_modules/d3/d3.min.js",
-    "node_modules/globalize/lib/globalize.js",
-    "node_modules/jquery/dist/jquery.min.js",
-    "node_modules/lodash/lodash.min.js",
-    "external/init.jquery.js",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-colorutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-typeutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-chartutils/lib/index.js"
-  ],
+  "externalJS": [],
   "style": "style/style.less",
   "capabilities": "capabilities.json"
 }

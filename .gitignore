@@ -256,3 +256,4 @@ dist/*
 typings/*
 coverage/*
 test/*.js
+/webpack.statistics.*html
