@@ -396,6 +396,7 @@ export class GeneralSettings {
     public fillNullValuesCells: boolean = true;
     public stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
+    public allowHorizontalScroll: boolean = false;
 }
 
 export class Settings extends DataViewObjectsParser {

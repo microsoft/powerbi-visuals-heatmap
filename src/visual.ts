@@ -463,10 +463,10 @@ export class TableHeatMap implements IVisual {
                 gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
             }
 
-            if (gridSizeHeight < TableHeatMap.ConstGridMinHeight) {
+            if (gridSizeHeight < TableHeatMap.ConstGridMinHeight && this.settings.general.allowHorizontalScroll) {
                 gridSizeHeight = TableHeatMap.ConstGridMinHeight;
             }
-            if (gridSizeWidth < TableHeatMap.ConstGridMinWidth) {
+            if (gridSizeWidth < TableHeatMap.ConstGridMinWidth && this.settings.general.allowHorizontalScroll) {
                 gridSizeWidth = TableHeatMap.ConstGridMinWidth;
             }
 

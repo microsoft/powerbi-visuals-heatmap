@@ -45,6 +45,13 @@
       "displayName": "General",
       "displayNameKey": "Visual_General",
       "properties": {
+        "allowHorizontalScroll": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Allow horizontal scroll",
+          "displayNameKey": "Visual_AllowHorizontalScroll"
+        },
         "enableColorbrewer": {
           "displayName": "Enable colorbrewer",
           "displayNameKey": "Visual_EnableColorbrewer",
