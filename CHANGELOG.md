@@ -1,3 +1,10 @@
+## 2.1.0
+* Add `allow horizontal scroll` option
+
+## 2.0.1
+* Add renderingStart, renderingFinshed and renderingFailed calls
+* Convert the visual to use new webpack baced-tools.
+
 ## 1.5.0
 * High contrast mode
 * API 1.13.0
