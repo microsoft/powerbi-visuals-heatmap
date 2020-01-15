@@ -30,6 +30,18 @@ patch:
         patched: '2020-01-15T10:26:38.678Z'
     - snyk > @snyk/dep-graph > graphlib > lodash:
         patched: '2020-01-15T10:26:38.678Z'
+    - css-loader > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
+    - powerbi-visuals-webpack-plugin > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
+    - snyk > @snyk/dep-graph > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
+    - snyk > @snyk/snyk-cocoapods-plugin > @snyk/dep-graph > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
+    - snyk > snyk-nuget-plugin > dotnet-deps-parser > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
+    - snyk > @snyk/snyk-cocoapods-plugin > @snyk/cocoapods-lockfile-parser > @snyk/dep-graph > lodash:
+        patched: '2020-01-15T10:28:35.391Z'
   SNYK-JS-HTTPSPROXYAGENT-469131:
     - snyk > proxy-agent > https-proxy-agent:
         patched: '2020-01-15T10:26:38.678Z'
