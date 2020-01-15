@@ -15,7 +15,8 @@
     "less-loader": "^4.1.0",
     "powerbi-visuals-api": "^2.3.1",
     "powerbi-visuals-webpack-plugin": "^2.0.1",
-    "webpack-visualizer-plugin": "^0.1.11"
+    "webpack-visualizer-plugin": "^0.1.11",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.2.5",
@@ -66,6 +67,9 @@
     "package": "pbiviz package",
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\" \"+(src|test)/**/*.ts\"",
     "test": "karma start",
-    "start:dev": "webpack-dev-server --mode development"
-  }
+    "start:dev": "webpack-dev-server --mode development",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "snyk": true
 }
