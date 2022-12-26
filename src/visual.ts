@@ -24,15 +24,15 @@
 *  THE SOFTWARE.
 */
 import powerbi from "powerbi-visuals-api";
-import "../style/style.less";
-import "@babel/polyfill";
+import "./../style/style.less";
 
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
 
-import ValueFormatter = valueFormatter.valueFormatter;
-import TextMeasurementService = textMeasurementService.textMeasurementService;
-import TextProperties = textMeasurementService.TextProperties;
+//import ValueFormatter = valueFormatter.valueFormatter;
+//import TextMeasurementService = textMeasurementService.textMeasurementService;
+//import TextProperties = textMeasurementService.TextProperties;
+import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 
 import { axis } from "powerbi-visuals-utils-chartutils";
 import LabelLayoutStrategy = axis.LabelLayoutStrategy;
@@ -197,23 +197,23 @@ export class TableHeatMap implements IVisual {
         }
 
         let categoryValueFormatter: IValueFormatter;
-        let valueFormatter: IValueFormatter;
+        let formatter: IValueFormatter;
         let dataPoints: TableHeatMapDataPoint[] = [];
 
-        categoryValueFormatter = ValueFormatter.create({
-            format: ValueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
+        categoryValueFormatter = valueFormatter.create({
+            format: valueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
             value: dataView.categorical.categories[0].values[0]
         });
 
-        valueFormatter = ValueFormatter.create({
-            format: ValueFormatter.getFormatStringByColumn(dataView.categorical.values[0].source),
+        formatter = valueFormatter.create({
+            format: valueFormatter.getFormatStringByColumn(dataView.categorical.values[0].source),
             value: dataView.categorical.values[0].values[0]
         });
 
         // dataView.categorical.categories
         dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
             dataView.categorical.values.forEach((categoryY) => {
-                let categoryYFormatter = ValueFormatter.create({
+                let categoryYFormatter = valueFormatter.create({
                     format: categoryY.source.format,
                     value: dataView.categorical.values[0].values[0]
                 });
@@ -280,11 +280,10 @@ export class TableHeatMap implements IVisual {
         try {
             this.host.eventService.renderingStarted(options);
 
-
             this.settings = TableHeatMap.parseSettings(options.dataViews[0], this.colorHelper);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
-            this.div.attr("widtht", PixelConverter.toString(options.viewport.width + this.margin.left));
+            this.div.attr("width", PixelConverter.toString(options.viewport.width + this.margin.left));
             this.div.style("height", PixelConverter.toString(options.viewport.height + this.margin.left));
 
             this.svg.attr("width", options.viewport.width);
@@ -304,7 +303,7 @@ export class TableHeatMap implements IVisual {
     private getYAxisWidth(chartData: TableHeatMapChartData): number {
         let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
         maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), this.settings.yAxisLabels.maxTextSymbol);
-        return TextMeasurementService.measureSvgTextWidth({
+        return textMeasurementService.measureSvgTextWidth({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
             text: maxLengthText.trim(),
             fontFamily: this.settings.yAxisLabels.fontFamily
@@ -313,7 +312,7 @@ export class TableHeatMap implements IVisual {
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
         let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
-        return TextMeasurementService.measureSvgTextHeight({
+        return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.xAxisLabels.fontSize),
             text: maxLengthText.toString().trim(),
             fontFamily: this.settings.xAxisLabels.fontFamily
@@ -322,7 +321,7 @@ export class TableHeatMap implements IVisual {
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
         let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
-        return TextMeasurementService.measureSvgTextHeight({
+        return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
             text: maxLengthText.toString().trim(),
             fontFamily: this.settings.yAxisLabels.fontFamily
@@ -445,7 +444,8 @@ export class TableHeatMap implements IVisual {
                 fontFamily: settings.labels.fontFamily,
                 text: maxDataText
             };
-            let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
+            
+            let textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
             let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
             let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
@@ -470,8 +470,8 @@ export class TableHeatMap implements IVisual {
                 gridSizeWidth = TableHeatMap.ConstGridMinWidth;
             }
 
-            let xOffset: number = this.margin.left + yAxisWidth; // add widht of y labels width
-            let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x categoru labels height
+            let xOffset: number = this.margin.left + yAxisWidth; // add width of y labels width
+            let yOffset: number = this.margin.top + xAxisHeight; // todo add height of x category labels height
 
             const TableHeatMapCellRaito: number = 2 / 3;
             let legendElementWidth: number = (this.viewport.width * TableHeatMapCellRaito - xOffset) / numBuckets;
@@ -587,13 +587,13 @@ export class TableHeatMap implements IVisual {
                         return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + textHeight / 2.6;
                     })
                     .style("text-anchor", TableHeatMap.ConstMiddle)
-                    .style("font-size", this.settings.labels.fontSize)
-                    .style("font-family", this.settings.labels.fontFamily)
-                    .style("fill", this.settings.labels.fill)
+                    .style("font-size", settings.labels.fontSize)
+                    .style("font-family", settings.labels.fontFamily)
+                    .style("fill", settings.labels.fill)
                     .text((dataPoint: TableHeatMapDataPoint) => {
-                        let textValue: string = ValueFormatter.format(dataPoint.value);
+                        let textValue: string = valueFormatter.format(dataPoint.value);
                         textProperties.text = textValue;
-                        textValue = TextMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
+                        textValue = textMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
                         return dataPoint.value === 0 ? 0 : textValue;
                     });
             }
@@ -601,15 +601,15 @@ export class TableHeatMap implements IVisual {
             let elementAnimation: Selection<D3Element> = <Selection<D3Element>>this.getAnimationMode(heatMapMerged, suppressAnimations);
             if (!this.settings.general.fillNullValuesCells) {
                 heatMapMerged.style(TableHeatMap.StOpacity, function (d: any) {
-                    return d.value === null ? 0 : 1;
+                    return d.value === null || d.value === "" ? 0 : 1;
                 });
             }
             elementAnimation.style(TableHeatMap.StFill, function (d: any) {
                 return <string>colorScale(d.value);
             });
 
-            this.tooltipServiceWrapper.addTooltip(heatMapMerged, (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
-                return tooltipEvent.data.tooltipInfo;
+            this.tooltipServiceWrapper.addTooltip(heatMapMerged, (tooltipDataPoint: TooltipEnabledDataPoint) => {
+                return tooltipDataPoint.tooltipInfo;
             });
 
             // legend
@@ -678,8 +678,8 @@ export class TableHeatMap implements IVisual {
 
                 this.tooltipServiceWrapper.addTooltip(
                     legendSelectionEntered,
-                    (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
-                        return tooltipEvent.data.tooltipInfo;
+                    (tooltipDataPoint: TooltipEnabledDataPoint) => {
+                        return tooltipDataPoint.tooltipInfo;
                     }
                 );
 
@@ -730,7 +730,7 @@ export class TableHeatMap implements IVisual {
     private truncateTextIfNeeded(text: Selection<any>, width: number): void {
         text.call(LabelLayoutStrategy.clip,
             width,
-            TextMeasurementService.svgEllipsis);
+            textMeasurementService.svgEllipsis);
     }
 
     private wrap(text, width): void {
