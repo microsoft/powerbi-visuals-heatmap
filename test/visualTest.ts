@@ -38,6 +38,8 @@ import {
 } from "powerbi-visuals-utils-formattingutils";
 
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
+import capabilities from '../capabilities.json';
+
 const DefaultTimeout: number = 300;
 
 describe("TableHeatmap", () => {
@@ -424,10 +426,6 @@ describe("TableHeatmap", () => {
 
     describe("Capabilities tests", () => {
         it("all items having displayName should have displayNameKey property", () => {
-            jasmine.getJSONFixtures().fixturesPath = "base";
-
-            let jsonData = getJSONFixture("capabilities.json");
-
             let objectsChecker: Function = (obj) => {
                 for (let property in obj) {
                     let value: any = obj[property];
@@ -446,7 +444,7 @@ describe("TableHeatmap", () => {
                 }
             };
 
-            objectsChecker(jsonData);
+            objectsChecker(capabilities.objects);
         });
 
         describe("Accessibility", () => {

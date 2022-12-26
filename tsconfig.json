@@ -8,7 +8,9 @@
     "sourceMap": true,
     "outDir": "./.tmp/build/",
     "moduleResolution": "node",
-    "declaration": true
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
   "files": [
     "src/visual.ts"
