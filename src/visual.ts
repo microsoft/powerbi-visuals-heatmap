@@ -47,7 +47,7 @@ type Quantile<T> = d3.ScaleQuantile<T>;
 
 import * as d3 from "d3";
 
-import * as _ from "lodash-es";
+import maxBy from "lodash.maxby";
 
 import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
 
@@ -301,7 +301,7 @@ export class TableHeatMap implements IVisual {
     }
 
     private getYAxisWidth(chartData: TableHeatMapChartData): number {
-        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
         maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), this.settings.yAxisLabels.maxTextSymbol);
         return textMeasurementService.measureSvgTextWidth({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
@@ -311,7 +311,7 @@ export class TableHeatMap implements IVisual {
     }
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
-        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
         return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.xAxisLabels.fontSize),
             text: maxLengthText.toString().trim(),
@@ -320,7 +320,7 @@ export class TableHeatMap implements IVisual {
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
-        let maxLengthText: powerbi.PrimitiveValue = _.maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
         return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
             text: maxLengthText.toString().trim(),

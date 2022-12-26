@@ -34,7 +34,9 @@ import {
 import {
     valueType
 } from "powerbi-visuals-utils-typeutils";
-import * as _ from "lodash-es";
+
+import range from "lodash.range";
+import random from "lodash.random";
 
 import TestDataViewBuilder = testDataViewBuilder.TestDataViewBuilder;
 import ValueType = valueType.ValueType;
@@ -48,8 +50,8 @@ export class TableHeatMapData extends TestDataViewBuilder {
 
     public constructor() {
         super();
-        this.dataCategory = _.range(0, 15).map(d => d + "");
-        this.dataMeasure = _.range(0, this.dataCategory.length).map(d => _.random(0, 100));
+        this.dataCategory = range(0, 15).map(d => d + "");
+        this.dataMeasure = range(0, this.dataCategory.length).map(d => random(0, 100));
     }
 
     public getDataView(columnNames?: string[]): DataView {
@@ -90,7 +92,7 @@ export class TableHeatMapData extends TestDataViewBuilder {
                     },
                     values: this.dataMeasure
                 }
-            ], columnNames).build();
+            ], columnNames!).build();
     }
 
     public getDataViewWithOneCategory(columnNames?: string[]): DataView {
@@ -131,7 +133,7 @@ export class TableHeatMapData extends TestDataViewBuilder {
                     },
                     values: this.dataMeasure
                 }
-            ], columnNames).build();
+            ], columnNames!).build();
     }
 
     public getDataViewWithNullAndZero(columnNames?: string[]): DataView {
@@ -170,8 +172,8 @@ export class TableHeatMapData extends TestDataViewBuilder {
                         },
                         type: ValueType.fromDescriptor({numeric: true})
                     },
-                    values: [0, null, 10]
+                    values: [0, "", 10]
                 }
-            ], columnNames).build();
+            ], columnNames!).build();
     }
 }
