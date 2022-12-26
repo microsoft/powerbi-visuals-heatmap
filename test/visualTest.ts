@@ -37,8 +37,7 @@ import {
     textMeasurementService as tms
 } from "powerbi-visuals-utils-formattingutils";
 
-import TextMeasurementService = tms.textMeasurementService;
-import TextProperties = tms.TextProperties;
+import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 const DefaultTimeout: number = 300;
 
 describe("TableHeatmap", () => {
@@ -52,9 +51,13 @@ describe("TableHeatmap", () => {
         dataView = defaultDataViewBuilder.getDataView();
     });
 
+    afterEach(() => {
+        document.body.innerHTML = "";
+    })
+
     it("main DOM created", (done) => {
         visualBuilder.updateRenderTimeout(dataView, () => {
-            expect($(visualBuilder.mainElement)).toBeInDOM();
+            expect(visualBuilder.mainElement!).toBeTruthy();
             done();
         }, DefaultTimeout);
     });
@@ -66,7 +69,7 @@ describe("TableHeatmap", () => {
 
         it("main DOM created", (done) => {
             visualBuilder.updateRenderTimeout(dataView, () => {
-                expect($(visualBuilder.mainElement)).toBeInDOM();
+                expect(visualBuilder.mainElement!).toBeTruthy();
                 done();
             }, DefaultTimeout);
         });
@@ -84,7 +87,7 @@ describe("TableHeatmap", () => {
 
         it("main DOM created", (done) => {
             visualBuilder.updateRenderTimeout(dataView, () => {
-                expect($(visualBuilder.mainElement)).toBeInDOM();
+                expect(visualBuilder.mainElement!).toBeTruthy();
                 done();
             }, DefaultTimeout);
         });
@@ -98,12 +101,12 @@ describe("TableHeatmap", () => {
         };
 
         visualBuilder.updateRenderTimeout(dataView, () => {
-            expect($(".heatMapDataLabels")).toBeInDOM();
+            expect(document.querySelectorAll(".heatMapDataLabels")).toBeTruthy();
             done();
         }, DefaultTimeout);
     });
 
-    it("data labels didin't created", (done) => {
+    it("data labels were not created", (done) => {
         dataView.metadata.objects = {
             labels: {
                 show: false
@@ -111,7 +114,7 @@ describe("TableHeatmap", () => {
         };
 
         visualBuilder.updateRenderTimeout(dataView, () => {
-            expect($(".heatMapDataLabels")).not.toBeInDOM();
+            expect(document.querySelectorAll(".heatMapDataLabels").length).toBe(0);
             done();
         }, DefaultTimeout);
     });
@@ -121,14 +124,19 @@ describe("TableHeatmap", () => {
             dataView.metadata.objects = {
                 xAxisLabels: {
                     show: true,
-                    fontSize: 12
+                    fontSize: 20
                 }
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryXLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("12px");
+                let labelDOMItems = document.querySelectorAll(".categoryXLabel");
+                const items = Array.from(labelDOMItems);
+                
+                const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "20px");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -142,9 +150,14 @@ describe("TableHeatmap", () => {
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryXLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("40px");
+                let labelDOMItems = document.querySelectorAll(".categoryXLabel");
+                const items = Array.from(labelDOMItems);
+                
+                const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "40px");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -158,9 +171,14 @@ describe("TableHeatmap", () => {
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryXLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-family")).toBe("Arial");
+                let labelDOMItems = document.querySelectorAll(".categoryXLabel");
+                const items = Array.from(labelDOMItems);
+                
+                const filteredItem = items.find(i => getComputedStyle(i)["font-family"] === "Arial");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -176,9 +194,14 @@ describe("TableHeatmap", () => {
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryYLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("12px");
+                let labelDOMItems = document.querySelectorAll(".categoryYLabel");
+                const items = Array.from(labelDOMItems);
+
+                const filteredItems = items.find(i => getComputedStyle(i)["font-size"] === "12px");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItems).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -192,9 +215,14 @@ describe("TableHeatmap", () => {
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryYLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("40px");
+                let labelDOMItems = document.querySelectorAll(".categoryYLabel");
+                const items = Array.from(labelDOMItems);
+
+                const filteredItems = items.find(i => getComputedStyle(i)["font-size"] === "40px");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItems).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -203,14 +231,19 @@ describe("TableHeatmap", () => {
             dataView.metadata.objects = {
                 yAxisLabels: {
                     show: true,
-                    fontFamily: "Arial"
+                    fontFamily: "Verdana"
                 }
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".categoryYLabel");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-family")).toBe("Arial");
+                let labelDOMItems = document.querySelectorAll(".categoryYLabel");
+                const items = Array.from(labelDOMItems);
+
+                const filteredItems = items.find(i => getComputedStyle(i)["font-family"] === "Verdana");
+                
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItems).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -221,14 +254,19 @@ describe("TableHeatmap", () => {
             dataView.metadata.objects = {
                 labels: {
                     show: true,
-                    fontSize: 12
+                    fontSize: 24,
                 }
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".heatMapDataLabels");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("12px");
+                let labelDOMItems = document.querySelectorAll(".heatMapDataLabels");
+                const items = Array.from(labelDOMItems);
+                
+                const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "24px");
+
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -237,14 +275,19 @@ describe("TableHeatmap", () => {
             dataView.metadata.objects = {
                 labels: {
                     show: true,
-                    fontSize: 40
+                    fontSize: 40,
                 }
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".heatMapDataLabels");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-size")).toBe("40px");
+                let labelDOMItems = document.querySelectorAll(".heatMapDataLabels");
+                const items = Array.from(labelDOMItems);
+
+                const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "40px");
+
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -253,14 +296,19 @@ describe("TableHeatmap", () => {
             dataView.metadata.objects = {
                 labels: {
                     show: true,
-                    fontFamily: "Arial"
+                    fontFamily: "Verdana"
                 }
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let labelDOMItems = $(".heatMapDataLabels");
-                expect($(labelDOMItems)).toBeInDOM();
-                expect(labelDOMItems.css("font-family")).toBe("Arial");
+                let labelDOMItems = document.querySelectorAll(".heatMapDataLabels");
+                const items = Array.from(labelDOMItems);
+
+                const filteredItem = items.find(i => getComputedStyle(i)["font-family"] === "Verdana");
+
+                expect(labelDOMItems).toBeTruthy();
+                expect(filteredItem).toBeTruthy();
+
                 done();
             }, DefaultTimeout);
         });
@@ -278,17 +326,15 @@ describe("TableHeatmap", () => {
                 }
             };
 
-            // set some values of Y as null;
-            const yRoleIndex: number = 1;
             const valueColIndex: number = 2;
             const transparentElementsCount: number = 2;
-            dataView.categorical.values[0].values[valueColIndex] = null;
-            dataView.categorical.values[1].values[valueColIndex] = null;
+            dataView.categorical!.values![0].values![valueColIndex] = "";
+            dataView.categorical!.values![1].values![valueColIndex] = "";
             visualBuilder.updateRenderTimeout(dataView, () => {
                 let transparentElements: number = 0;
-                let rects: JQuery = $("rect.categoryX");
-                rects.each((index: number, el: HTMLElement) => {
-                    if (+(el.style.opacity || 1) === 0) {
+                let rects = document.querySelectorAll("rect.categoryX");
+                rects.forEach((el: Element) => {
+                    if (+(getComputedStyle(el)["opacity"] || 1) === 0) {
                         transparentElements++;
                     }
                 });
@@ -308,9 +354,9 @@ describe("TableHeatmap", () => {
             visualBuilder.updateRenderTimeout(dataView, () => {
                 let transparentElements: number = 0;
                 const transparentElementsCount: number = 0;
-                let rects: JQuery = $("rect.categoryX");
-                rects.each((index: number, el: HTMLElement) => {
-                    if (+(el.style.opacity || 1) === 0) {
+                let rects = document.querySelectorAll("rect.categoryX");
+                rects.forEach((el: Element) => {
+                    if (+(getComputedStyle(el)["opacity"] || 1) === 0) {
                         transparentElements++;
                     }
                 });
@@ -334,8 +380,8 @@ describe("TableHeatmap", () => {
             };
 
             visualBuilder.updateRenderTimeout(dataView, () => {
-                let texts: JQuery = $("text.categoryXLabel");
-                let text: HTMLElement = texts[0];
+                let texts = document.querySelectorAll("text.categoryXLabel");
+                let text: Element = texts[0];
                 expect(text.textContent).toBe("0");
                 done();
             }, DefaultTimeout);
@@ -360,8 +406,8 @@ describe("TableHeatmap", () => {
                     fontFamily: fontFamily,
                     text: "00"
                 };
-                let textRect: SVGRect = TextMeasurementService.measureSvgTextRect(textProperties);
-                expect(+$(".categoryX").attr("width")).toBeGreaterThan(textRect.width);
+                let textRect: SVGRect = tms.measureSvgTextRect(textProperties);
+                expect(+document.querySelector(".categoryX")!.getAttribute("width")!).toBeGreaterThan(textRect.width);
                 done();
             }, DefaultTimeout);
         });
@@ -370,7 +416,7 @@ describe("TableHeatmap", () => {
             dataView = defaultDataViewBuilder.getDataViewWithOneCategory();
             visualBuilder.updateRenderTimeout(dataView, () => {
                 const CellMaxHeightLimit: number = 61;
-                expect(+$(".categoryX").attr("height")).toBeLessThan(CellMaxHeightLimit);
+                expect(+document.querySelector(".categoryX")!.getAttribute("height")!).toBeLessThan(CellMaxHeightLimit);
                 done();
             }, DefaultTimeout);
         });
@@ -417,7 +463,7 @@ describe("TableHeatmap", () => {
 
                 it("should use background theme color as fill", (done) => {
                     visualBuilder.updateRenderTimeout(dataView, () => {
-                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+                        const rects = Array.from(visualBuilder.rects!);
 
                         expect(isColorAppliedToElements(rects, backgroundColor, "fill"));
 
@@ -427,7 +473,7 @@ describe("TableHeatmap", () => {
 
                 it("should use foreground theme color as stroke", (done) => {
                     visualBuilder.updateRenderTimeout(dataView, () => {
-                        const rects: JQuery[] = visualBuilder.rects.toArray().map($);
+                        const rects = Array.from(visualBuilder.rects!);
 
                         expect(isColorAppliedToElements(rects, foregroundColor, "stroke"));
 
@@ -436,12 +482,12 @@ describe("TableHeatmap", () => {
                 });
 
                 function isColorAppliedToElements(
-                    elements: JQuery[],
+                    elements: Element[],
                     color?: string,
                     colorStyleName: string = "fill"
                 ): boolean {
-                    return elements.some((element: JQuery) => {
-                        const currentColor: string = element.css(colorStyleName);
+                    return elements.some((element: Element) => {
+                        const currentColor: string = getComputedStyle(element)[colorStyleName];
 
                         if (!currentColor || !color) {
                             return currentColor === color;

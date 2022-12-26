@@ -38,11 +38,11 @@ export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
         return new VisualClass(options);
     }
 
-    public get mainElement(): JQuery {
-        return this.element.children("div.divTableHeatMap");
+    public get mainElement(): Element | null {
+        return this.element.querySelector("div.divTableHeatMap");
     }
 
-    public get rects(): JQuery {
-        return this.mainElement.find(".categoryX");
+    public get rects(): NodeListOf<Element> | undefined {
+        return this.mainElement?.querySelectorAll(".categoryX");
     }
 }
