@@ -29,9 +29,6 @@ import "./../style/style.less";
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
 
-//import ValueFormatter = valueFormatter.valueFormatter;
-//import TextMeasurementService = textMeasurementService.textMeasurementService;
-//import TextProperties = textMeasurementService.TextProperties;
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 
 import { axis } from "powerbi-visuals-utils-chartutils";
@@ -42,10 +39,14 @@ import translate = manipulation.translate;
 
 import { createLinearColorScale, LinearColorScale, ColorHelper } from "powerbi-visuals-utils-colorutils";
 
-type Selection<T> = d3.Selection<any, T, any, any>;
-type Quantile<T> = d3.ScaleQuantile<T>;
-
 import * as d3 from "d3";
+
+import { select as d3Select, Selection as ID3Selection, BaseType as ID3BaseType } from "d3-selection";
+import { ScaleQuantile as ID3ScaleQuantile, scaleQuantile as d3ScaleQuantile } from "d3-scale";
+import { min as d3Min, max as d3Max } from "d3-array";
+
+type Selection<T> = ID3Selection<any, T, any, any>;
+type Quantile<T> = ID3ScaleQuantile<T>;
 
 import maxBy from "lodash.maxby";
 
@@ -62,6 +63,7 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 
 import {
     IColorArray,
@@ -176,6 +178,8 @@ export class TableHeatMap implements IVisual {
 
     private element: HTMLElement;
 
+    private selectionManager: ISelectionManager;
+
     public converter(dataView: DataView, colors: IColorPalette): TableHeatMapChartData {
         if (!dataView
             || !dataView.categorical
@@ -260,6 +264,10 @@ export class TableHeatMap implements IVisual {
         this.tooltipServiceWrapper = createTooltipServiceWrapper(
             this.host.tooltipService,
             element);
+
+        this.selectionManager = this.host.createSelectionManager();
+
+        this.handleContextMenu();
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -314,6 +322,17 @@ export class TableHeatMap implements IVisual {
             fontSize: PixelConverter.toString(this.settings.yAxisLabels.fontSize),
             text: maxLengthText.toString().trim(),
             fontFamily: this.settings.yAxisLabels.fontFamily
+        });
+    }
+
+    private handleContextMenu = () => {
+        this.svg.on('contextmenu', (event) => {
+            const datapoint = d3Select(event.target).datum() as { identity };
+            this.selectionManager.showContextMenu(datapoint ? datapoint.identity : {}, {
+                x: event.clientX,
+                y: event.clientY
+            });
+            event.preventDefault();
         });
     }
 
@@ -376,10 +395,10 @@ export class TableHeatMap implements IVisual {
         const chartData: TableHeatMapChartData = this.converter(dataView, this.colors);
         const suppressAnimations: boolean = false;
         if (chartData.dataPoints) {
-            const minDataValue: number = d3.min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
+            const minDataValue: number = d3Min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
                 return d.value as number;
             });
-            const maxDataValue: number = d3.max(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
+            const maxDataValue: number = d3Max(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
                 return d.value as number;
             });
 
@@ -406,7 +425,7 @@ export class TableHeatMap implements IVisual {
                 }
             }
 
-            const colorScale: Quantile<string> = d3.scaleQuantile<string>()
+            const colorScale: Quantile<string> = d3ScaleQuantile<string>()
                 .domain([minDataValue, maxDataValue])
                 .range(colors);
 
@@ -468,7 +487,7 @@ export class TableHeatMap implements IVisual {
             const legendElementHeight: number = gridSizeHeight;
 
             if (settings.yAxisLabels.show) {
-                const categoryYElements:  d3.Selection<d3.BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
+                const categoryYElements:  ID3Selection<ID3BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
                 const categoryYElementsData = categoryYElements
                     .data(chartData.categoryY);
                     const categoryYElementsEntered = categoryYElementsData
@@ -504,7 +523,7 @@ export class TableHeatMap implements IVisual {
             }
 
             if (settings.xAxisLabels.show) {
-                const categoryXElements:  d3.Selection<d3.BaseType, any, any, any> =  this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel);
+                const categoryXElements:  ID3Selection<ID3BaseType, any, any, any> =  this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel);
                 const categoryXElementsData = categoryXElements
                     .data(chartData.categoryX);
                 categoryXElementsData.exit().remove();
@@ -722,7 +741,7 @@ export class TableHeatMap implements IVisual {
 
     private wrap(text, width): void {
         text.each(function () {
-            const text: Selection<D3Element> = d3.select(this);
+            const text: Selection<D3Element> = d3Select(this);
             const words: string[] = text.text().split(/\s+/).reverse();
             let word: string;
             let line: string[] = [];

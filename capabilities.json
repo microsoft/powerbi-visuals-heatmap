@@ -532,5 +532,7 @@
           }
       }
     }
-  }
+  },
+  "supportsKeyboardFocus": true,
+  "supportsMultiVisualSelection": true
 }
