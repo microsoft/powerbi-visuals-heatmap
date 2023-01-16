@@ -461,7 +461,7 @@ export class TableHeatMap implements IVisual {
             const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
             let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
-            let gridSizeHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
+            let gridSizeHeight: number = Math.floor((this.viewport.height - yAxisHeight) / (chartData.categoryY.length));
 
             if (gridSizeWidth < textRect.width && settingsModel.labels.show.value) {
                 gridSizeWidth = textRect.width;
