@@ -29,11 +29,7 @@ import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
-import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
-import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
-import {
-    IColorBrewer
-} from "./dataInterfaces";
+import { IColorBrewer } from "./dataInterfaces";
 
 export const colorbrewer: IColorBrewer = <IColorBrewer>{
     YlGn: {
@@ -373,85 +369,115 @@ export const colorbrewer: IColorBrewer = <IColorBrewer>{
     }
 };
 
-// export class LabelsSettings {
-//     public static DefaultFontSize: number = 12;
+export class GeneralSettings extends FormattingSettingsCard {
+    public name: string = "general";
+    public displayNameKey: string = "Visual_General";
 
-//     public show: boolean = false;
-//     public fill: string = "#aaa";
-//     public fontSize: number = LabelsSettings.DefaultFontSize;
-//     public fontFamily: string = "Arial";
-// }
+    public enableColorbrewer = new formattingSettings.ToggleSwitch({
+        name: "enableColorbrewer",
+        displayNameKey: "Visual_EnableColorbrewer",
+        value: true, 
+    });
+
+    public colorbrewer = new formattingSettings.AutoDropdown({
+        name: "colorbrewer",
+        displayNameKey: "Visual_General_Colorbrewer",
+        value: "Reds", 
+    });
+
+    public buckets = new formattingSettings.NumUpDown({
+        name: "buckets",
+        displayNameKey: "Visual_General_Buckets",
+        value: 5, 
+    });
+    
+    public gradientStart = new formattingSettings.ColorPicker({
+        name: "gradientStart",
+        displayNameKey: "Visual_GradientStart",
+        value: { value: "#FFFFFF" }, 
+    });
+
+    public gradientEnd = new formattingSettings.ColorPicker({
+        name: "gradientEnd",
+        displayNameKey: "Visual_GradientEnd",
+        value: { value: "#000000" }, 
+    });
+
+    public fillNullValuesCells = new formattingSettings.ToggleSwitch({
+        name: "fillNullValuesCells",
+        displayNameKey: "Visual_FillNullValCell",
+        value: true, 
+    });
+
+    public stroke: string = "#E6E6E6";
+    public textColor: string = "#AAAAAA";
+
+    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.buckets, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];
+}
 
 export class LabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
 
     public name: string = "labels";
-    public displayName: string = "Data labels";
+    public displayNameKey: string = "Visual_DataPointsLabels";
 
     public show = new formattingSettings.ToggleSwitch({
         name: "show",
-        displayName: "Show",
-        value: false, 
+        displayNameKey: "Visual_Show",
+        value: false,
+        topLevelToggle: true, 
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
-        displayName: "Color",
+        displayNameKey: "Visual_LabelsFill",
         value: { value: "#aaa" }, 
     });
 
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
-        displayName: "Text Size",
+        displayNameKey: "Visual_TextSize",
         value: LabelsSettings.DefaultFontSize, 
     });
 
     public fontFamily = new formattingSettings.AutoDropdown({
         name: "fontFamily",
-        displayName: "Font family",
+        displayNameKey: "Visual_FontFamily",
         value: "Arial", 
     });
 
     public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily];
 }
 
-// export class AxisLabelsSettings {
-//     public static DefaultFontSize: number = 12;
-
-//     public show: boolean = true;
-//     public fill: string = "#aaa";
-//     public fontSize: number = LabelsSettings.DefaultFontSize;
-//     public maxTextSymbol: number = 25;
-//     public fontFamily: string = "Arial";
-// }
 
 export class XAxisLabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
 
     public name: string = "xAxisLabels";
-    public displayName: string = "X axis data labels";
+    public displayNameKey: string = "Visual_XAxis";
 
     public show = new formattingSettings.ToggleSwitch({
         name: "show",
-        displayName: "Show",
-        value: true, 
+        displayNameKey: "Visual_Show",
+        value: true,
+        topLevelToggle: true, 
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
-        displayName: "Color",
+        displayNameKey: "Visual_LabelsFill",
         value: { value: "#aaa" }, 
     });
 
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
-        displayName: "Text Size",
+        displayNameKey: "Visual_TextSize",
         value: XAxisLabelsSettings.DefaultFontSize, 
     });
 
     public fontFamily = new formattingSettings.AutoDropdown({
         name: "fontFamily",
-        displayName: "Font family",
+        displayNameKey: "Visual_FontFamily",
         value: "Arial", 
     });
 
@@ -462,104 +488,41 @@ export class YAxisLabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
 
     public name: string = "yAxisLabels";
-    public displayName: string = "Y axis data labels";
+    public displayNameKey: string = "Visual_YAxis";
 
     public show = new formattingSettings.ToggleSwitch({
         name: "show",
-        displayName: "Show",
-        value: true, 
+        displayNameKey: "Visual_Show",
+        value: true,
+        topLevelToggle: true, 
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
-        displayName: "Color",
+        displayNameKey: "Visual_LabelsFill",
         value: { value: "#aaa" }, 
     });
 
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
-        displayName: "Text Size",
+        displayNameKey: "Visual_TextSize",
         value: YAxisLabelsSettings.DefaultFontSize, 
-    });
-
-    public fontFamily = new formattingSettings.AutoDropdown({
-        name: "fontFamily",
-        displayName: "Font family",
-        value: "Arial", 
     });
 
     public maxTextSymbol = new formattingSettings.NumUpDown({
         name: "maxTextSymbol",
-        displayName:  "Max text symbold",
+        displayNameKey:  "Visual_MaxTextSymbols",
         value: 25, 
     });
 
-    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily, this.maxTextSymbol];
+    public fontFamily = new formattingSettings.AutoDropdown({
+        name: "fontFamily",
+        displayNameKey: "Visual_FontFamily",
+        value: "Arial", 
+    });
+
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.maxTextSymbol, this.fontFamily];
 }
-
-// export class GeneralSettings {
-//     public enableColorbrewer: boolean = true;
-//     public colorbrewer: string = "Reds";
-//     public buckets: number = 5;
-//     public gradientStart: string = "#FFFFFF";
-//     public gradientEnd: string = "#000000";
-//     public fillNullValuesCells: boolean = true;
-//     public stroke: string = "#E6E6E6";
-//     public textColor: string = "#AAAAAA";
-// }
-
-export class GeneralSettings extends FormattingSettingsCard {
-    public name: string = "general";
-    public displayName: string = "General";
-
-    public enableColorbrewer = new formattingSettings.ToggleSwitch({
-        name: "enableColorbrewer",
-        displayName: "Enable colorbrewer",
-        value: true, 
-    });
-
-    public colorbrewer = new formattingSettings.AutoDropdown({
-        name: "colorbrewer",
-        displayName: "Colorbrewer",
-        value: "Reds", 
-    });
-
-    public buckets = new formattingSettings.NumUpDown({
-        name: "buckets",
-        displayName: "Buckets",
-        value: 5, 
-    });
-    
-    public gradientStart = new formattingSettings.ColorPicker({
-        name: "gradientStart",
-        displayName: "Gradient start",
-        value: { value: "#FFFFFF" }, 
-    });
-
-    public gradientEnd = new formattingSettings.ColorPicker({
-        name: "gradientEnd",
-        displayName: "Gradient end",
-        value: { value: "#000000" }, 
-    });
-
-    public fillNullValuesCells = new formattingSettings.ToggleSwitch({
-        name: "fillNullValuesCells",
-        displayName: "Fill by color cells with null value",
-        value: true, 
-    });
-
-    public stroke: string = "#E6E6E6";
-    public textColor: string = "#AAAAAA";
-
-    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.buckets, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];
-}
-
-// export class Settings extends DataViewObjectsParser {
-//     public labels: LabelsSettings = new LabelsSettings();
-//     public xAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
-//     public yAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
-//     public general: GeneralSettings = new GeneralSettings();
-// }
 
 export class SettingsModel extends FormattingSettingsModel {
     public labels: LabelsSettings = new LabelsSettings();
@@ -567,5 +530,5 @@ export class SettingsModel extends FormattingSettingsModel {
     public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings();
     public general: GeneralSettings = new GeneralSettings();
 
-    public cards: FormattingSettingsCard[] = [this.labels, this.xAxisLabels, this.yAxisLabels, this.general];
+    public cards: FormattingSettingsCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
 }
