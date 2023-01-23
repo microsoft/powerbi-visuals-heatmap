@@ -331,9 +331,8 @@ export class TableHeatMap implements IVisual {
     }
 
     private handleContextMenu = () => {
-        this.svg.on('contextmenu', (event) => {
-            const datapoint = d3Select(event.target).datum() as { identity };
-            this.selectionManager.showContextMenu(datapoint ? datapoint.identity : {}, {
+        this.svg.on('contextmenu', (event: PointerEvent, dataPoint) => {
+            this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {}, {
                 x: event.clientX,
                 y: event.clientY
             });
