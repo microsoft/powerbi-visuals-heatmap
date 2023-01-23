@@ -69,7 +69,7 @@
     "pbiviz": "pbiviz",
     "start": "pbiviz start",
     "package": "pbiviz package",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "karma start",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
