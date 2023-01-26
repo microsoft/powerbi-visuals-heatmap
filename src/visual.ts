@@ -39,11 +39,11 @@ import translate = manipulation.translate;
 
 import { createLinearColorScale, LinearColorScale, ColorHelper } from "powerbi-visuals-utils-colorutils";
 
-import * as d3 from "d3";
-
 import { select as d3Select, Selection as ID3Selection, BaseType as ID3BaseType } from "d3-selection";
 import { ScaleQuantile as ID3ScaleQuantile, scaleQuantile as d3ScaleQuantile } from "d3-scale";
 import { min as d3Min, max as d3Max } from "d3-array";
+
+import "d3-transition";
 
 type Selection<T> = ID3Selection<any, T, any, any>;
 type Quantile<T> = ID3ScaleQuantile<T>;
@@ -75,7 +75,7 @@ import {
     colorbrewer
 } from "./settings";
 
-import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { FormattingSettingsService, formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 // powerbi.extensibility.utils.tooltip
 import {
@@ -165,8 +165,13 @@ export class TableHeatMap implements IVisual {
     private static ConstGridLegendWidthRaito: number = 0.666;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
 
-    private static BucketCountMaxLimit: number = 18;
-    private static BucketCountMinLimit: number = 1;
+    public static BucketCountMaxLimit: number = 18;
+    public static BucketCountMinLimit: number = 1;
+    
+    private static CurrentBucketCountMaxLimit: number = 18;
+    private static CurrentBucketCountMinLimit: number = 1;
+    private static CurrentBucketCount: number = this.CurrentBucketCountMinLimit;
+
     private static ColorbrewerMaxBucketCount: number = 14;
 
     private static CellMaxHeightLimit: number = 60;
@@ -253,7 +258,7 @@ export class TableHeatMap implements IVisual {
         this.host = host;
         this.element = element;
 
-        this.div = d3.select(element)
+        this.div = d3Select(element)
             .append(TableHeatMap.HtmlObjDiv)
             .classed(TableHeatMap.ClsNameDivTableHeatMap, true);
         this.svg = this.div
@@ -342,12 +347,9 @@ export class TableHeatMap implements IVisual {
 
     private static parseSettings(dataView: DataView, colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {
         if (!settingsModel.general.enableColorbrewer.value) {
-            if (settingsModel.general.buckets.value > TableHeatMap.BucketCountMaxLimit) {
-                settingsModel.general.buckets.value = TableHeatMap.BucketCountMaxLimit;
-            }
-            if (settingsModel.general.buckets.value < TableHeatMap.BucketCountMinLimit) {
-                settingsModel.general.buckets.value = TableHeatMap.BucketCountMinLimit;
-            }
+            this.CurrentBucketCountMaxLimit = TableHeatMap.BucketCountMaxLimit;
+            this.CurrentBucketCountMinLimit = TableHeatMap.BucketCountMinLimit;
+            this.CurrentBucketCount = settingsModel.general.buckets.value;
         } else {
             if (settingsModel.general.colorbrewer.value.toString() === "") {
                 settingsModel.general.colorbrewer.value = TableHeatMap.DefaultColorbrewer;
@@ -364,11 +366,15 @@ export class TableHeatMap implements IVisual {
                 }
             }
 
+            this.CurrentBucketCountMaxLimit = maxBucketNum;
+            this.CurrentBucketCountMinLimit = minBucketNum;
+            this.CurrentBucketCount = settingsModel.general.buckets.value;
+
             if (settingsModel.general.buckets.value > maxBucketNum) {
-                settingsModel.general.buckets.value = maxBucketNum;
+                this.CurrentBucketCount = maxBucketNum;
             }
             if (settingsModel.general.buckets.value < minBucketNum) {
-                settingsModel.general.buckets.value = minBucketNum;
+                this.CurrentBucketCount = minBucketNum;
             }
         }
 
@@ -405,7 +411,15 @@ export class TableHeatMap implements IVisual {
                 return d.value as number;
             });
 
-            const numBuckets: number = settingsModel.general.buckets.value;
+            let numBuckets: number = settingsModel.general.buckets.value;
+            
+            if (numBuckets > TableHeatMap.CurrentBucketCountMaxLimit) {
+                numBuckets = TableHeatMap.CurrentBucketCountMaxLimit;
+            }
+            if (numBuckets < TableHeatMap.CurrentBucketCountMinLimit) {
+                numBuckets = TableHeatMap.CurrentBucketCountMinLimit;
+            }
+
             const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
             const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
             let colors: Array<string>;
@@ -676,6 +690,11 @@ export class TableHeatMap implements IVisual {
                 .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
                 .classed(TableHeatMap.ClsBordered, true);
 
+            const legendFormatter: IValueFormatter = valueFormatter.create({
+                value: 1000,
+                precision: 2
+            });
+
             legendSelectionEntered
                 .append(TableHeatMap.HtmlObjText)
                 .classed(TableHeatMap.ClsMono, true)
@@ -684,7 +703,8 @@ export class TableHeatMap implements IVisual {
                 })
                 .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .text(function (d) {
-                    return chartData.valueFormatter.format(d.value);
+                    const formattedValue = legendFormatter.format(d.value);
+                    return formattedValue;
                 })
                 .style("fill", settingsModel.general.textColor);
 
@@ -769,16 +789,40 @@ export class TableHeatMap implements IVisual {
         });
     }
 
-    private getAnimationMode(element: D3Element, suppressAnimations: boolean): D3Element {
+    private getAnimationMode(element: D3Element, suppressAnimations: boolean) {
         if (suppressAnimations) {
             return element;
         }
 
-        return (<any>element)
-            .transition().duration(this.animationDuration);
+        return element.transition().duration(this.animationDuration);
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {
-        return this.formattingSettingsService.buildFormattingModel(this.settingsModel);
+        this.settingsModel.cards.forEach(card => {
+            if (card.name === "general") {
+                card.slices = card.slices.filter(slice => slice.name !== "buckets");
+
+                const bucketsSlice = new formattingSettings.NumUpDown({
+                    name: "buckets",
+                    displayNameKey: "Visual_General_Buckets",
+                    value: Number(this.dataView.metadata.objects?.general?.buckets ?? 5) || 5,
+                    options: {
+                        minValue: {
+                            type: powerbi.visuals.ValidatorType.Min,
+                            value: TableHeatMap.CurrentBucketCountMinLimit
+                        },
+                        maxValue: {
+                            type: powerbi.visuals.ValidatorType.Max,
+                            value: TableHeatMap.CurrentBucketCountMaxLimit
+                        },
+                    } 
+                });
+
+                card.slices.push(bucketsSlice);
+            }
+        });
+        
+        const model = this.formattingSettingsService.buildFormattingModel(this.settingsModel);
+        return model;
     }
 }

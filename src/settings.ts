@@ -30,6 +30,7 @@ import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
 import { IColorBrewer } from "./dataInterfaces";
+import { TableHeatMap } from "./visual";
 
 export const colorbrewer: IColorBrewer = <IColorBrewer>{
     YlGn: {
@@ -388,7 +389,17 @@ export class GeneralSettings extends FormattingSettingsCard {
     public buckets = new formattingSettings.NumUpDown({
         name: "buckets",
         displayNameKey: "Visual_General_Buckets",
-        value: 5, 
+        value: 5,
+        options: {
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: TableHeatMap.BucketCountMinLimit
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: TableHeatMap.BucketCountMaxLimit
+            },
+        } 
     });
     
     public gradientStart = new formattingSettings.ColorPicker({
