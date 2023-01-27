@@ -29,8 +29,10 @@ import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
-import { IColorBrewer } from "./dataInterfaces";
+import { IColorArray, IColorBrewer } from "./dataInterfaces";
 import { TableHeatMap } from "./visual";
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
 export const colorbrewer: IColorBrewer = <IColorBrewer>{
     YlGn: {
@@ -386,21 +388,6 @@ export class GeneralSettings extends FormattingSettingsCard {
         value: "Reds", 
     });
 
-    public buckets = new formattingSettings.NumUpDown({
-        name: "buckets",
-        displayNameKey: "Visual_General_Buckets",
-        value: 5,
-        options: {
-            minValue: {
-                type: powerbi.visuals.ValidatorType.Min,
-                value: TableHeatMap.BucketCountMinLimit
-            },
-            maxValue: {
-                type: powerbi.visuals.ValidatorType.Max,
-                value: TableHeatMap.BucketCountMaxLimit
-            },
-        } 
-    });
     
     public gradientStart = new formattingSettings.ColorPicker({
         name: "gradientStart",
@@ -423,7 +410,7 @@ export class GeneralSettings extends FormattingSettingsCard {
     public stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
-    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.buckets, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];
+    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];
 }
 
 export class LabelsSettings extends FormattingSettingsCard {
@@ -542,4 +529,103 @@ export class SettingsModel extends FormattingSettingsModel {
     public general: GeneralSettings = new GeneralSettings();
 
     public cards: FormattingSettingsCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
+
+    public CurrentBucketCount: number = TableHeatMap.BucketCountMinLimit;
+
+    public CurrentBucketCountMinLimit: number = TableHeatMap.BucketCountMinLimit;
+    public CurrentBucketCountMaxLimit: number = TableHeatMap.BucketCountMaxLimit;
+
+    private getBucketCountFromDataView = (dataView: DataView): number => {
+        return Number(dataView.metadata.objects?.general?.buckets ?? TableHeatMap.DefaultBucketCount) 
+            || TableHeatMap.DefaultBucketCount
+    }
+
+    private initBucketsWithoutColorbrewer = (dataView: DataView): void => {
+        this.CurrentBucketCountMaxLimit = TableHeatMap.BucketCountMaxLimit;
+        this.CurrentBucketCountMinLimit = TableHeatMap.BucketCountMinLimit;
+        this.CurrentBucketCount = this.getBucketCountFromDataView(dataView);
+
+        if (this.CurrentBucketCount > this.CurrentBucketCountMaxLimit) {
+            this.CurrentBucketCount = this.CurrentBucketCountMaxLimit;
+        }
+
+        if (this.CurrentBucketCount < this.CurrentBucketCountMinLimit) {
+            this.CurrentBucketCount = this.CurrentBucketCountMinLimit;
+        }
+
+        const bucketsSlice = new formattingSettings.NumUpDown({
+            name: "buckets",
+            displayNameKey: "Visual_General_Buckets",
+            value: this.CurrentBucketCount,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: TableHeatMap.BucketCountMinLimit
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: TableHeatMap.BucketCountMaxLimit
+                },
+            } 
+        });
+
+        this.general.slices.push(bucketsSlice);
+    }
+
+    private initBucketsWithColorbrewer = (dataView: DataView): void => {
+        if (this.general.colorbrewer.value.toString() === "") {
+            this.general.colorbrewer.value = TableHeatMap.DefaultColorbrewer;
+        }
+
+        const colorbrewerArray: IColorArray = colorbrewer[this.general.colorbrewer.value];
+        
+        let minBucketNum: number = 0;
+        let maxBucketNum: number = 0;
+
+        for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
+            if (minBucketNum === 0 && Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
+                minBucketNum = bucketIndex;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
+                maxBucketNum = bucketIndex;
+            }
+        }
+
+        this.CurrentBucketCountMaxLimit = maxBucketNum;
+        this.CurrentBucketCountMinLimit = minBucketNum;
+        this.CurrentBucketCount = this.getBucketCountFromDataView(dataView);
+
+        if (this.CurrentBucketCount > maxBucketNum) {
+            this.CurrentBucketCount = maxBucketNum;
+        }
+
+        if (this.CurrentBucketCount < minBucketNum) {
+            this.CurrentBucketCount = minBucketNum;
+        }
+
+        const bucketsSlice = new formattingSettings.NumUpDown({
+            name: "buckets",
+            displayNameKey: "Visual_General_Buckets",
+            value: this.CurrentBucketCount,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: minBucketNum
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: maxBucketNum
+                },
+            } 
+        });
+
+        this.general.slices.push(bucketsSlice);
+    }
+
+    public initBuckets(dataView: DataView): void {
+        this.general.enableColorbrewer.value 
+            ? this.initBucketsWithColorbrewer(dataView) 
+            : this.initBucketsWithoutColorbrewer(dataView);
+    }
 }

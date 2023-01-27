@@ -75,7 +75,7 @@ import {
     colorbrewer
 } from "./settings";
 
-import { FormattingSettingsService, formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 // powerbi.extensibility.utils.tooltip
 import {
@@ -165,19 +165,15 @@ export class TableHeatMap implements IVisual {
     private static ConstGridLegendWidthRaito: number = 0.666;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
 
-    public static BucketCountMaxLimit: number = 18;
-    public static BucketCountMinLimit: number = 1;
-    
-    private static CurrentBucketCountMaxLimit: number = 18;
-    private static CurrentBucketCountMinLimit: number = 1;
-    private static CurrentBucketCount: number = this.CurrentBucketCountMinLimit;
-
-    private static ColorbrewerMaxBucketCount: number = 14;
-
     private static CellMaxHeightLimit: number = 60;
     private static CellMaxWidthFactorLimit: number = 3;
 
-    private static DefaultColorbrewer: string = "Reds";
+    public static BucketCountMaxLimit: number = 18;
+    public static BucketCountMinLimit: number = 1;
+    public static DefaultBucketCount: number = 5;
+    public static ColorbrewerMaxBucketCount: number = 14;
+
+    public static DefaultColorbrewer: string = "Reds";
 
     private element: HTMLElement;
 
@@ -287,7 +283,8 @@ export class TableHeatMap implements IVisual {
             this.host.eventService.renderingStarted(options);
 
             this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews);
-            this.settingsModel = TableHeatMap.parseSettings(options.dataViews[0], this.colorHelper, this.settingsModel);
+            this.settingsModel.initBuckets(options.dataViews[0]);
+            this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
             this.div.attr("width", PixelConverter.toString(options.viewport.width + this.margin.left));
@@ -345,39 +342,7 @@ export class TableHeatMap implements IVisual {
         });
     }
 
-    private static parseSettings(dataView: DataView, colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {
-        if (!settingsModel.general.enableColorbrewer.value) {
-            this.CurrentBucketCountMaxLimit = TableHeatMap.BucketCountMaxLimit;
-            this.CurrentBucketCountMinLimit = TableHeatMap.BucketCountMinLimit;
-            this.CurrentBucketCount = settingsModel.general.buckets.value;
-        } else {
-            if (settingsModel.general.colorbrewer.value.toString() === "") {
-                settingsModel.general.colorbrewer.value = TableHeatMap.DefaultColorbrewer;
-            }
-            const colorbrewerArray: IColorArray = colorbrewer[settingsModel.general.colorbrewer.value];
-            let minBucketNum: number = 0;
-            let maxBucketNum: number = 0;
-            for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
-                if (minBucketNum === 0 && Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
-                    minBucketNum = bucketIndex;
-                }
-                if (Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
-                    maxBucketNum = bucketIndex;
-                }
-            }
-
-            this.CurrentBucketCountMaxLimit = maxBucketNum;
-            this.CurrentBucketCountMinLimit = minBucketNum;
-            this.CurrentBucketCount = settingsModel.general.buckets.value;
-
-            if (settingsModel.general.buckets.value > maxBucketNum) {
-                this.CurrentBucketCount = maxBucketNum;
-            }
-            if (settingsModel.general.buckets.value < minBucketNum) {
-                this.CurrentBucketCount = minBucketNum;
-            }
-        }
-
+    private static parseSettings(colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {
         if (colorHelper.isHighContrast) {
             const foregroundColor: string = colorHelper.getThemeColor("foreground");
             const backgroundColor: string = colorHelper.getThemeColor("background");
@@ -411,14 +376,7 @@ export class TableHeatMap implements IVisual {
                 return d.value as number;
             });
 
-            let numBuckets: number = settingsModel.general.buckets.value;
-            
-            if (numBuckets > TableHeatMap.CurrentBucketCountMaxLimit) {
-                numBuckets = TableHeatMap.CurrentBucketCountMaxLimit;
-            }
-            if (numBuckets < TableHeatMap.CurrentBucketCountMinLimit) {
-                numBuckets = TableHeatMap.CurrentBucketCountMinLimit;
-            }
+            const numBuckets: number = settingsModel.CurrentBucketCount;
 
             const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
             const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
@@ -691,8 +649,7 @@ export class TableHeatMap implements IVisual {
                 .classed(TableHeatMap.ClsBordered, true);
 
             const legendFormatter: IValueFormatter = valueFormatter.create({
-                value: 1000,
-                precision: 2
+                value: 1000
             });
 
             legendSelectionEntered
@@ -798,30 +755,6 @@ export class TableHeatMap implements IVisual {
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {
-        this.settingsModel.cards.forEach(card => {
-            if (card.name === "general") {
-                card.slices = card.slices.filter(slice => slice.name !== "buckets");
-
-                const bucketsSlice = new formattingSettings.NumUpDown({
-                    name: "buckets",
-                    displayNameKey: "Visual_General_Buckets",
-                    value: Number(this.dataView.metadata.objects?.general?.buckets ?? 5) || 5,
-                    options: {
-                        minValue: {
-                            type: powerbi.visuals.ValidatorType.Min,
-                            value: TableHeatMap.CurrentBucketCountMinLimit
-                        },
-                        maxValue: {
-                            type: powerbi.visuals.ValidatorType.Max,
-                            value: TableHeatMap.CurrentBucketCountMaxLimit
-                        },
-                    } 
-                });
-
-                card.slices.push(bucketsSlice);
-            }
-        });
-        
         const model = this.formattingSettingsService.buildFormattingModel(this.settingsModel);
         return model;
     }
