@@ -201,6 +201,10 @@ export class TableHeatMap implements IVisual {
         }
 
         const dataPoints: TableHeatMapDataPoint[] = [];
+        const formatter = valueFormatter.create({
+            format: valueFormatter.getFormatStringByColumn(dataView.categorical.values[0].source),
+            value: dataView.categorical.values[0].values[0]
+        });
 
         const categoryValueFormatter: IValueFormatter = valueFormatter.create({
             format: valueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
@@ -243,7 +247,7 @@ export class TableHeatMap implements IVisual {
                 return n !== undefined;
             }),
             categoryValueFormatter: categoryValueFormatter,
-            valueFormatter: valueFormatter
+            valueFormatter: formatter
         };
     }
 
@@ -648,10 +652,6 @@ export class TableHeatMap implements IVisual {
                 .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
                 .classed(TableHeatMap.ClsBordered, true);
 
-            const legendFormatter: IValueFormatter = valueFormatter.create({
-                value: 1000
-            });
-
             legendSelectionEntered
                 .append(TableHeatMap.HtmlObjText)
                 .classed(TableHeatMap.ClsMono, true)
@@ -660,7 +660,7 @@ export class TableHeatMap implements IVisual {
                 })
                 .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .text(function (d) {
-                    const formattedValue = legendFormatter.format(d.value);
+                    const formattedValue = chartData.valueFormatter.format(d.value);
                     return formattedValue;
                 })
                 .style("fill", settingsModel.general.textColor);
