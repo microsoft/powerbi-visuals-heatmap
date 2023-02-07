@@ -183,7 +183,7 @@ export class TableHeatMap implements IVisual {
 
     private formattingSettingsService: FormattingSettingsService;
 
-    public converter(dataView: DataView, colors: IColorPalette): TableHeatMapChartData {
+    public converter(dataView: DataView): TableHeatMapChartData {
         if (!dataView
             || !dataView.categorical
             || !dataView.categorical.categories
@@ -370,7 +370,7 @@ export class TableHeatMap implements IVisual {
     // eslint-disable-next-line max-lines-per-function
     private updateInternal(options: VisualUpdateOptions, settingsModel: SettingsModel): void {
         const dataView: DataView = this.dataView = options.dataViews[0];
-        const chartData: TableHeatMapChartData = this.converter(dataView, this.colors);
+        const chartData: TableHeatMapChartData = this.converter(dataView);
         const suppressAnimations: boolean = false;
         if (chartData.dataPoints) {
             const minDataValue: number = d3Min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {

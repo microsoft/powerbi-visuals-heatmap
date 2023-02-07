@@ -38,7 +38,7 @@ export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
         return new VisualClass(options);
     }
 
-    public get mainElement(): Element | null {
+    public get mainElement(): HTMLElement | null {
         return this.element.querySelector("div.divTableHeatMap");
     }
 

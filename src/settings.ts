@@ -388,7 +388,6 @@ export class GeneralSettings extends FormattingSettingsCard {
         value: "Reds", 
     });
 
-    
     public gradientStart = new formattingSettings.ColorPicker({
         name: "gradientStart",
         displayNameKey: "Visual_GradientStart",
@@ -573,7 +572,7 @@ export class SettingsModel extends FormattingSettingsModel {
     }
 
     private initBucketsWithColorbrewer = (dataView: DataView): void => {
-        if (this.general.colorbrewer.value.toString() === "") {
+        if (this.general.colorbrewer.value === "") {
             this.general.colorbrewer.value = TableHeatMap.DefaultColorbrewer;
         }
 
@@ -583,11 +582,13 @@ export class SettingsModel extends FormattingSettingsModel {
         let maxBucketNum: number = 0;
 
         for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
-            if (minBucketNum === 0 && Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
+            const currentColorbrewerElement = colorbrewerArray[bucketIndex.toString()];
+
+            if (minBucketNum === 0 && currentColorbrewerElement) {
                 minBucketNum = bucketIndex;
             }
 
-            if (Object.prototype.hasOwnProperty.call(colorbrewerArray, bucketIndex.toString())) {
+            if (currentColorbrewerElement) {
                 maxBucketNum = bucketIndex;
             }
         }
