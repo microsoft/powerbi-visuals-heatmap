@@ -1,7 +1,3 @@
-## 3.1.1
-* Fixed issue with rounding legend values
-* Fixed issue with incorrect number of buckets displayed in the formatting pane
-
 ## 3.1.0
 * Added option to resize cells vertically
 

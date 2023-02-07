@@ -4,13 +4,12 @@
     "email": "pbicvsupport@microsoft.com"
   },
   "name": "TableHeatmap",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "dependencies": {
     "d3-array": "^3.2.2",
     "d3-scale": "^4.0.2",
     "d3-selection": "^3.0.0",
     "d3-transition": "^3.0.1",
-    "image-to-base64": "^2.0.1",
     "lodash.maxby": "^4.6.0",
     "lodash.random": "^3.2.0",
     "lodash.range": "^3.2.0",
@@ -22,8 +21,7 @@
     "powerbi-visuals-utils-interactivityutils": "^6.0.0",
     "powerbi-visuals-utils-svgutils": "^3.0.0",
     "powerbi-visuals-utils-tooltiputils": "^3.0.0",
-    "powerbi-visuals-utils-typeutils": "^3.0.1",
-    "snyk": "^1.1090.0"
+    "powerbi-visuals-utils-typeutils": "^3.0.1"
   },
   "devDependencies": {
     "@types/d3-array": "^3.0.4",
@@ -70,9 +68,6 @@
     "package": "pbiviz package",
     "eslint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "lint": "npm run eslint",
-    "test": "karma start",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
-  },
-  "snyk": true
+    "test": "karma start"
+  }
 }
