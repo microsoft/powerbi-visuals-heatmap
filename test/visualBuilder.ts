@@ -42,7 +42,7 @@ export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
         return this.element.querySelector("div.divTableHeatMap");
     }
 
-    public get rects(): NodeListOf<Element> | undefined {
+    public get rects(): NodeListOf<SVGElement> | undefined {
         return this.mainElement?.querySelectorAll(".categoryX");
     }
 }
