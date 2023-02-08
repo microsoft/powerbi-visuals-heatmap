@@ -1,3 +1,17 @@
+## 3.1.2
+* Removed redundant packages
+
+## 3.1.1
+* Fixed issue with rounding legend values
+* Fixed issue with incorrect number of buckets displayed in the formatting pane
+
+## 3.1.0
+* Added option to resize cells vertically
+
+## 3.0.0
+* Updated packages and APIs to the current latest version
+* Fixed vulnerabilities
+
 ## 1.5.0
 * High contrast mode
 * API 1.13.0

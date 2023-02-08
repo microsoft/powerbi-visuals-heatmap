@@ -23,12 +23,16 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
+import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
-import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
-import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
-import {
-    IColorBrewer
-} from "./dataInterfaces";
+import FormattingSettingsCard = formattingSettings.Card;
+import FormattingSettingsSlice = formattingSettings.Slice;
+import FormattingSettingsModel = formattingSettings.Model;
+
+import { IColorArray, IColorBrewer } from "./dataInterfaces";
+import { TableHeatMap } from "./visual";
+import powerbi from "powerbi-visuals-api";
+import DataView = powerbi.DataView;
 
 export const colorbrewer: IColorBrewer = <IColorBrewer>{
     YlGn: {
@@ -368,39 +372,261 @@ export const colorbrewer: IColorBrewer = <IColorBrewer>{
     }
 };
 
-export class LabelsSettings {
-    public static DefaultFontSize: number = 12;
+export class GeneralSettings extends FormattingSettingsCard {
+    public name: string = "general";
+    public displayNameKey: string = "Visual_General";
 
-    public show: boolean = false;
-    public fill: string = "#aaa";
-    public fontSize: number = LabelsSettings.DefaultFontSize;
-    public fontFamily: string = "Arial";
-}
+    public enableColorbrewer = new formattingSettings.ToggleSwitch({
+        name: "enableColorbrewer",
+        displayNameKey: "Visual_EnableColorbrewer",
+        value: true, 
+    });
 
-export class AxisLabelsSettings {
-    public static DefaultFontSize: number = 12;
+    public colorbrewer = new formattingSettings.AutoDropdown({
+        name: "colorbrewer",
+        displayNameKey: "Visual_General_Colorbrewer",
+        value: "Reds", 
+    });
 
-    public show: boolean = true;
-    public fill: string = "#aaa";
-    public fontSize: number = LabelsSettings.DefaultFontSize;
-    public maxTextSymbol: number = 25;
-    public fontFamily: string = "Arial";
-}
+    public gradientStart = new formattingSettings.ColorPicker({
+        name: "gradientStart",
+        displayNameKey: "Visual_GradientStart",
+        value: { value: "#FFFFFF" }, 
+    });
 
-export class GeneralSettings {
-    public enableColorbrewer: boolean = true;
-    public colorbrewer: string = "Reds";
-    public buckets: number = 5;
-    public gradientStart: string = "#FFFFFF";
-    public gradientEnd: string = "#000000";
-    public fillNullValuesCells: boolean = true;
+    public gradientEnd = new formattingSettings.ColorPicker({
+        name: "gradientEnd",
+        displayNameKey: "Visual_GradientEnd",
+        value: { value: "#000000" }, 
+    });
+
+    public fillNullValuesCells = new formattingSettings.ToggleSwitch({
+        name: "fillNullValuesCells",
+        displayNameKey: "Visual_FillNullValCell",
+        value: true, 
+    });
+
     public stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
+
+    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];
 }
 
-export class Settings extends DataViewObjectsParser {
+export class LabelsSettings extends FormattingSettingsCard {
+    public static DefaultFontSize: number = 12;
+
+    public name: string = "labels";
+    public displayNameKey: string = "Visual_DataPointsLabels";
+
+    public show = new formattingSettings.ToggleSwitch({
+        name: "show",
+        displayNameKey: "Visual_Show",
+        value: false,
+        topLevelToggle: true, 
+    });
+
+    public fill = new formattingSettings.ColorPicker({
+        name: "fill",
+        displayNameKey: "Visual_LabelsFill",
+        value: { value: "#aaa" }, 
+    });
+
+    public fontSize = new formattingSettings.NumUpDown({
+        name: "fontSize",
+        displayNameKey: "Visual_TextSize",
+        value: LabelsSettings.DefaultFontSize, 
+    });
+
+    public fontFamily = new formattingSettings.AutoDropdown({
+        name: "fontFamily",
+        displayNameKey: "Visual_FontFamily",
+        value: "Arial", 
+    });
+
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily];
+}
+
+
+export class XAxisLabelsSettings extends FormattingSettingsCard {
+    public static DefaultFontSize: number = 12;
+
+    public name: string = "xAxisLabels";
+    public displayNameKey: string = "Visual_XAxis";
+
+    public show = new formattingSettings.ToggleSwitch({
+        name: "show",
+        displayNameKey: "Visual_Show",
+        value: true,
+        topLevelToggle: true, 
+    });
+
+    public fill = new formattingSettings.ColorPicker({
+        name: "fill",
+        displayNameKey: "Visual_LabelsFill",
+        value: { value: "#aaa" }, 
+    });
+
+    public fontSize = new formattingSettings.NumUpDown({
+        name: "fontSize",
+        displayNameKey: "Visual_TextSize",
+        value: XAxisLabelsSettings.DefaultFontSize, 
+    });
+
+    public fontFamily = new formattingSettings.AutoDropdown({
+        name: "fontFamily",
+        displayNameKey: "Visual_FontFamily",
+        value: "Arial", 
+    });
+
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily];
+}
+
+export class YAxisLabelsSettings extends FormattingSettingsCard {
+    public static DefaultFontSize: number = 12;
+
+    public name: string = "yAxisLabels";
+    public displayNameKey: string = "Visual_YAxis";
+
+    public show = new formattingSettings.ToggleSwitch({
+        name: "show",
+        displayNameKey: "Visual_Show",
+        value: true,
+        topLevelToggle: true, 
+    });
+
+    public fill = new formattingSettings.ColorPicker({
+        name: "fill",
+        displayNameKey: "Visual_LabelsFill",
+        value: { value: "#aaa" }, 
+    });
+
+    public fontSize = new formattingSettings.NumUpDown({
+        name: "fontSize",
+        displayNameKey: "Visual_TextSize",
+        value: YAxisLabelsSettings.DefaultFontSize, 
+    });
+
+    public maxTextSymbol = new formattingSettings.NumUpDown({
+        name: "maxTextSymbol",
+        displayNameKey:  "Visual_MaxTextSymbols",
+        value: 25, 
+    });
+
+    public fontFamily = new formattingSettings.AutoDropdown({
+        name: "fontFamily",
+        displayNameKey: "Visual_FontFamily",
+        value: "Arial", 
+    });
+
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.maxTextSymbol, this.fontFamily];
+}
+
+export class SettingsModel extends FormattingSettingsModel {
     public labels: LabelsSettings = new LabelsSettings();
-    public xAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
-    public yAxisLabels: AxisLabelsSettings = new AxisLabelsSettings();
+    public xAxisLabels: XAxisLabelsSettings = new XAxisLabelsSettings();
+    public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings();
     public general: GeneralSettings = new GeneralSettings();
+
+    public cards: FormattingSettingsCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
+
+    public CurrentBucketCount: number = TableHeatMap.BucketCountMinLimit;
+
+    public CurrentBucketCountMinLimit: number = TableHeatMap.BucketCountMinLimit;
+    public CurrentBucketCountMaxLimit: number = TableHeatMap.BucketCountMaxLimit;
+
+    private getBucketCountFromDataView = (dataView: DataView): number => {
+        return Number(dataView.metadata.objects?.general?.buckets ?? TableHeatMap.DefaultBucketCount) 
+            || TableHeatMap.DefaultBucketCount
+    }
+
+    private initBucketsWithoutColorbrewer = (dataView: DataView): void => {
+        this.CurrentBucketCountMaxLimit = TableHeatMap.BucketCountMaxLimit;
+        this.CurrentBucketCountMinLimit = TableHeatMap.BucketCountMinLimit;
+        this.CurrentBucketCount = this.getBucketCountFromDataView(dataView);
+
+        if (this.CurrentBucketCount > this.CurrentBucketCountMaxLimit) {
+            this.CurrentBucketCount = this.CurrentBucketCountMaxLimit;
+        }
+
+        if (this.CurrentBucketCount < this.CurrentBucketCountMinLimit) {
+            this.CurrentBucketCount = this.CurrentBucketCountMinLimit;
+        }
+
+        const bucketsSlice = new formattingSettings.NumUpDown({
+            name: "buckets",
+            displayNameKey: "Visual_General_Buckets",
+            value: this.CurrentBucketCount,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: TableHeatMap.BucketCountMinLimit
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: TableHeatMap.BucketCountMaxLimit
+                },
+            } 
+        });
+
+        this.general.slices.push(bucketsSlice);
+    }
+
+    private initBucketsWithColorbrewer = (dataView: DataView): void => {
+        if (this.general.colorbrewer.value === "") {
+            this.general.colorbrewer.value = TableHeatMap.DefaultColorbrewer;
+        }
+
+        const colorbrewerArray: IColorArray = colorbrewer[this.general.colorbrewer.value];
+        
+        let minBucketNum: number = 0;
+        let maxBucketNum: number = 0;
+
+        for (let bucketIndex: number = TableHeatMap.BucketCountMinLimit; bucketIndex < TableHeatMap.ColorbrewerMaxBucketCount; bucketIndex++) {
+            const currentColorbrewerElement = colorbrewerArray[bucketIndex.toString()];
+
+            if (minBucketNum === 0 && currentColorbrewerElement) {
+                minBucketNum = bucketIndex;
+            }
+
+            if (currentColorbrewerElement) {
+                maxBucketNum = bucketIndex;
+            }
+        }
+
+        this.CurrentBucketCountMaxLimit = maxBucketNum;
+        this.CurrentBucketCountMinLimit = minBucketNum;
+        this.CurrentBucketCount = this.getBucketCountFromDataView(dataView);
+
+        if (this.CurrentBucketCount > maxBucketNum) {
+            this.CurrentBucketCount = maxBucketNum;
+        }
+
+        if (this.CurrentBucketCount < minBucketNum) {
+            this.CurrentBucketCount = minBucketNum;
+        }
+
+        const bucketsSlice = new formattingSettings.NumUpDown({
+            name: "buckets",
+            displayNameKey: "Visual_General_Buckets",
+            value: this.CurrentBucketCount,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: minBucketNum
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: maxBucketNum
+                },
+            } 
+        });
+
+        this.general.slices.push(bucketsSlice);
+    }
+
+    public initBuckets(dataView: DataView): void {
+        this.general.enableColorbrewer.value 
+            ? this.initBucketsWithColorbrewer(dataView) 
+            : this.initBucketsWithoutColorbrewer(dataView);
+    }
 }

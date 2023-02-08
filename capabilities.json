@@ -1,4 +1,5 @@
 {
+  "privileges": [],
   "dataRoles": [
     {
       "name": "Category",
@@ -531,5 +532,7 @@
           }
       }
     }
-  }
+  },
+  "supportsKeyboardFocus": true,
+  "supportsMultiVisualSelection": true
 }
