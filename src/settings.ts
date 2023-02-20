@@ -414,6 +414,8 @@ export class GeneralSettings extends FormattingSettingsCard {
 
 export class LabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
+    private static MinFontSize: number = 8;
+    private static MaxFontSize: number = 32;
 
     public name: string = "labels";
     public displayNameKey: string = "Visual_DataPointsLabels";
@@ -434,7 +436,17 @@ export class LabelsSettings extends FormattingSettingsCard {
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
         displayNameKey: "Visual_TextSize",
-        value: LabelsSettings.DefaultFontSize, 
+        value: LabelsSettings.DefaultFontSize,
+        options: {
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: LabelsSettings.MinFontSize
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: LabelsSettings.MaxFontSize
+            },
+        } 
     });
 
     public fontFamily = new formattingSettings.AutoDropdown({
@@ -448,7 +460,9 @@ export class LabelsSettings extends FormattingSettingsCard {
 
 
 export class XAxisLabelsSettings extends FormattingSettingsCard {
-    public static DefaultFontSize: number = 12;
+    private static DefaultFontSize: number = 12;
+    private static MinFontSize: number = 8;
+    private static MaxFontSize: number = 32;
 
     public name: string = "xAxisLabels";
     public displayNameKey: string = "Visual_XAxis";
@@ -469,7 +483,17 @@ export class XAxisLabelsSettings extends FormattingSettingsCard {
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
         displayNameKey: "Visual_TextSize",
-        value: XAxisLabelsSettings.DefaultFontSize, 
+        value: XAxisLabelsSettings.DefaultFontSize,
+        options: {
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: XAxisLabelsSettings.MinFontSize
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: XAxisLabelsSettings.MaxFontSize
+            },
+        } 
     });
 
     public fontFamily = new formattingSettings.AutoDropdown({
@@ -483,6 +507,11 @@ export class XAxisLabelsSettings extends FormattingSettingsCard {
 
 export class YAxisLabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
+    private static MinFontSize: number = 8;
+    private static MaxFontSize: number = 32;
+
+    private static TextSymbolMinValue: number = 0;
+    private static TextSymbolMaxValue: number = 500;
 
     public name: string = "yAxisLabels";
     public displayNameKey: string = "Visual_YAxis";
@@ -503,13 +532,33 @@ export class YAxisLabelsSettings extends FormattingSettingsCard {
     public fontSize = new formattingSettings.NumUpDown({
         name: "fontSize",
         displayNameKey: "Visual_TextSize",
-        value: YAxisLabelsSettings.DefaultFontSize, 
+        value: YAxisLabelsSettings.DefaultFontSize,
+        options: {
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: YAxisLabelsSettings.MinFontSize
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: YAxisLabelsSettings.MaxFontSize
+            },
+        } 
     });
 
     public maxTextSymbol = new formattingSettings.NumUpDown({
         name: "maxTextSymbol",
         displayNameKey:  "Visual_MaxTextSymbols",
-        value: 25, 
+        value: 25,
+        options: {
+            minValue: {
+                type: powerbi.visuals.ValidatorType.Min,
+                value: YAxisLabelsSettings.TextSymbolMinValue
+            },
+            maxValue: {
+                type: powerbi.visuals.ValidatorType.Max,
+                value: YAxisLabelsSettings.TextSymbolMaxValue
+            },
+        }
     });
 
     public fontFamily = new formattingSettings.AutoDropdown({
