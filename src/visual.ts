@@ -77,7 +77,6 @@ import {
 
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
-// powerbi.extensibility.utils.tooltip
 import {
     ITooltipServiceWrapper,
     TooltipEnabledDataPoint,
@@ -159,14 +158,17 @@ export class TableHeatMap implements IVisual {
 
     private static ConstGridSizeWidthLimit: number = 80;
     private static ConstShiftLabelFromGrid: number = -6;
-    private static ConstGridHeightWidthRaito: number = 0.5;
-    private static ConstGridMinHeight: number = 16;
-    private static ConstGridMinWidth: number = 36;
-    private static ConstGridLegendWidthRaito: number = 0.666;
+    private static ConstGridHeightWidthRatio: number = 0.5;
+    private static ConstGridMinHeight: number = 0;
+    private static ConstGridMinWidth: number = 0;
+    private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
 
+    private static LegendTextFontSize = 12;
+    private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
+
     private static CellMaxHeightLimit: number = 60;
-    private static CellMaxWidthFactorLimit: number = 3;
+    private static CellMaxWidthFactorLimit: number = 5;
 
     public static BucketCountMaxLimit: number = 18;
     public static BucketCountMinLimit: number = 1;
@@ -209,7 +211,7 @@ export class TableHeatMap implements IVisual {
 
         const categoryValueFormatter: IValueFormatter = valueFormatter.create({
             format: valueFormatter.getFormatStringByColumn(dataView.categorical.categories[0].source),
-            value: dataView.categorical.categories[0].values[0],
+            value: dataView.categorical.categories[0].values[0]
         });
 
         dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
@@ -262,6 +264,7 @@ export class TableHeatMap implements IVisual {
         this.div = d3Select(element)
             .append(TableHeatMap.HtmlObjDiv)
             .classed(TableHeatMap.ClsNameDivTableHeatMap, true);
+
         this.svg = this.div
             .append(TableHeatMap.HtmlObjSvg)
             .classed(TableHeatMap.ClsNameSvgTableHeatMap, true);
@@ -295,8 +298,8 @@ export class TableHeatMap implements IVisual {
             this.div.attr("width", PixelConverter.toString(options.viewport.width + this.margin.left));
             this.div.attr("height", PixelConverter.toString(options.viewport.height + this.margin.left));
 
-            //this.svg.attr("width", options.viewport.width);
-            //this.svg.attr("height", options.viewport.height);
+            this.svg.attr("width", options.viewport.width);
+            this.svg.attr("height", options.viewport.height);
 
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
 
@@ -317,16 +320,6 @@ export class TableHeatMap implements IVisual {
             text: maxLengthText.trim(),
             fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
         }) + TableHeatMap.YAxisAdditinalMargin;
-    }
-
-
-    private getXAxisWidth(chartData: TableHeatMapChartData): number {
-        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryX, "length") || "";
-        return textMeasurementService.measureSvgTextWidth({
-            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
-            text: maxLengthText.toString().trim(),
-            fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
-        }) + 5;
     }
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
@@ -378,6 +371,45 @@ export class TableHeatMap implements IVisual {
         return settingsModel;
     }
 
+    private adjustGridSizeHeight(gridSizeHeight: number, 
+        textRectHeight: number, 
+        showLabels: boolean): number {
+
+        if (gridSizeHeight < textRectHeight && showLabels) {
+            gridSizeHeight = textRectHeight;
+        }
+
+        if (gridSizeHeight > TableHeatMap.CellMaxHeightLimit) {
+            gridSizeHeight = TableHeatMap.CellMaxHeightLimit;
+        }
+
+        if (gridSizeHeight < TableHeatMap.ConstGridMinHeight) {
+            gridSizeHeight = TableHeatMap.ConstGridMinHeight;
+        }
+
+        return gridSizeHeight;
+    }
+
+    private adjustGridSizeWidth(gridSizeWidth: number, 
+        gridSizeHeight: number, 
+        textRectWidth: number, 
+        showLabels: boolean): number {
+        
+        if (gridSizeWidth < textRectWidth && showLabels) {
+            gridSizeWidth = textRectWidth;
+        }
+
+        if (gridSizeWidth > gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit) {
+            gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
+        }
+
+        if (gridSizeWidth < TableHeatMap.ConstGridMinWidth) {
+            gridSizeWidth = TableHeatMap.ConstGridMinWidth;
+        }
+
+        return gridSizeWidth;
+    }
+
     // eslint-disable-next-line max-lines-per-function
     private updateInternal(options: VisualUpdateOptions, settingsModel: SettingsModel): void {
         const dataView: DataView = this.dataView = options.dataViews[0];
@@ -422,7 +454,6 @@ export class TableHeatMap implements IVisual {
             let xAxisHeight: number = this.getXAxisHeight(chartData);
             let yAxisWidth: number = this.getYAxisWidth(chartData);
             const yAxisHeight: number = this.getYAxisHeight(chartData);
-            const xAxisWidth: number = this.getXAxisWidth(chartData);
 
             if (!settingsModel.yAxisLabels.show.value) {
                 yAxisWidth = 0;
@@ -447,51 +478,36 @@ export class TableHeatMap implements IVisual {
             
             const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
-            let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
             let gridSizeHeight: number = Math.floor((this.viewport.height - yAxisHeight) / (chartData.categoryY.length));
-            let prevHeight: number = gridSizeWidth * TableHeatMap.ConstGridHeightWidthRaito;
-
-            let ax = Math.floor((this.viewport.width - xAxisWidth) / (chartData.categoryX.length));
-
-            if (gridSizeWidth < textRect.width && settingsModel.labels.show.value) {
-                gridSizeWidth = textRect.width;
-            }
-            if (gridSizeHeight < textRect.height && settingsModel.labels.show.value) {
-                gridSizeHeight = textRect.height;
-            }
-            if (gridSizeHeight > TableHeatMap.CellMaxHeightLimit) {
-                gridSizeHeight = TableHeatMap.CellMaxHeightLimit;
-            }
-            if (gridSizeWidth > gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit) {
-                gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
-            }
-
-            if (gridSizeHeight < TableHeatMap.ConstGridMinHeight) {
-                gridSizeHeight = TableHeatMap.ConstGridMinHeight;
-            }
-            if (gridSizeWidth < TableHeatMap.ConstGridMinWidth) {
-                gridSizeWidth = TableHeatMap.ConstGridMinWidth;
-            }
+            let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
+            
+            gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight, textRect.height, settingsModel.labels.show.value);
+            gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight, textRect.width, settingsModel.labels.show.value);
 
             const xOffset: number = this.margin.left + yAxisWidth; // add width of y labels width
             const yOffset: number = this.margin.top + xAxisHeight; // todo add height of x category labels height
 
-            const TableHeatMapCellRaito: number = 2 / 3;
-            const legendElementWidth: number = (this.viewport.width * 0.95 - xOffset) / numBuckets;
+            let legendElementWidth: number = (this.viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset) / numBuckets;
+            if (legendElementWidth < 0) legendElementWidth = 0;
+
             const legendElementHeight: number = gridSizeHeight;
 
-            let legendOffsetCellsY2: number = this.margin.top
+            let legendOffsetCellsY: number = this.margin.top
                 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
                 + xAxisHeight;
             
-            let legendOffsetTextY2: number = this.margin.top
+            let legendOffsetTextY: number = this.margin.top
                 - gridSizeHeight / 2
                 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
                 + legendElementHeight * 2
                 + xAxisHeight;
 
-            if (legendOffsetTextY2 + gridSizeHeight > this.viewport.height) {
-                gridSizeHeight = gridSizeHeight - Math.floor((legendOffsetTextY2 + gridSizeHeight - this.viewport.height) / chartData.categoryY.length);                
+            const actualHeight = legendOffsetTextY + gridSizeHeight;
+
+            if (actualHeight > this.viewport.height) {
+                gridSizeHeight =  gridSizeHeight - Math.floor((actualHeight - this.viewport.height) / chartData.categoryY.length);
+                gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight, textRect.height, settingsModel.labels.show.value);
+                gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight, textRect.width, settingsModel.labels.show.value);
             }
 
             if (settingsModel.yAxisLabels.show.value) {
@@ -550,11 +566,7 @@ export class TableHeatMap implements IVisual {
                         return chartData.categoryValueFormatter.format(d);
                     })
                     .attr(TableHeatMap.AttrX, function (d: string, i: number) {
-                        //return i * gridSizeWidth - (gridSizeWidth / 2) + xOffset - xAxisHeight / 3;
-
                         return i * gridSizeWidth + xOffset;
-                        // const off = i * gridSizeWidth;
-                        // return off;
                     })
                     .attr(TableHeatMap.AttrY, xAxisHeight / 2)
                     .attr(TableHeatMap.AttrDY, TableHeatMap.Const0em)
@@ -563,7 +575,7 @@ export class TableHeatMap implements IVisual {
                     .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
                     .style("fill", settingsModel.xAxisLabels.fill.value.value)
                     .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
-                    .attr(TableHeatMap.AttrTransform, translate(prevHeight, TableHeatMap.ConstShiftLabelFromGrid));
+                    .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid));
 
                 this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
             }
@@ -593,16 +605,7 @@ export class TableHeatMap implements IVisual {
                 
             if (chartData.categoryX.length * gridSizeWidth + xOffset > options.viewport.width) {
                 this.svg.attr("width", chartData.categoryX.length * gridSizeWidth);
-                //this.div.attr("width", options.viewport.width)
-                //this.svg.attr("width", options.viewport.width);
-                //this.mainGraphics.attr("width", options.viewport.width);
             }
-
-            // if (chartData.categoryY.length * gridSizeHeight + yOffset > options.viewport.height) {
-            //     this.div.attr("height", options.viewport.height)
-            //     this.svg.attr("height", options.viewport.height);
-            //     this.mainGraphics.attr("height", options.viewport.height);
-            // }
 
             // add data labels
             const textHeight: number = textRect.height;
@@ -677,34 +680,18 @@ export class TableHeatMap implements IVisual {
             const legendSelectionMerged = legendSelectionData.merge(legendSelection);
             legendSelectionMerged.classed(TableHeatMap.ClsLegend, true);
 
-            legendOffsetCellsY2 = this.margin.top
+            legendOffsetCellsY = this.margin.top
                 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
                 + xAxisHeight;
 
-            const margin = this.viewport.height < 300 ? this.margin.top : -5;
-
-            legendOffsetTextY2 = margin
-                - gridSizeHeight / 2
-                + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-                + legendElementHeight * 2
-                + xAxisHeight;
-
-            // const legendOffsetCellsY: number = this.margin.top
-            //     + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-            //     + xAxisHeight;
-            
-            // const legendOffsetTextY: number = this.margin.top
-            //     - gridSizeHeight / 2
-            //     + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-            //     + legendElementHeight * 2
-            //     + xAxisHeight;
+            legendOffsetTextY = legendOffsetCellsY + legendElementHeight + xAxisHeight + 5;
 
             legendSelectionEntered
                 .append(TableHeatMap.HtmlObjRect)
                 .attr(TableHeatMap.AttrX, function (d, i) {
                     return legendElementWidth * i + xOffset;
                 })
-                .attr(TableHeatMap.AttrY, legendOffsetCellsY2)
+                .attr(TableHeatMap.AttrY, legendOffsetCellsY)
                 .attr(TableHeatMap.AttrWidth, legendElementWidth)
                 .attr(TableHeatMap.AttrHeight, legendElementHeight)
                 .style(TableHeatMap.StFill, function (d, i) {
@@ -720,35 +707,31 @@ export class TableHeatMap implements IVisual {
                 .attr(TableHeatMap.AttrX, function (d, i) {
                     return legendElementWidth * i + xOffset;
                 })
-                .attr(TableHeatMap.AttrY, legendOffsetTextY2)
+                .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .attr(TableHeatMap.AttrWidth, legendElementWidth)
                 .attr(TableHeatMap.AttrHeight, legendElementHeight)
                 .text(function (d) {
-                    let formattedValue = chartData.valueFormatter.format(d.value);
+                    const formattedValue = chartData.valueFormatter.format(d.value);
                     return formattedValue;
                 })
-                .style("font-size", 12)
-                .style("font-family", "Segoe UI")
+                .style("font-size", TableHeatMap.LegendTextFontSize)
+                .style("font-family", TableHeatMap.LegendTextFontFamily)
                 .style("fill", settingsModel.general.textColor)
                 .attr("transform", function (d, i) {
                     const textProperties = {
-                        fontSize: PixelConverter.toString(12),
+                        fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
                         text: chartData.valueFormatter.format(d.value),
-                        fontFamily: "Segoe UI"
+                        fontFamily: TableHeatMap.LegendTextFontFamily
                     }
                     
                     const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+                    const offset = 10;
+                    const angle = 65;
                     
-                    if (textWidth >= legendElementWidth - 10) {
-                        return manipulation.translateAndRotate(0, 0, legendElementWidth * i + xOffset, legendOffsetTextY2, 65);
+                    if (textWidth >= legendElementWidth - offset) {
+                        return manipulation.translateAndRotate(0, 0, legendElementWidth * i + xOffset, legendOffsetTextY, angle);
                     }
                 })
-
-
-            this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend)
-                 .call(this.wrap, gridSizeWidth);
-
-            this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend), gridSizeWidth);
 
             this.tooltipServiceWrapper.addTooltip(
                 legendSelectionEntered,
@@ -757,8 +740,8 @@ export class TableHeatMap implements IVisual {
                 }
             );
 
-            if (legendOffsetTextY2 + gridSizeHeight > options.viewport.height) {
-                this.svg.attr("height", legendOffsetTextY2 + gridSizeHeight);
+            if (legendOffsetTextY + gridSizeHeight > options.viewport.height) {
+                this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
             }
         }
     }
