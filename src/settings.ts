@@ -415,7 +415,7 @@ export class GeneralSettings extends FormattingSettingsCard {
 export class LabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
     private static MinFontSize: number = 8;
-    private static MaxFontSize: number = 32;
+    private static MaxFontSize: number = 60;
 
     public name: string = "labels";
     public displayNameKey: string = "Visual_DataPointsLabels";
@@ -462,7 +462,7 @@ export class LabelsSettings extends FormattingSettingsCard {
 export class XAxisLabelsSettings extends FormattingSettingsCard {
     private static DefaultFontSize: number = 12;
     private static MinFontSize: number = 8;
-    private static MaxFontSize: number = 32;
+    private static MaxFontSize: number = 60;
 
     public name: string = "xAxisLabels";
     public displayNameKey: string = "Visual_XAxis";
@@ -508,10 +508,10 @@ export class XAxisLabelsSettings extends FormattingSettingsCard {
 export class YAxisLabelsSettings extends FormattingSettingsCard {
     public static DefaultFontSize: number = 12;
     private static MinFontSize: number = 8;
-    private static MaxFontSize: number = 32;
+    private static MaxFontSize: number = 60;
 
     private static TextSymbolMinValue: number = 0;
-    private static TextSymbolMaxValue: number = 500;
+    private static TextSymbolMaxValue: number = 50;
 
     public name: string = "yAxisLabels";
     public displayNameKey: string = "Visual_YAxis";
