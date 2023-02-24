@@ -1,3 +1,10 @@
+## 3.2.0
+* Disabled scrolling in the visual
+* Negative values in NumUpDown components in the formatting pane are no longer allowed
+* Fixed bug when the rightmost X-axis label is cut off when the visual is resized
+* Fixed bug with X-axis labels shifting to the right
+* Legend labels rotate 65 degrees on resize to avoid collisions
+
 ## 3.1.2
 * Removed redundant packages
 
