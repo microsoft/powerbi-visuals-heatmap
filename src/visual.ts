@@ -129,6 +129,7 @@ export class TableHeatMap implements IVisual {
     private static ClsBordered: string = "bordered";
     private static ClsNameSvgTableHeatMap: string = "svgTableHeatMap";
     private static ClsNameDivTableHeatMap: string = "divTableHeatMap";
+    private static LegendLabel: string = "legendLabel";
 
     private static AttrTransform: string = "transform";
     private static AttrX: string = "x";
@@ -701,37 +702,50 @@ export class TableHeatMap implements IVisual {
                 .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
                 .classed(TableHeatMap.ClsBordered, true);
 
+            let shouldRotate = false;
+            const margin = 10;
+
             legendSelectionEntered
                 .append(TableHeatMap.HtmlObjText)
                 .classed(TableHeatMap.ClsMono, true)
+                .classed(TableHeatMap.LegendLabel, true)
                 .attr(TableHeatMap.AttrX, function (d, i) {
-                    return legendElementWidth * i + xOffset;
+                    return legendElementWidth * i + xOffset - margin;
                 })
                 .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .attr(TableHeatMap.AttrWidth, legendElementWidth)
                 .attr(TableHeatMap.AttrHeight, legendElementHeight)
                 .text(function (d) {
                     const formattedValue = chartData.valueFormatter.format(d.value);
+
+                    const textProperties = {
+                        fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
+                        text: formattedValue,
+                        fontFamily: TableHeatMap.LegendTextFontFamily
+                    };
+                    
+                    const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+
+                    if (textWidth >= legendElementWidth - margin) {
+                        shouldRotate = true;
+                    }
+
                     return formattedValue;
                 })
                 .style("font-size", TableHeatMap.LegendTextFontSize)
                 .style("font-family", TableHeatMap.LegendTextFontFamily)
                 .style("fill", settingsModel.general.textColor)
                 .attr("transform", function (d, i) {
-                    const textProperties = {
-                        fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
-                        text: chartData.valueFormatter.format(d.value),
-                        fontFamily: TableHeatMap.LegendTextFontFamily
-                    }
+                    let rotationAngle = 65;
                     
-                    const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
-                    const offset = 10;
-                    const angle = 65;
-                    
-                    if (textWidth >= legendElementWidth - offset) {
-                        return manipulation.translateAndRotate(0, 0, legendElementWidth * i + xOffset, legendOffsetTextY, angle);
+                    if (options.viewport.width < 400 && shouldRotate) {
+                        rotationAngle = 90;
                     }
-                })
+
+                    if (shouldRotate) {
+                        return manipulation.translateAndRotate(0, 0, legendElementWidth * i + xOffset, legendOffsetTextY, rotationAngle);
+                    }
+                });
 
             this.tooltipServiceWrapper.addTooltip(
                 legendSelectionEntered,
