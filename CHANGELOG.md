@@ -1,3 +1,6 @@
+## 3.3.0
+* Made the visual resize more predictably
+
 ## 3.2.0
 * Disabled scrolling in the visual
 * Negative values in NumUpDown components in the formatting pane are no longer allowed
