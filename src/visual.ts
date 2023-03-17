@@ -45,15 +45,10 @@ import { min as d3Min, max as d3Max } from "d3-array";
 
 import "d3-transition";
 
-type Selection<T> = ID3Selection<any, T, any, any>;
-type Quantile<T> = ID3ScaleQuantile<T>;
-
 import maxBy from "lodash.maxby";
 
 import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
 
-import IColorPalette = powerbi.extensibility.IColorPalette;
-import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IViewport = powerbi.IViewport;
 import DataView = powerbi.DataView;
@@ -83,25 +78,11 @@ import {
     createTooltipServiceWrapper
 } from "powerbi-visuals-utils-tooltiputils";
 
-type D3Element =
-    Selection<any>;
+type Selection<T> = ID3Selection<any, T, any, any>;
+type Quantile<T> = ID3ScaleQuantile<T>;
+type D3Element = Selection<any>;
 
 export class TableHeatMap implements IVisual {
-    private static Properties: any = {
-        dataPoint: {
-            fill: <DataViewObjectPropertyIdentifier>{
-                objectName: "dataPoint",
-                propertyName: "fill"
-            }
-        },
-        labels: {
-            labelPrecision: <DataViewObjectPropertyIdentifier>{
-                objectName: "labels",
-                propertyName: "labelPrecision"
-            }
-        }
-    };
-
     private host: IVisualHost;
     private colorHelper: ColorHelper;
     private localizationManager: ILocalizationManager;
@@ -110,7 +91,6 @@ export class TableHeatMap implements IVisual {
     private svg: Selection<any>;
     private div: Selection<any>;
     private mainGraphics: Selection<any>;
-    private colors: IColorPalette;
     private dataView: DataView;
     private viewport: IViewport;
     private margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
@@ -160,7 +140,7 @@ export class TableHeatMap implements IVisual {
     private static ConstGridSizeWidthLimit: number = 80;
     private static ConstShiftLabelFromGrid: number = -6;
     private static ConstGridHeightWidthRatio: number = 0.5;
-    private static ConstGridMinHeight: number = 0;
+    private static ConstGridMinHeight: number = 5;
     private static ConstGridMinWidth: number = 0;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
@@ -168,8 +148,8 @@ export class TableHeatMap implements IVisual {
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
 
-    private static CellMaxHeightLimit: number = 60;
-    private static CellMaxWidthFactorLimit: number = 5;
+    public static CellMaxHeightLimit: number = 300;
+    private static CellMaxWidthFactorLimit: number = 15;
 
     public static BucketCountMaxLimit: number = 18;
     public static BucketCountMinLimit: number = 1;
@@ -177,8 +157,6 @@ export class TableHeatMap implements IVisual {
     public static ColorbrewerMaxBucketCount: number = 14;
 
     public static DefaultColorbrewer: string = "Reds";
-
-    private element: HTMLElement;
 
     private selectionManager: ISelectionManager;
 
@@ -260,7 +238,6 @@ export class TableHeatMap implements IVisual {
         element
     }: VisualConstructorOptions) {
         this.host = host;
-        this.element = element;
 
         this.div = d3Select(element)
             .append(TableHeatMap.HtmlObjDiv)
@@ -479,37 +456,30 @@ export class TableHeatMap implements IVisual {
             
             const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
-            let gridSizeHeight: number = Math.floor((this.viewport.height - yAxisHeight) / (chartData.categoryY.length));
+            const xOffset: number = this.margin.left + yAxisWidth;
+            const yOffset: number = this.margin.top + xAxisHeight;
+
+            const bottomMargin = 20;
+            const additionalSpaceForColorbrewerCells = 2;
+
+            let gridSizeHeight: number = Math.floor((this.viewport.height - this.margin.top - xAxisHeight - bottomMargin) / (chartData.categoryY.length + additionalSpaceForColorbrewerCells));
             let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
             
             gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight, textRect.height, settingsModel.labels.show.value);
             gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight, textRect.width, settingsModel.labels.show.value);
 
-            const xOffset: number = this.margin.left + yAxisWidth; // add width of y labels width
-            const yOffset: number = this.margin.top + xAxisHeight; // todo add height of x category labels height
-
-            let legendElementWidth: number = (this.viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset) / numBuckets;
-            if (legendElementWidth < 0) legendElementWidth = 0;
-
             const legendElementHeight: number = gridSizeHeight;
+            let legendElementWidth: number = (this.viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset) / numBuckets;
 
-            let legendOffsetCellsY: number = this.margin.top
+            if (legendElementWidth < 0) {
+                legendElementWidth = 0;
+            }
+
+            const legendOffsetCellsY: number = this.margin.top
                 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
                 + xAxisHeight;
             
-            let legendOffsetTextY: number = this.margin.top
-                - gridSizeHeight / 2
-                + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-                + legendElementHeight * 2
-                + xAxisHeight;
-
-            const actualHeight = legendOffsetTextY + gridSizeHeight;
-
-            if (actualHeight > this.viewport.height) {
-                gridSizeHeight =  gridSizeHeight - Math.floor((actualHeight - this.viewport.height) / chartData.categoryY.length);
-                gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight, textRect.height, settingsModel.labels.show.value);
-                gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight, textRect.width, settingsModel.labels.show.value);
-            }
+            const legendOffsetTextY: number = legendOffsetCellsY + legendElementHeight + this.margin.bottom + xAxisHeight;
 
             if (settingsModel.yAxisLabels.show.value) {
                 const categoryYElements:  ID3Selection<ID3BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
@@ -569,7 +539,7 @@ export class TableHeatMap implements IVisual {
                     .attr(TableHeatMap.AttrX, function (d: string, i: number) {
                         return i * gridSizeWidth + xOffset;
                     })
-                    .attr(TableHeatMap.AttrY, xAxisHeight / 2)
+                    .attr(TableHeatMap.AttrY, this.margin.top)
                     .attr(TableHeatMap.AttrDY, TableHeatMap.Const0em)
                     .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
                     .style("font-size", settingsModel.xAxisLabels.fontSize.value)
@@ -603,10 +573,6 @@ export class TableHeatMap implements IVisual {
                 .attr(TableHeatMap.AttrHeight, gridSizeHeight)
                 .style(TableHeatMap.StFill, colors[0])
                 .style("stroke", settingsModel.general.stroke);
-                
-            if (chartData.categoryX.length * gridSizeWidth + xOffset > options.viewport.width) {
-                this.svg.attr("width", chartData.categoryX.length * gridSizeWidth);
-            }
 
             // add data labels
             const textHeight: number = textRect.height;
@@ -680,12 +646,6 @@ export class TableHeatMap implements IVisual {
 
             const legendSelectionMerged = legendSelectionData.merge(legendSelection);
             legendSelectionMerged.classed(TableHeatMap.ClsLegend, true);
-
-            legendOffsetCellsY = this.margin.top
-                + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-                + xAxisHeight;
-
-            legendOffsetTextY = legendOffsetCellsY + legendElementHeight + xAxisHeight + 5;
 
             legendSelectionEntered
                 .append(TableHeatMap.HtmlObjRect)

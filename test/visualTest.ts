@@ -39,6 +39,7 @@ import {
 
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 import capabilities from '../capabilities.json';
+import { TableHeatMap } from "../src/visual";
 
 const DefaultTimeout: number = 300;
 
@@ -414,11 +415,11 @@ describe("TableHeatmap", () => {
             }, DefaultTimeout);
         });
 
-        it("height must be limited by 60px", (done) => {
+        it("height must be limited", (done) => {
             dataView = defaultDataViewBuilder.getDataViewWithOneCategory();
             visualBuilder.updateRenderTimeout(dataView, () => {
-                const CellMaxHeightLimit: number = 61;
-                expect(+document.querySelector(".categoryX")!.getAttribute("height")!).toBeLessThan(CellMaxHeightLimit);
+                const cellMaxHeightLimit: number = TableHeatMap.CellMaxHeightLimit;
+                expect(+document.querySelector(".categoryX")!.getAttribute("height")!).toBeLessThanOrEqual(cellMaxHeightLimit);
                 done();
             }, DefaultTimeout);
         });
