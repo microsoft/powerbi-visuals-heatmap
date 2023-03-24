@@ -349,13 +349,7 @@ export class TableHeatMap implements IVisual {
         return settingsModel;
     }
 
-    private adjustGridSizeHeight(gridSizeHeight: number, 
-        textRectHeight: number, 
-        showLabels: boolean): number {
-
-        if (gridSizeHeight < textRectHeight && showLabels) {
-            gridSizeHeight = textRectHeight;
-        }
+    private adjustGridSizeHeight(gridSizeHeight: number): number {
 
         if (gridSizeHeight > TableHeatMap.CellMaxHeightLimit) {
             gridSizeHeight = TableHeatMap.CellMaxHeightLimit;
@@ -368,14 +362,7 @@ export class TableHeatMap implements IVisual {
         return gridSizeHeight;
     }
 
-    private adjustGridSizeWidth(gridSizeWidth: number, 
-        gridSizeHeight: number, 
-        textRectWidth: number, 
-        showLabels: boolean): number {
-        
-        if (gridSizeWidth < textRectWidth && showLabels) {
-            gridSizeWidth = textRectWidth;
-        }
+    private adjustGridSizeWidth(gridSizeWidth: number, gridSizeHeight: number): number {
 
         if (gridSizeWidth > gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit) {
             gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
@@ -429,6 +416,9 @@ export class TableHeatMap implements IVisual {
                 .domain([minDataValue, maxDataValue])
                 .range(colors);
 
+            settingsModel.general.gradientStart.value.value = colors[0];
+            settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
+
             let xAxisHeight: number = this.getXAxisHeight(chartData);
             let yAxisWidth: number = this.getYAxisWidth(chartData);
             const yAxisHeight: number = this.getYAxisHeight(chartData);
@@ -465,8 +455,8 @@ export class TableHeatMap implements IVisual {
             let gridSizeHeight: number = Math.floor((this.viewport.height - this.margin.top - xAxisHeight - bottomMargin) / (chartData.categoryY.length + additionalSpaceForColorbrewerCells));
             let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
             
-            gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight, textRect.height, settingsModel.labels.show.value);
-            gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight, textRect.width, settingsModel.labels.show.value);
+            gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight);
+            gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight);
 
             const legendElementHeight: number = gridSizeHeight;
             let legendElementWidth: number = (this.viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset) / numBuckets;
@@ -479,7 +469,7 @@ export class TableHeatMap implements IVisual {
                 + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
                 + xAxisHeight;
             
-            const legendOffsetTextY: number = legendOffsetCellsY + legendElementHeight + this.margin.bottom + xAxisHeight;
+            const legendOffsetTextY: number = legendOffsetCellsY + legendElementHeight + this.margin.bottom;
 
             if (settingsModel.yAxisLabels.show.value) {
                 const categoryYElements:  ID3Selection<ID3BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
@@ -540,7 +530,7 @@ export class TableHeatMap implements IVisual {
                         return i * gridSizeWidth + xOffset;
                     })
                     .attr(TableHeatMap.AttrY, this.margin.top)
-                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const0em)
+                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
                     .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
                     .style("font-size", settingsModel.xAxisLabels.fontSize.value)
                     .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
@@ -575,10 +565,9 @@ export class TableHeatMap implements IVisual {
                 .style("stroke", settingsModel.general.stroke);
 
             // add data labels
-            const textHeight: number = textRect.height;
             const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
-            if (settingsModel.labels.show.value && textHeight <= gridSizeHeight) {
+            if (settingsModel.labels.show.value) {
                 const heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(chartData.dataPoints);
                 heatMapDataLables.exit().remove();
 
@@ -591,7 +580,7 @@ export class TableHeatMap implements IVisual {
                         return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
                     })
                     .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                        return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + textHeight / 2.6;
+                        return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + gridSizeHeight / 5;
                     })
                     .style("text-anchor", TableHeatMap.ConstMiddle)
                     .style("font-size", settingsModel.labels.fontSize.value)
@@ -601,6 +590,9 @@ export class TableHeatMap implements IVisual {
                         let textValue: string = valueFormatter.format(dataPoint.value);
                         textProperties.text = textValue;
                         textValue = textMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
+
+                        if (textRect.height >= gridSizeHeight) return "..."
+
                         return dataPoint.value === 0 ? 0 : textValue;
                     });
             }
