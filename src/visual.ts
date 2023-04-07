@@ -301,7 +301,9 @@ export class TableHeatMap implements IVisual {
     }
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
-        const maxLengthText: powerbi.PrimitiveValue = TableHeatMap.getMaxTextLengthForXAxis(chartData.categoryX);
+        const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
+        const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
+
         return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settingsModel.xAxisLabels.fontSize.value),
             text: maxLengthText.toString().trim(),
@@ -316,29 +318,6 @@ export class TableHeatMap implements IVisual {
             text: maxLengthText.toString().trim(),
             fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
         });
-    }
-
-    public static mapPrimitiveValuesToStrings(category: powerbi.PrimitiveValue[]): string[] {
-        const mappedCategory = category.map(value => {
-            if (typeof(value) === "number" || typeof(value) === "boolean" || value instanceof Date) {
-                return value.toString();
-            }
-            else if (typeof(value) === "string") {
-                return value;
-            }
-            else {
-                return "";
-            }
-        });
-
-        return mappedCategory;
-    }
-
-    public static getMaxTextLengthForXAxis(categoryX: powerbi.PrimitiveValue[]): string {
-        const mappedCategory = this.mapPrimitiveValuesToStrings(categoryX);
-        const maxLengthText = maxBy(mappedCategory, "length") || "";
-
-        return maxLengthText;
     }
 
     private handleContextMenu = () => {
