@@ -1,3 +1,6 @@
+## 3.5.0
+* Fixed bug when X axis labels height was calculated incorrectly if labels were numeric
+
 ## 3.4.0
 * Fixed the issue when Gradient Start and End colors didn't change after changing Colorbrewer
 * Fixed the bug when X-axis labels cut off at the top when increasing text size

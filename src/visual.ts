@@ -301,7 +301,9 @@ export class TableHeatMap implements IVisual {
     }
 
     private getXAxisHeight(chartData: TableHeatMapChartData): number {
-        const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryX, "length") || "";
+        const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
+        const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
+
         return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settingsModel.xAxisLabels.fontSize.value),
             text: maxLengthText.toString().trim(),
