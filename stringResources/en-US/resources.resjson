@@ -19,7 +19,9 @@
 	"Visual_ForceDisplay": "Force display",
 	"Visual_XAxis": "X axis data labels",
 	"Visual_YAxis": "Y axis data labels",
-	"Visual_MaxTextSymbols": "Max text symbold",
+	"Visual_MaxTextSymbols": "Max text symbols",
 	"Visual_FillNullValCell": "Fill by color cells with null value",
-	"Visual_Description_DisplayAllLabelsAnyway": "Display all labels anyway"
+	"Visual_Description_DisplayAllLabelsAnyway": "Display all labels anyway",
+    "Visual_FontControl": "Font",
+    "Visual_Margin": "Margins"
 }

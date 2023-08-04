@@ -379,31 +379,31 @@ export class GeneralSettings extends FormattingSettingsCard {
     public enableColorbrewer = new formattingSettings.ToggleSwitch({
         name: "enableColorbrewer",
         displayNameKey: "Visual_EnableColorbrewer",
-        value: true, 
+        value: true,
     });
 
     public colorbrewer = new formattingSettings.AutoDropdown({
         name: "colorbrewer",
         displayNameKey: "Visual_General_Colorbrewer",
-        value: "Reds", 
+        value: "Reds",
     });
 
     public gradientStart = new formattingSettings.ColorPicker({
         name: "gradientStart",
         displayNameKey: "Visual_GradientStart",
-        value: { value: "#FFFFFF" }, 
+        value: { value: "#FFFFFF" },
     });
 
     public gradientEnd = new formattingSettings.ColorPicker({
         name: "gradientEnd",
         displayNameKey: "Visual_GradientEnd",
-        value: { value: "#000000" }, 
+        value: { value: "#000000" },
     });
 
     public fillNullValuesCells = new formattingSettings.ToggleSwitch({
         name: "fillNullValuesCells",
         displayNameKey: "Visual_FillNullValCell",
-        value: true, 
+        value: true,
     });
 
     public stroke: string = "#E6E6E6";
@@ -424,38 +424,56 @@ export class LabelsSettings extends FormattingSettingsCard {
         name: "show",
         displayNameKey: "Visual_Show",
         value: false,
-        topLevelToggle: true, 
+        topLevelToggle: true,
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
         displayNameKey: "Visual_LabelsFill",
-        value: { value: "#aaa" }, 
+        value: { value: "#aaa" },
     });
 
-    public fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize",
-        displayNameKey: "Visual_TextSize",
-        value: LabelsSettings.DefaultFontSize,
-        options: {
-            minValue: {
-                type: powerbi.visuals.ValidatorType.Min,
-                value: LabelsSettings.MinFontSize
-            },
-            maxValue: {
-                type: powerbi.visuals.ValidatorType.Max,
-                value: LabelsSettings.MaxFontSize
-            },
-        } 
+    public fontControl = new formattingSettings.FontControl({
+        name: "fontControl",
+        displayNameKey: "Visual_FontControl",
+        fontFamily: new formattingSettings.FontPicker({
+            name: "fontFamily",
+            displayNameKey: "Visual_FontFamily",
+            value: "Arial",
+        }),
+        fontSize: new formattingSettings.NumUpDown({
+            name: "fontSize",
+            displayNameKey: "Visual_TextSize",
+            value: LabelsSettings.DefaultFontSize,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: LabelsSettings.MinFontSize
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: LabelsSettings.MaxFontSize
+                },
+            }
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: "bold",
+            displayNameKey: "Visual_Bold",
+            value: false,
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: "italic",
+            displayNameKey: "Visual_Italic",
+            value: false,
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: "underline",
+            displayNameKey: "Visual_Underline",
+            value: false,
+        }),
     });
 
-    public fontFamily = new formattingSettings.AutoDropdown({
-        name: "fontFamily",
-        displayNameKey: "Visual_FontFamily",
-        value: "Arial", 
-    });
-
-    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily];
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontControl];
 }
 
 
@@ -471,38 +489,72 @@ export class XAxisLabelsSettings extends FormattingSettingsCard {
         name: "show",
         displayNameKey: "Visual_Show",
         value: true,
-        topLevelToggle: true, 
+        topLevelToggle: true,
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
         displayNameKey: "Visual_LabelsFill",
-        value: { value: "#aaa" }, 
+        value: { value: "#aaa" },
     });
 
-    public fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize",
-        displayNameKey: "Visual_TextSize",
-        value: XAxisLabelsSettings.DefaultFontSize,
+    public fontControl = new formattingSettings.FontControl({
+        name: "fontControl",
+        displayNameKey: "Visual_FontControl",
+        fontFamily: new formattingSettings.FontPicker({
+            name: "fontFamily",
+            displayNameKey: "Visual_FontFamily",
+            value: "Arial",
+        }),
+        fontSize: new formattingSettings.NumUpDown({
+            name: "fontSize",
+            displayNameKey: "Visual_TextSize",
+            value: XAxisLabelsSettings.DefaultFontSize,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: XAxisLabelsSettings.MinFontSize
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: XAxisLabelsSettings.MaxFontSize
+                },
+            }
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: "bold",
+            displayNameKey: "Visual_Bold",
+            value: false,
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: "italic",
+            displayNameKey: "Visual_Italic",
+            value: false,
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: "underline",
+            displayNameKey: "Visual_Underline",
+            value: false,
+        }),
+    });
+
+    public margin = new formattingSettings.NumUpDown({
+        name: "margin",
+        displayNameKey: "Visual_Margin",
+        value: 0,
         options: {
             minValue: {
                 type: powerbi.visuals.ValidatorType.Min,
-                value: XAxisLabelsSettings.MinFontSize
+                value: 0
             },
             maxValue: {
                 type: powerbi.visuals.ValidatorType.Max,
-                value: XAxisLabelsSettings.MaxFontSize
+                value: 100
             },
-        } 
+        }
     });
 
-    public fontFamily = new formattingSettings.AutoDropdown({
-        name: "fontFamily",
-        displayNameKey: "Visual_FontFamily",
-        value: "Arial", 
-    });
-
-    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.fontFamily];
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontControl, this.margin];
 }
 
 export class YAxisLabelsSettings extends FormattingSettingsCard {
@@ -520,34 +572,74 @@ export class YAxisLabelsSettings extends FormattingSettingsCard {
         name: "show",
         displayNameKey: "Visual_Show",
         value: true,
-        topLevelToggle: true, 
+        topLevelToggle: true,
     });
 
     public fill = new formattingSettings.ColorPicker({
         name: "fill",
         displayNameKey: "Visual_LabelsFill",
-        value: { value: "#aaa" }, 
+        value: { value: "#aaa" },
     });
 
-    public fontSize = new formattingSettings.NumUpDown({
-        name: "fontSize",
-        displayNameKey: "Visual_TextSize",
-        value: YAxisLabelsSettings.DefaultFontSize,
+    public fontControl = new formattingSettings.FontControl({
+        name: "fontControl",
+        displayNameKey: "Visual_FontControl",
+        fontFamily: new formattingSettings.FontPicker({
+            name: "fontFamily",
+            displayNameKey: "Visual_FontFamily",
+            value: "Arial",
+        }),
+        fontSize: new formattingSettings.NumUpDown({
+            name: "fontSize",
+            displayNameKey: "Visual_TextSize",
+            value: YAxisLabelsSettings.DefaultFontSize,
+            options: {
+                minValue: {
+                    type: powerbi.visuals.ValidatorType.Min,
+                    value: YAxisLabelsSettings.MinFontSize
+                },
+                maxValue: {
+                    type: powerbi.visuals.ValidatorType.Max,
+                    value: YAxisLabelsSettings.MaxFontSize
+                },
+            }
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: "bold",
+            displayNameKey: "Visual_Bold",
+            value: false,
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: "italic",
+            displayNameKey: "Visual_Italic",
+            value: false,
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: "underline",
+            displayNameKey: "Visual_Underline",
+            value: false,
+        }),
+    });
+
+    public margin = new formattingSettings.NumUpDown({
+        name: "margin",
+        displayNameKey: "Visual_Margin",
+        value: 5,
         options: {
             minValue: {
                 type: powerbi.visuals.ValidatorType.Min,
-                value: YAxisLabelsSettings.MinFontSize
+                value: 0
             },
             maxValue: {
                 type: powerbi.visuals.ValidatorType.Max,
-                value: YAxisLabelsSettings.MaxFontSize
+                value: 100
             },
-        } 
+        }
     });
 
     public maxTextSymbol = new formattingSettings.NumUpDown({
         name: "maxTextSymbol",
-        displayNameKey:  "Visual_MaxTextSymbols",
+        displayNameKey: "Visual_MaxTextSymbols",
         value: 25,
         options: {
             minValue: {
@@ -561,13 +653,7 @@ export class YAxisLabelsSettings extends FormattingSettingsCard {
         }
     });
 
-    public fontFamily = new formattingSettings.AutoDropdown({
-        name: "fontFamily",
-        displayNameKey: "Visual_FontFamily",
-        value: "Arial", 
-    });
-
-    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontSize, this.maxTextSymbol, this.fontFamily];
+    public slices: FormattingSettingsSlice[] = [this.show, this.fill, this.fontControl, this.margin, this.maxTextSymbol];
 }
 
 export class SettingsModel extends FormattingSettingsModel {
@@ -584,7 +670,7 @@ export class SettingsModel extends FormattingSettingsModel {
     public CurrentBucketCountMaxLimit: number = TableHeatMap.BucketCountMaxLimit;
 
     private getBucketCountFromDataView = (dataView: DataView): number => {
-        return Number(dataView.metadata.objects?.general?.buckets ?? TableHeatMap.DefaultBucketCount) 
+        return Number(dataView.metadata.objects?.general?.buckets ?? TableHeatMap.DefaultBucketCount)
             || TableHeatMap.DefaultBucketCount
     }
 
@@ -614,7 +700,7 @@ export class SettingsModel extends FormattingSettingsModel {
                     type: powerbi.visuals.ValidatorType.Max,
                     value: TableHeatMap.BucketCountMaxLimit
                 },
-            } 
+            }
         });
 
         this.general.slices.push(bucketsSlice);
@@ -626,7 +712,7 @@ export class SettingsModel extends FormattingSettingsModel {
         }
 
         const colorbrewerArray: IColorArray = colorbrewer[this.general.colorbrewer.value];
-        
+
         let minBucketNum: number = 0;
         let maxBucketNum: number = 0;
 
@@ -667,15 +753,15 @@ export class SettingsModel extends FormattingSettingsModel {
                     type: powerbi.visuals.ValidatorType.Max,
                     value: maxBucketNum
                 },
-            } 
+            }
         });
 
         this.general.slices.push(bucketsSlice);
     }
 
     public initBuckets(dataView: DataView): void {
-        this.general.enableColorbrewer.value 
-            ? this.initBucketsWithColorbrewer(dataView) 
+        this.general.enableColorbrewer.value
+            ? this.initBucketsWithColorbrewer(dataView)
             : this.initBucketsWithoutColorbrewer(dataView);
     }
 }
