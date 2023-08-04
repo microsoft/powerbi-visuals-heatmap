@@ -1,3 +1,6 @@
+## 3.7.0
+* Added Keyboard support and focus on elements.
+
 ## 3.5.0
 * Fixed bug when X axis labels height was calculated incorrectly if labels were numeric
 
