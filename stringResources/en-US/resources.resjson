@@ -22,6 +22,6 @@
 	"Visual_MaxTextSymbols": "Max text symbols",
 	"Visual_FillNullValCell": "Fill by color cells with null value",
 	"Visual_Description_DisplayAllLabelsAnyway": "Display all labels anyway",
-    "Visual_FontControl": "Font",
-    "Visual_Margin": "Margins"
+	"Visual_FontControl": "Font",
+	"Visual_Margin": "Margins"
 }
