@@ -40,9 +40,155 @@ import {
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 import capabilities from '../capabilities.json';
 import { TableHeatMap } from "../src/visual";
-
+import powerbiVisualsApi from "powerbi-visuals-api";
+import VisualObjectInstance = powerbiVisualsApi.VisualObjectInstance;
+import { d3Click } from "powerbi-visuals-utils-testutils";
 const DefaultTimeout: number = 300;
 
+describe("Aria-Selected_Attributes_and_such", () =>{
+    let visualBuilder: TableHeatMapBuilder;
+    let dataView: DataView;
+    let defaultDataViewBuilder: TableHeatMapData;
+    
+    beforeEach(() => {
+        visualBuilder = new TableHeatMapBuilder(1000, 1000);
+        defaultDataViewBuilder = new TableHeatMapData();
+        dataView = defaultDataViewBuilder.getDataView();
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+    
+    it("should have aria-selected, tabindex attributes correctly set", (done) => {
+        visualBuilder.updateRenderTimeout(dataView, () => {
+            if(visualBuilder.rects){
+            visualBuilder.rects.forEach((el: Element) => {
+                expect(el.getAttribute("aria-selected")).toBe("false");
+                expect(el.getAttribute("tabindex")).toBe("0");
+            });
+        }
+            done();
+        }, DefaultTimeout);
+    });
+    it("should have role=listbox attribute correctly set", (done) => {
+        visualBuilder.updateRenderTimeout(dataView, () => {
+          let svgElement = visualBuilder.mainElement?.querySelector("svg");
+      
+          expect(svgElement).toBeTruthy(); // Check if SVG element exists.
+          expect(svgElement?.getAttribute("role")).toBe("listbox"); // Check the "role" attribute.
+      
+          done();
+        }, DefaultTimeout);
+      });
+
+    it("aria attributs work when clicked", (done: DoneFn) => {
+        visualBuilder.updateRenderTimeout(dataView, async () => {
+        if(visualBuilder.rects){
+            d3Click(visualBuilder.rects[0], 5, 5);
+            await timeout(DefaultTimeout)
+            expect(visualBuilder.rects[0].getAttribute("aria-selected")).toBe("true");
+            for (const rect of visualBuilder.rects) {
+                if (rect !== visualBuilder.rects[0]) {
+                    expect(rect.getAttribute("aria-selected")).toBe("false");
+                }
+            }
+        }
+        done();
+        });
+    });
+    it("enter toggles the correct rects", (done: DoneFn) => {
+        const enterEvent = new KeyboardEvent("keypress", { code: "Enter", bubbles: true });
+        visualBuilder.updateRenderTimeout(
+            dataView,
+                async () => {
+                    if(visualBuilder.rects){
+                    visualBuilder.rects[0].dispatchEvent(enterEvent);
+                    await timeout(DefaultTimeout);
+                    expect(visualBuilder.rects[0].getAttribute("aria-selected")).toBe("true");
+                    for (const rects of visualBuilder.rects) {
+                        if (rects !== visualBuilder.rects[0]) {
+                            expect(rects.getAttribute("aria-selected")).toBe("false");
+                        }
+                    }
+
+                    visualBuilder.rects[0].dispatchEvent(enterEvent);
+                    await timeout(DefaultTimeout);
+                    for (const rects of visualBuilder.rects) {
+                        expect(rects.getAttribute("aria-selected")).toBe("false");
+                    }
+
+                    done();
+                }
+                },
+            2,
+            );
+    });
+    it("space toggles the correct rects", (done: DoneFn) => {
+        const spaceEvent = new KeyboardEvent("keypress", { code: "Space", bubbles: true });
+        visualBuilder.updateRenderTimeout(
+            dataView,
+                async () => {
+                    if(visualBuilder.rects){
+                    visualBuilder.rects[0].dispatchEvent(spaceEvent);
+                    await timeout(DefaultTimeout);
+                    expect(visualBuilder.rects[0].getAttribute("aria-selected")).toBe("true");
+                    for (const rects of visualBuilder.rects) {
+                        if (rects !== visualBuilder.rects[0]) {
+                            expect(rects.getAttribute("aria-selected")).toBe("false");
+                        }
+                    }
+
+                    visualBuilder.rects[0].dispatchEvent(spaceEvent);
+                    await timeout(DefaultTimeout);
+                    for (const rects of visualBuilder.rects) {
+                        expect(rects.getAttribute("aria-selected")).toBe("false");
+                    }
+
+                    done();
+                }
+                },
+            2,
+            );
+    });
+    it("tab between rects works", (done: DoneFn) => {
+        const tabEvent = new KeyboardEvent("keypress", { code: "Tab", bubbles: true });
+        const enterEvent = new KeyboardEvent("keypress", { code: "Enter", bubbles: true });
+        visualBuilder.updateRenderTimeout(
+            dataView,
+            async () => {
+                if(visualBuilder.rects){
+                visualBuilder.rects[0].dispatchEvent(enterEvent);
+                await timeout(DefaultTimeout);
+                expect(visualBuilder.rects[0].getAttribute("aria-selected")).toBe("true");
+                for (const rects of visualBuilder.rects) {
+                    if (rects !== visualBuilder.rects[0]) {
+                        expect(rects.getAttribute("aria-selected")).toBe("false");
+                    }
+                }
+
+                visualBuilder.element.dispatchEvent(tabEvent);
+                await timeout(DefaultTimeout);
+
+                visualBuilder.rects[1].dispatchEvent(enterEvent);
+                await timeout(DefaultTimeout);
+                expect(visualBuilder.rects[1].getAttribute("aria-selected")).toBe("true");
+                for (const rects of visualBuilder.rects) {
+                    if (rects !== visualBuilder.rects[1]) {
+                        expect(rects.getAttribute("aria-selected")).toBe("false");
+                    }
+                }
+
+                done();
+            }
+            },
+            2,
+            );
+    });
+});
+
+function timeout(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 describe("TableHeatmap", () => {
     let visualBuilder: TableHeatMapBuilder;
     let dataView: DataView;
