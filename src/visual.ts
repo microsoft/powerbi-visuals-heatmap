@@ -23,8 +23,12 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
+
 import powerbi from "powerbi-visuals-api";
 import "./../style/style.less";
+
+import { HeatMapBehavior } from "./behavior";
+import { HeatmapBehaviorOptions } from "./behavior";
 
 import { valueFormatter, textMeasurementService } from "powerbi-visuals-utils-formattingutils";
 import IValueFormatter = valueFormatter.IValueFormatter;
@@ -32,6 +36,7 @@ import IValueFormatter = valueFormatter.IValueFormatter;
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 
 import { axis } from "powerbi-visuals-utils-chartutils";
+
 import LabelLayoutStrategy = axis.LabelLayoutStrategy;
 
 import { manipulation } from "powerbi-visuals-utils-svgutils";
@@ -40,11 +45,9 @@ import translate = manipulation.translate;
 import { createLinearColorScale, LinearColorScale, ColorHelper } from "powerbi-visuals-utils-colorutils";
 
 import { select as d3Select, Selection as ID3Selection, BaseType as ID3BaseType } from "d3-selection";
+
 import { ScaleQuantile as ID3ScaleQuantile, scaleQuantile as d3ScaleQuantile } from "d3-scale";
-import { min as d3Min, max as d3Max } from "d3-array";
-
-import "d3-transition";
-
+import { min as d3Min, max as d3Max } from "d3-array";import "d3-transition";
 import maxBy from "lodash.maxby";
 
 import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
@@ -58,25 +61,16 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 
-import {
-    IColorArray,
-    IMargin,
-    TableHeatMapChartData,
-    TableHeatMapDataPoint,
-} from "./dataInterfaces";
-
-import {
-    SettingsModel,
-    colorbrewer
-} from "./settings";
-
+import { IColorArray, IMargin, TableHeatMapChartData, TableHeatMapDataPoint } from "./dataInterfaces";
+import { SettingsModel, colorbrewer } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
-
-import {
-    ITooltipServiceWrapper,
-    TooltipEnabledDataPoint,
-    createTooltipServiceWrapper
-} from "powerbi-visuals-utils-tooltiputils";
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import { interactivitySelectionService, interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import { IInteractiveBehavior } from "powerbi-visuals-utils-interactivityutils/lib/interactivityBaseService";
+import createInteractivitySelectionService = interactivitySelectionService.createInteractivitySelectionService;
+import { ITooltipServiceWrapper, TooltipEnabledDataPoint, createTooltipServiceWrapper } from "powerbi-visuals-utils-tooltiputils";
+import IVisualEventService = powerbiVisualsApi.extensibility.IVisualEventService;
+import powerbiVisualsApi from "powerbi-visuals-api";
 
 type Selection<T> = ID3Selection<any, T, any, any>;
 type Quantile<T> = ID3ScaleQuantile<T>;
@@ -93,8 +87,12 @@ export class TableHeatMap implements IVisual {
     private mainGraphics: Selection<any>;
     private dataView: DataView;
     private viewport: IViewport;
-    private margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
-
+    private margin: IMargin = {
+        left: 5,
+        right: 10,
+        bottom: 15,
+        top: 10
+    };
     private static YAxisAdditinalMargin: number = 5;
     private animationDuration: number = 1000;
 
@@ -144,13 +142,13 @@ export class TableHeatMap implements IVisual {
     private static ConstGridMinWidth: number = 0;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
-
+    
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
-
+    
     public static CellMaxHeightLimit: number = 300;
     private static CellMaxWidthFactorLimit: number = 15;
-
+    
     public static BucketCountMaxLimit: number = 18;
     public static BucketCountMinLimit: number = 1;
     public static DefaultBucketCount: number = 5;
@@ -161,21 +159,12 @@ export class TableHeatMap implements IVisual {
     private selectionManager: ISelectionManager;
 
     private settingsModel: SettingsModel;
-
+    
     private formattingSettingsService: FormattingSettingsService;
-
+    private behavior: IInteractiveBehavior = new HeatMapBehavior();
+    private events: IVisualEventService;
     public converter(dataView: DataView): TableHeatMapChartData {
-        if (!dataView
-            || !dataView.categorical
-            || !dataView.categorical.categories
-            || !dataView.categorical.categories[0]
-            || !dataView.categorical.categories[0].values
-            || !dataView.categorical.categories[0].values.length
-            || !dataView.categorical.values
-            || !dataView.categorical.values[0]
-            || !dataView.categorical.values[0].values
-            || !dataView.categorical.values[0].values.length
-        ) {
+        if (!dataView || !dataView.categorical || !dataView.categorical.categories || !dataView.categorical.categories[0] || !dataView.categorical.categories[0].values || !dataView.categorical.categories[0].values.length || !dataView.categorical.values || !dataView.categorical.values[0] || !dataView.categorical.values[0].values || !dataView.categorical.values[0].values.length) {
             return <TableHeatMapChartData>{
                 dataPoints: null
             };
@@ -194,12 +183,19 @@ export class TableHeatMap implements IVisual {
         });
 
         dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
-            dataView.categorical.values.forEach((categoryY) => {
+            dataView.categorical.values.forEach((categoryY, indexY) => {
                 const categoryYFormatter = valueFormatter.create({
                     format: categoryY.source.format,
                     value: dataView.categorical.values[0].values[0]
                 });
                 const value = categoryY.values[indexX];
+
+                // Create a unique identifier for the combination of "x" and "y" categories
+                const categorySelectionId = this.host.createSelectionIdBuilder()
+                    .withCategory(dataView.categorical.categories[0], indexX) // "x" category
+                    .withCategory(dataView.categorical[0], indexY) // "y" category
+                    .createSelectionId();
+
                 dataPoints.push({
                     categoryX: categoryX,
                     categoryY: categoryY.source.displayName,
@@ -216,10 +212,13 @@ export class TableHeatMap implements IVisual {
                     {
                         displayName: `Value`,
                         value: categoryYFormatter.format(value)
-                    }]
+                    }],
+                    identity: categorySelectionId,
+                    selected: false
                 });
             });
         });
+
         return <TableHeatMapChartData>{
             dataPoints: dataPoints,
             categoryX: dataView.categorical.categories[0].values.filter((n) => {
@@ -233,32 +232,37 @@ export class TableHeatMap implements IVisual {
         };
     }
 
-    constructor({
-        host,
-        element
-    }: VisualConstructorOptions) {
-        this.host = host;
+    private interactivityService: IInteractivityService<any>;
 
-        this.div = d3Select(element)
+    constructor(options: VisualConstructorOptions) {
+        this.host = options.host;
+        this.events = options.host.eventService;
+        this.div = d3Select(options.element)
             .append(TableHeatMap.HtmlObjDiv)
             .classed(TableHeatMap.ClsNameDivTableHeatMap, true);
 
         this.svg = this.div
-            .append(TableHeatMap.HtmlObjSvg)
+            .append(TableHeatMap.HtmlObjSvg).attr("role", "listbox")
             .classed(TableHeatMap.ClsNameSvgTableHeatMap, true);
 
         this.colorHelper = new ColorHelper(this.host.colorPalette);
-        this.localizationManager = host.createLocalizationManager();
+        this.localizationManager = this.host.createLocalizationManager();
 
         this.formattingSettingsService = new FormattingSettingsService(this.localizationManager);
 
         this.tooltipServiceWrapper = createTooltipServiceWrapper(
             this.host.tooltipService,
-            element);
+            options.element
+        );
 
         this.selectionManager = this.host.createSelectionManager();
 
         this.handleContextMenu();
+        this.behavior = new HeatMapBehavior();
+
+        // Initialize interactivity service
+        this.settingsModel = new SettingsModel();
+        this.interactivityService = createInteractivitySelectionService(options.host)
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -267,12 +271,14 @@ export class TableHeatMap implements IVisual {
         }
         try {
             this.host.eventService.renderingStarted(options);
+            this.events && this.events.renderingStarted(options);
 
             this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews);
             this.settingsModel.initBuckets(options.dataViews[0]);
             this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
+
             this.div.attr("width", PixelConverter.toString(options.viewport.width + this.margin.left));
             this.div.attr("height", PixelConverter.toString(options.viewport.height + this.margin.left));
 
@@ -566,7 +572,7 @@ export class TableHeatMap implements IVisual {
 
             const heatMapEntered = heatMapData
                 .enter()
-                .append(TableHeatMap.HtmlObjRect);
+                .append(TableHeatMap.HtmlObjRect).attr("aria-selected", "false").attr("tabindex", 0);
 
             const heatMapMerged = heatMapEntered.merge(heatMap);
 
@@ -662,7 +668,7 @@ export class TableHeatMap implements IVisual {
             legendSelectionMerged.classed(TableHeatMap.ClsLegend, true);
 
             legendSelectionEntered
-                .append(TableHeatMap.HtmlObjRect)
+                .append(TableHeatMap.HtmlObjRect).attr("aria-selected", "false").attr("tabindex", 0)
                 .attr(TableHeatMap.AttrX, function (d, i) {
                     return legendElementWidth * i + xOffset;
                 })
@@ -689,7 +695,8 @@ export class TableHeatMap implements IVisual {
                 .attr(TableHeatMap.AttrY, legendOffsetTextY)
                 .attr(TableHeatMap.AttrWidth, legendElementWidth)
                 .attr(TableHeatMap.AttrHeight, legendElementHeight)
-                .text(function (d) {
+
+                .text((d) => {
                     const formattedValue = chartData.valueFormatter.format(d.value);
 
                     const textProperties = {
@@ -699,6 +706,20 @@ export class TableHeatMap implements IVisual {
                     };
 
                     const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+
+                    if (this.interactivityService) {
+                        const behaviorOptions: HeatmapBehaviorOptions = {
+                            dataPoints: chartData.dataPoints,
+                            interactivityService: this.interactivityService,
+                            behavior: this.behavior,
+                            selection: heatMapMerged,
+                            clearCatcher: this.svg,
+                        };
+
+                        this.interactivityService.bind(behaviorOptions);
+                        this.behavior.renderSelection(false);
+                    }
+                    this.events && this.events.renderingFinished(options);
 
                     if (textWidth >= legendElementWidth - margin) {
                         shouldRotate = true;

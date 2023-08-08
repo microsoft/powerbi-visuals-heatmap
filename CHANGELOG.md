@@ -1,3 +1,6 @@
+## 3.7.0
+* Added Keyboard support and focus on elements.
+
 ## 3.6.0
 * Made the margins around labels adjustable
 * Added composite font controls
