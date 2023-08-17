@@ -1,6 +1,11 @@
 ## 3.7.0
 * Added Keyboard support and focus on elements.
 
+## 3.6.0
+* Made the margins around labels adjustable
+* Added composite font controls
+* Fixed npm ci and vulnerabilities + updated visual tools
+
 ## 3.5.0
 * Fixed bug when X axis labels height was calculated incorrectly if labels were numeric
 

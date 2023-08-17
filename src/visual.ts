@@ -284,10 +284,13 @@ export class TableHeatMap implements IVisual {
 
             this.svg.attr("width", options.viewport.width);
             this.svg.attr("height", options.viewport.height);
+            this.svg.style("margin-top", PixelConverter.toString(this.settingsModel.xAxisLabels.margin.value));
 
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
 
             this.setSize(options.viewport);
+
+            TableHeatMap.YAxisAdditinalMargin = this.settingsModel.yAxisLabels.margin.value / 2;
 
             this.updateInternal(options, this.settingsModel);
         } catch (ex) {
@@ -300,9 +303,11 @@ export class TableHeatMap implements IVisual {
         let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
         maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), this.settingsModel.yAxisLabels.maxTextSymbol.value);
         return textMeasurementService.measureSvgTextWidth({
-            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
+            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontControl.fontSize.value),
             text: maxLengthText.trim(),
-            fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
+            fontFamily: this.settingsModel.yAxisLabels.fontControl.fontFamily.value.toString(),
+            fontWeight: this.settingsModel.yAxisLabels.fontControl.bold.value ? "bold" : "normal",
+            fontStyle: this.settingsModel.yAxisLabels.fontControl.italic.value ? "italic" : "normal"
         }) + TableHeatMap.YAxisAdditinalMargin;
     }
 
@@ -311,18 +316,22 @@ export class TableHeatMap implements IVisual {
         const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
 
         return textMeasurementService.measureSvgTextHeight({
-            fontSize: PixelConverter.toString(this.settingsModel.xAxisLabels.fontSize.value),
+            fontSize: PixelConverter.toString(this.settingsModel.xAxisLabels.fontControl.fontSize.value),
             text: maxLengthText.toString().trim(),
-            fontFamily: this.settingsModel.xAxisLabels.fontFamily.value.toString()
-        });
+            fontFamily: this.settingsModel.xAxisLabels.fontControl.fontFamily.value.toString(),
+            fontWeight: this.settingsModel.xAxisLabels.fontControl.bold.value ? "bold" : "normal",
+            fontStyle: this.settingsModel.xAxisLabels.fontControl.italic.value ? "italic" : "normal"
+        }) + this.settingsModel.xAxisLabels.margin.value;
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
         const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
         return textMeasurementService.measureSvgTextHeight({
-            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
+            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontControl.fontSize.value),
             text: maxLengthText.toString().trim(),
-            fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
+            fontFamily: this.settingsModel.yAxisLabels.fontControl.fontFamily.value.toString(),
+            fontWeight: this.settingsModel.yAxisLabels.fontControl.bold.value ? "bold" : "normal",
+            fontStyle: this.settingsModel.yAxisLabels.fontControl.italic.value ? "italic" : "normal"
         });
     }
 
@@ -447,14 +456,16 @@ export class TableHeatMap implements IVisual {
             });
 
             const textProperties: TextProperties = {
-                fontSize: PixelConverter.toString(settingsModel.labels.fontSize.value),
-                fontFamily: settingsModel.labels.fontFamily.value.toString(),
+                fontSize: PixelConverter.toString(settingsModel.labels.fontControl.fontSize.value),
+                fontFamily: settingsModel.labels.fontControl.fontFamily.value.toString(),
+                fontWeight: settingsModel.labels.fontControl.bold.value ? "bold" : "normal",
+                fontStyle: settingsModel.labels.fontControl.italic.value ? "italic" : "normal",
                 text: maxDataText
             };
 
             const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
-            const xOffset: number = this.margin.left + yAxisWidth;
+            const xOffset: number = this.margin.left + yAxisWidth + this.settingsModel.yAxisLabels.margin.value;
             const yOffset: number = this.margin.top + xAxisHeight;
 
             const bottomMargin = 20;
@@ -502,8 +513,11 @@ export class TableHeatMap implements IVisual {
                         return i * gridSizeHeight - (gridSizeHeight / 2) + yOffset - yAxisHeight / 3;
                     })
                     .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
-                    .style("font-size", settingsModel.yAxisLabels.fontSize.value)
-                    .style("font-family", settingsModel.yAxisLabels.fontFamily.value)
+                    .style("font-size", settingsModel.yAxisLabels.fontControl.fontSize.value)
+                    .style("font-family", settingsModel.yAxisLabels.fontControl.fontFamily.value)
+                    .style("font-weight", settingsModel.yAxisLabels.fontControl.bold.value ? "bold" : "normal")
+                    .style("font-style", settingsModel.yAxisLabels.fontControl.italic.value ? "italic" : "normal")
+                    .style("text-decoration", settingsModel.yAxisLabels.fontControl.underline.value ? "underline" : "none")
                     .style("fill", settingsModel.yAxisLabels.fill.value.value)
                     .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
                     .classed(TableHeatMap.ClsCategoryYLabel, true)
@@ -540,8 +554,11 @@ export class TableHeatMap implements IVisual {
                     .attr(TableHeatMap.AttrY, this.margin.top)
                     .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
                     .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
-                    .style("font-size", settingsModel.xAxisLabels.fontSize.value)
-                    .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
+                    .style("font-size", settingsModel.xAxisLabels.fontControl.fontSize.value)
+                    .style("font-family", settingsModel.xAxisLabels.fontControl.fontFamily.value)
+                    .style("font-weight", settingsModel.xAxisLabels.fontControl.bold.value ? "bold" : "normal")
+                    .style("font-style", settingsModel.xAxisLabels.fontControl.italic.value ? "italic" : "normal")
+                    .style("text-decoration", settingsModel.xAxisLabels.fontControl.underline.value ? "underline" : "none")
                     .style("fill", settingsModel.xAxisLabels.fill.value.value)
                     .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
                     .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid));
@@ -591,8 +608,11 @@ export class TableHeatMap implements IVisual {
                         return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + gridSizeHeight / 5;
                     })
                     .style("text-anchor", TableHeatMap.ConstMiddle)
-                    .style("font-size", settingsModel.labels.fontSize.value)
-                    .style("font-family", settingsModel.labels.fontFamily.value)
+                    .style("font-size", settingsModel.labels.fontControl.fontSize.value)
+                    .style("font-family", settingsModel.labels.fontControl.fontFamily.value)
+                    .style("font-weight", settingsModel.labels.fontControl.bold.value ? "bold" : "normal")
+                    .style("font-style", settingsModel.labels.fontControl.italic.value ? "italic" : "normal")
+                    .style("text-decoration", settingsModel.labels.fontControl.underline.value ? "underline" : "none")
                     .style("fill", settingsModel.labels.fill.value.value)
                     .text((dataPoint: TableHeatMapDataPoint) => {
                         let textValue: string = valueFormatter.format(dataPoint.value);
@@ -756,7 +776,8 @@ export class TableHeatMap implements IVisual {
         const width: number =
             viewport.width -
             this.margin.left -
-            this.margin.right;
+            this.margin.right -
+            2 * this.settingsModel.yAxisLabels.margin.value;
 
         this.viewport = {
             height: height,
@@ -765,9 +786,9 @@ export class TableHeatMap implements IVisual {
 
         this.mainGraphics
             .attr(TableHeatMap.AttrHeight, Math.max(this.viewport.height + this.margin.top, 0))
-            .attr(TableHeatMap.AttrWidth, Math.max(this.viewport.width + this.margin.left, 0));
+            .attr(TableHeatMap.AttrWidth, Math.max(this.viewport.width + this.margin.left + this.settingsModel.yAxisLabels.margin.value, 0));
 
-        this.mainGraphics.attr(TableHeatMap.AttrTransform, translate(this.margin.left, this.margin.top));
+        this.mainGraphics.attr(TableHeatMap.AttrTransform, translate(this.margin.left + this.settingsModel.yAxisLabels.margin.value, this.margin.top));
     }
 
     private truncateTextIfNeeded(text: Selection<any>, width: number): void {
