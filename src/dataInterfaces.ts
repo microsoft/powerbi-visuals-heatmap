@@ -34,6 +34,7 @@ export interface TableHeatMapDataPoint {
     categoryY: powerbi.PrimitiveValue;
     value: powerbi.PrimitiveValue;
     valueStr: string;
+    selectionId: powerbi.visuals.ISelectionId,
     tooltipInfo?: VisualTooltipDataItem[];
 }
 

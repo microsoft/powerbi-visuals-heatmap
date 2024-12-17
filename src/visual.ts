@@ -53,6 +53,7 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IViewport = powerbi.IViewport;
 import DataView = powerbi.DataView;
 import IVisual = powerbi.extensibility.visual.IVisual;
+import ISelectionId = powerbi.visuals.ISelectionId;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
@@ -86,6 +87,7 @@ export class TableHeatMap implements IVisual {
     private host: IVisualHost;
     private colorHelper: ColorHelper;
     private localizationManager: ILocalizationManager;
+    private heatMapSelection: Selection<TableHeatMapDataPoint>;
 
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private svg: Selection<any>;
@@ -200,11 +202,17 @@ export class TableHeatMap implements IVisual {
                     value: dataView.categorical.values[0].values[0]
                 });
                 const value = categoryY.values[indexX];
+                const selectionId = this.host.createSelectionIdBuilder()
+                    .withCategory(dataView.categorical.categories[0], indexX)
+                    .withMeasure(categoryY.source.queryName)
+                    .createSelectionId();
+
                 dataPoints.push({
                     categoryX: categoryX,
                     categoryY: categoryY.source.displayName,
                     value: value,
                     valueStr: categoryYFormatter.format(value),
+                    selectionId: selectionId,
                     tooltipInfo: [{
                         displayName: `Category`,
                         value: (categoryX || "").toString()
@@ -258,7 +266,11 @@ export class TableHeatMap implements IVisual {
 
         this.selectionManager = this.host.createSelectionManager();
 
-        this.handleContextMenu();
+        this.selectionManager.registerOnSelectCallback(() => {
+            this.syncSelectionState(this.heatMapSelection, <ISelectionId[]>this.selectionManager.getSelectionIds());
+        });
+
+        this.handleMapClick();
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -322,11 +334,23 @@ export class TableHeatMap implements IVisual {
 
     private handleContextMenu = () => {
         this.svg.on('contextmenu', (event: PointerEvent, dataPoint) => {
-            this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {}, {
-                x: event.clientX,
-                y: event.clientY
-            });
-            event.preventDefault();
+                this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {}, {
+                    x: event.clientX,
+                    y: event.clientY
+                });
+                event.preventDefault();
+        });
+    }
+
+    private handleMapClick = () => {
+        this.svg.on("click", () => {
+            if (this.host.hostCapabilities.allowInteractions) {
+                this.selectionManager
+                    .clear()
+                    .then(() => {
+                        this.syncSelectionState(this.heatMapSelection, []);
+                    });
+            }
         });
     }
 
@@ -538,12 +562,19 @@ export class TableHeatMap implements IVisual {
                     .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
                     .style("fill", settingsModel.xAxisLabels.fill.value.value)
                     .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
-                    .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid));
+                    .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid))
+                    .attr("role", "presentation");
 
                 this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
             }
 
-            const heatMap: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX);
+            const grid = this.mainGraphics.append(TableHeatMap.HtmlObjG);
+            grid
+                .attr("id", "gridTableHeatMap")
+                .attr("role", "grid")
+                .attr("aria-multiselectable", true);
+
+            const heatMap: Selection<TableHeatMapDataPoint> = grid.selectAll("." + TableHeatMap.ClsCategoryX);
 
             const heatMapData = heatMap.data(chartData.dataPoints);
             
@@ -555,17 +586,19 @@ export class TableHeatMap implements IVisual {
 
             heatMapMerged
                 .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset;
+                    return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + 1) + xOffset;
                 })
                 .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset;
+                    return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + 1) + yOffset;
                 })
+                .attr("tabindex", 0)
                 .classed(TableHeatMap.ClsCategoryX + " " + TableHeatMap.ClsBordered, true)
                 .attr(TableHeatMap.AttrWidth, gridSizeWidth)
                 .attr(TableHeatMap.AttrHeight, gridSizeHeight)
                 .style(TableHeatMap.StFill, colors[0])
-                .style("stroke", settingsModel.general.stroke);
-
+                .style("stroke", settingsModel.general.stroke)
+                .style("stroke-width", "1px");
+            
             // add data labels
             const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
 
@@ -711,7 +744,84 @@ export class TableHeatMap implements IVisual {
             if (legendOffsetTextY + gridSizeHeight > options.viewport.height) {
                 this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
             }
+            
+            this.heatMapSelection = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX).data(chartData.dataPoints);
+
+            this.heatMapSelection.on("click", (event, dataPoint) => {
+                const isMultiselect: boolean = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).shiftKey || (<MouseEvent>event).metaKey;
+                this.selectionManager
+                    .select(dataPoint.selectionId, isMultiselect)
+                    .then((ids: powerbi.visuals.ISelectionId[]) => {
+                        this.syncSelectionState(this.heatMapSelection, ids);
+                    });
+                event.stopPropagation();;
+            })
+
+            this.heatMapSelection.on("keydown", (event, dataPoint) => {
+                if (event.code === "Enter" || event.code === "Space") {
+                    const isMultiselect: boolean = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).shiftKey || (<MouseEvent>event).metaKey;
+                    this.selectionManager
+                    .select(dataPoint.selectionId, isMultiselect)
+                    .then((ids: powerbi.visuals.ISelectionId[]) => {
+                        this.syncSelectionState(this.heatMapSelection, ids);
+                    });
+                    event.stopPropagation();
+                }
+            })
+
+            this.heatMapSelection.on("contextmenu", (event: PointerEvent, dataPoint: TableHeatMapDataPoint) => {
+                this.selectionManager.showContextMenu(dataPoint ? dataPoint.selectionId : {},
+                    {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
+                );
+                event.preventDefault();
+                event.stopPropagation();
+            });
+
+            this.syncSelectionState(
+                this.heatMapSelection,
+                <ISelectionId[]>this.selectionManager.getSelectionIds()
+            );
+            this.handleContextMenu();
         }
+    }
+
+    private syncSelectionState(
+        selection: Selection<TableHeatMapDataPoint>,
+        selectionIds: powerbi.visuals.ISelectionId[]
+    ): void {
+        if (!selection || !selectionIds) {
+            return;
+        }
+        // eslint-disable-next-line
+        const self: this = this;
+        
+        selection.each(function (barDataPoint: TableHeatMapDataPoint) {
+            let opacity: number = 1;
+            let isSelected: boolean = false;
+            if (selectionIds.length) {
+                isSelected = self.isSelectionIdInArray(selectionIds, barDataPoint.selectionId);
+                opacity = isSelected ? 1 : 0.4;
+            }
+
+            d3Select(this)
+                .classed("selected", isSelected)
+                .attr("aria-selected", isSelected)
+                .style("fill-opacity", opacity)
+                .style("stroke-opacity", opacity);
+        });
+    }
+
+    private isSelectionIdInArray(selectionIds: ISelectionId[], selectionId: ISelectionId): boolean {
+        if (!selectionIds || !selectionId) {
+            return false;
+        }
+
+        return selectionIds.some((currentSelectionId: ISelectionId) => {
+            return currentSelectionId.equals(selectionId);
+        });
     }
 
     private static textLimit(text: string, limit: number) {

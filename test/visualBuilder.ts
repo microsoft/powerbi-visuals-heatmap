@@ -45,4 +45,18 @@ export class TableHeatMapBuilder extends VisualBuilderBase<VisualClass> {
     public get rects(): NodeListOf<SVGElement> | undefined {
         return this.mainElement?.querySelectorAll(".categoryX");
     }
+
+    public get selectedRects(): Element[] {
+        return Array.from(this.rects!).filter((rect) => {
+            return rect.classList.contains("selected");
+        });
+    }
+
+    public get labels(): NodeListOf<SVGElement> | undefined {
+        return this.mainElement?.querySelectorAll(".categoryXLabel");
+    }
+
+    public get grid(): HTMLElement | null | undefined {
+        return this.mainElement?.querySelector("#gridTableHeatMap");
+    }
 }

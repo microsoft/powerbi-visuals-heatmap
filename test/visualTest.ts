@@ -40,6 +40,7 @@ import {
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 import capabilities from '../capabilities.json';
 import { TableHeatMap } from "../src/visual";
+import { ClickEventType, d3Click, renderTimeout } from "powerbi-visuals-utils-testutils";
 
 const DefaultTimeout: number = 300;
 
@@ -497,5 +498,185 @@ describe("TableHeatmap", () => {
                 }
             });
         });
+    });
+    describe("Selection tests", () => {
+        it("element can be selected", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const firstRect = visualBuilder.rects![0];
+                d3Click(firstRect, 0, 0, ClickEventType.Default);
+
+                renderTimeout(() => {
+                    expect(visualBuilder.selectedRects?.length).toBe(1);
+                    done();
+                });
+            });
+        });
+
+        it("element can be deselected", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const firstRect = visualBuilder.rects![0];
+                d3Click(firstRect, 0, 0, ClickEventType.Default);
+
+                renderTimeout(() => {
+                    expect(visualBuilder.selectedRects?.length).toBe(1);
+                    d3Click(firstRect, 0, 0, ClickEventType.CtrlKey);
+
+                    renderTimeout(() => {
+                        expect(visualBuilder.selectedRects?.length).toBe(0);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it("multi-selection should work with ctrlKey", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                checkMultiselection(ClickEventType.CtrlKey, done);
+            });
+        });
+
+        it("multi-selection should work with metaKey", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                checkMultiselection(ClickEventType.MetaKey, done);
+            });
+        });
+
+        it("multi-selection should work with shiftKey", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                checkMultiselection(ClickEventType.ShiftKey, done);
+            });
+        });
+
+        function checkMultiselection(eventType: number, done: DoneFn): void {
+            const firstColumn = visualBuilder.rects![0];
+            const secondColumn = visualBuilder.rects![1];
+            d3Click(firstColumn, 0, 0, ClickEventType.Default);
+            renderTimeout(() => {
+                expect(visualBuilder.selectedRects?.length).toBe(1);
+
+                d3Click(secondColumn, 0, 0, eventType);
+
+                renderTimeout(() => {
+                    expect(visualBuilder.selectedRects?.length).toBe(2);
+                    done();
+                });
+            });
+        }
+    });
+
+    describe("Keyboard navigation and related aria-attributes tests:", () => {
+        it("should have role=grid and aria-multiselectable attributes correctly set", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const grid = visualBuilder.grid;
+
+                expect(grid!.getAttribute("role")).toBe("grid");
+                expect(grid!.getAttribute("aria-multiselectable")).toBe("true");
+
+                done();
+            });
+        });
+
+        it("should have role=presentation correctly set on text labels", (done) => {
+            visualBuilder.updateRenderTimeout(dataView, () => {
+
+                const labels = Array.from(visualBuilder.labels!);
+                for (const label of labels) { 
+                    expect(label.getAttribute("role")).toBe("presentation");
+                }
+
+                done();
+            });
+        });
+
+        it("enter toggles the correct column", (done) => {
+            const enterEvent = new KeyboardEvent("keydown", { key: "enter", code: "Enter", bubbles: true });
+            checkKeyboardSingleSelection(enterEvent, done);
+        });
+
+        it("space toggles the correct column", (done) => {
+            const spaceEvent = new KeyboardEvent("keydown", { code: "Space", bubbles: true });
+            checkKeyboardSingleSelection(spaceEvent, done);
+        });
+
+        it("multiselection should work with ctrlKey", (done) => {
+            const enterEventCtrlKey = new KeyboardEvent("keydown", { code: "Enter", bubbles: true, ctrlKey: true });
+            checkKeyboardMultiSelection(enterEventCtrlKey, done);
+        });
+
+        it("multiselection should work with metaKey", (done) => {
+            const enterEventMetaKey = new KeyboardEvent("keydown", { code: "Enter", bubbles: true, metaKey: true });
+            checkKeyboardMultiSelection(enterEventMetaKey, done);
+        });
+
+        it("multiselection should work with shiftKey", (done) => {
+            const enterEventShiftKey = new KeyboardEvent("keydown", { code: "Enter", bubbles: true, shiftKey: true });
+            checkKeyboardMultiSelection(enterEventShiftKey, done);
+        });
+
+        it("element can be focused", () => {
+            visualBuilder.updateFlushAllD3Transitions(dataView);
+
+            const rects = Array.from(visualBuilder.rects!);
+            const firstRect = rects[0];
+
+            rects.forEach((rect) => {
+                expect(rect.matches(":focus-visible")).toBeFalse();
+            });
+
+            firstRect.focus();
+            expect(firstRect.matches(':focus-visible')).toBeTrue();
+
+            const otherRects = rects.slice(1);
+            otherRects.forEach((rect) => {
+                expect(rect.matches(":focus-visible")).toBeFalse();
+            });
+
+        });
+
+        function checkKeyboardSingleSelection(keyboardSingleSelectionEvent: KeyboardEvent, done: DoneFn): void {
+            visualBuilder.updateFlushAllD3Transitions(dataView);
+            let rects = Array.from(visualBuilder.rects!);
+            const firstRect = rects[0];
+            const secondRect = rects[1];
+
+            firstRect.dispatchEvent(keyboardSingleSelectionEvent);
+            renderTimeout(() => {
+                expect(firstRect.getAttribute("aria-selected")).toBe("true");
+                const otherRects = rects.slice(1);
+                otherRects.forEach((rect) => {
+                    expect(rect.getAttribute("aria-selected")).toBe("false");
+                });
+
+                secondRect.dispatchEvent(keyboardSingleSelectionEvent);
+                renderTimeout(() => {
+                    expect(secondRect.getAttribute("aria-selected")).toBe("true");
+                    
+                    rects.splice(1, 1);
+                    rects.forEach((rect) => {
+                        expect(rect.getAttribute("aria-selected")).toBe("false");
+                    });
+                    done();
+                });
+            });
+        }
+
+        function checkKeyboardMultiSelection(keyboardMultiselectionEvent: KeyboardEvent, done: DoneFn): void {
+            visualBuilder.updateFlushAllD3Transitions(dataView);
+            const enterEvent = new KeyboardEvent("keydown", { code: "Enter", bubbles: true });
+            const rects = Array.from(visualBuilder.rects!);
+            const firstRect = rects[0];
+            const secondRect = rects[1];
+
+            // select first column
+            firstRect.dispatchEvent(enterEvent);
+            // multiselect second column
+            secondRect.dispatchEvent(keyboardMultiselectionEvent);
+            renderTimeout(() => {
+                expect(firstRect.getAttribute("aria-selected")).toBe("true");
+                expect(secondRect.getAttribute("aria-selected")).toBe("true");
+                expect(visualBuilder.selectedRects?.length).toBe(2);
+                done();
+            });
+        }
     });
 });
