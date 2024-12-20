@@ -754,7 +754,7 @@ export class TableHeatMap implements IVisual {
                     .then((ids: powerbi.visuals.ISelectionId[]) => {
                         this.syncSelectionState(this.heatMapSelection, ids);
                     });
-                event.stopPropagation();;
+                event.stopPropagation();
             })
 
             this.heatMapSelection.on("keydown", (event, dataPoint) => {
