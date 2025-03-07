@@ -34,7 +34,8 @@ import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/in
 import { axis } from "powerbi-visuals-utils-chartutils";
 import LabelLayoutStrategy = axis.LabelLayoutStrategy;
 
-import { manipulation } from "powerbi-visuals-utils-svgutils";
+import { manipulation, CssConstants } from "powerbi-visuals-utils-svgutils";
+import createClassAndSelector = CssConstants.createClassAndSelector;
 import translate = manipulation.translate;
 
 import { createLinearColorScale, LinearColorScale, ColorHelper } from "powerbi-visuals-utils-colorutils";
@@ -58,6 +59,8 @@ import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+
+import { VisualWebBehavior, VisualBehaviorOptions } from "./visualWebBehavior";
 
 import {
     IColorArray,
@@ -95,6 +98,7 @@ export class TableHeatMap implements IVisual {
     private mainGraphics: Selection<any>;
     private dataView: DataView;
     private viewport: IViewport;
+    private behavior: VisualWebBehavior;
     private margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
 
     private static YAxisAdditinalMargin: number = 5;
@@ -146,6 +150,8 @@ export class TableHeatMap implements IVisual {
     private static ConstGridMinWidth: number = 0;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
+    private static ConstRectWidthAdjustment: number = 1;
+    private static ConstRectHeightAdjustment: number = 1;
 
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
@@ -270,7 +276,7 @@ export class TableHeatMap implements IVisual {
             this.syncSelectionState(this.heatMapSelection, <ISelectionId[]>this.selectionManager.getSelectionIds());
         });
 
-        this.handleMapClick();
+        this.behavior = new VisualWebBehavior(this.selectionManager);
     }
 
     public update(options: VisualUpdateOptions): void {
@@ -329,28 +335,6 @@ export class TableHeatMap implements IVisual {
             fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
             text: maxLengthText.toString().trim(),
             fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
-        });
-    }
-
-    private handleContextMenu = () => {
-        this.svg.on('contextmenu', (event: PointerEvent, dataPoint) => {
-                this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {}, {
-                    x: event.clientX,
-                    y: event.clientY
-                });
-                event.preventDefault();
-        });
-    }
-
-    private handleMapClick = () => {
-        this.svg.on("click", () => {
-            if (this.host.hostCapabilities.allowInteractions) {
-                this.selectionManager
-                    .clear()
-                    .then(() => {
-                        this.syncSelectionState(this.heatMapSelection, []);
-                    });
-            }
         });
     }
 
@@ -574,7 +558,8 @@ export class TableHeatMap implements IVisual {
                 .attr("role", "grid")
                 .attr("aria-multiselectable", true);
 
-            const heatMap: Selection<TableHeatMapDataPoint> = grid.selectAll("." + TableHeatMap.ClsCategoryX);
+            const heatMapSelector = createClassAndSelector(TableHeatMap.ClsCategoryX);
+            const heatMap: Selection<TableHeatMapDataPoint> = grid.selectAll(heatMapSelector.selectorName);
 
             const heatMapData = heatMap.data(chartData.dataPoints);
             
@@ -586,10 +571,10 @@ export class TableHeatMap implements IVisual {
 
             heatMapMerged
                 .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + 1) + xOffset;
+                    return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + TableHeatMap.ConstRectWidthAdjustment) + xOffset;
                 })
                 .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + 1) + yOffset;
+                    return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + TableHeatMap.ConstRectHeightAdjustment) + yOffset;
                 })
                 .attr("tabindex", 0)
                 .classed(TableHeatMap.ClsCategoryX + " " + TableHeatMap.ClsBordered, true)
@@ -597,7 +582,6 @@ export class TableHeatMap implements IVisual {
                 .attr(TableHeatMap.AttrHeight, gridSizeHeight)
                 .style(TableHeatMap.StFill, colors[0])
                 .style("stroke", settingsModel.general.stroke)
-                .style("stroke-width", "1px");
             
             // add data labels
             const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
@@ -745,47 +729,19 @@ export class TableHeatMap implements IVisual {
                 this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
             }
             
-            this.heatMapSelection = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryX).data(chartData.dataPoints);
+            this.heatMapSelection = this.mainGraphics.selectAll(heatMapSelector.selectorName).data(chartData.dataPoints);
 
-            this.heatMapSelection.on("click", (event, dataPoint) => {
-                const isMultiselect: boolean = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).shiftKey || (<MouseEvent>event).metaKey;
-                this.selectionManager
-                    .select(dataPoint.selectionId, isMultiselect)
-                    .then((ids: powerbi.visuals.ISelectionId[]) => {
-                        this.syncSelectionState(this.heatMapSelection, ids);
-                    });
-                event.stopPropagation();
-            })
-
-            this.heatMapSelection.on("keydown", (event, dataPoint) => {
-                if (event.code === "Enter" || event.code === "Space") {
-                    const isMultiselect: boolean = (<MouseEvent>event).ctrlKey || (<MouseEvent>event).shiftKey || (<MouseEvent>event).metaKey;
-                    this.selectionManager
-                    .select(dataPoint.selectionId, isMultiselect)
-                    .then((ids: powerbi.visuals.ISelectionId[]) => {
-                        this.syncSelectionState(this.heatMapSelection, ids);
-                    });
-                    event.stopPropagation();
-                }
-            })
-
-            this.heatMapSelection.on("contextmenu", (event: PointerEvent, dataPoint: TableHeatMapDataPoint) => {
-                this.selectionManager.showContextMenu(dataPoint ? dataPoint.selectionId : {},
-                    {
-                        x: event.clientX,
-                        y: event.clientY
-                    }
-                );
-                event.preventDefault();
-                event.stopPropagation();
-            });
-
-            this.syncSelectionState(
-                this.heatMapSelection,
-                <ISelectionId[]>this.selectionManager.getSelectionIds()
-            );
-            this.handleContextMenu();
+            this.bindBehaviorToVisual();
         }
+    }
+
+    private bindBehaviorToVisual(): void {
+        const behaviorOptions: VisualBehaviorOptions = {
+            selection: this.heatMapSelection,
+            clearCatcher: this.svg
+        };
+
+        this.behavior.bindEvents(behaviorOptions);
     }
 
     private syncSelectionState(

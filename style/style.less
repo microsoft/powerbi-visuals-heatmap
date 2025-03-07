@@ -26,12 +26,13 @@
 
 .svgTableHeatMap rect.bordered {
   stroke: #E6E6E6;
-  stroke-width: 2px;
+  stroke-width: 1px;
 }
 
-.svgTableHeatMap rect.bordered:focus-visible{
-  stroke: "#252423";
-  stroke-width: 1px !important;
+.svgTableHeatMap rect.bordered{
+  &:focus{
+    stroke: #252423;
+  }
 }
 
 .svgTableHeatMap text.mono {
