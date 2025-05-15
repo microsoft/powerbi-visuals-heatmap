@@ -30,8 +30,12 @@ import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
 import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
 
+import { ScaleQuantile } from "d3-scale";
+type Quantile<T> = ScaleQuantile<T>;
+
 import IValueFormatter = valueFormatter.IValueFormatter;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import { SettingsModel } from "./settings";
 export interface TableHeatMapDataPoint extends ISelectableDataPoint {
     categoryX: powerbi.PrimitiveValue;
     categoryY: powerbi.PrimitiveValue;
@@ -116,4 +120,18 @@ export interface IColorBrewer {
     Set1: IColorArray;
     Set2: IColorArray;
     Set3: IColorArray;
+}
+
+export interface IRenderOptions {
+    chartData: TableHeatMapChartData;
+    settingsModel: SettingsModel;
+    xAxisHeight: number;
+    yAxisHeight: number;
+    yAxisWidth: number;
+    xOffset: number;
+    yOffset: number;
+    gridSizeHeight: number;
+    gridSizeWidth: number;
+    colors: string[];
+    colorScale: Quantile<string>;
 }

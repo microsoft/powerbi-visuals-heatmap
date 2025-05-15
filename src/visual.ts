@@ -31,7 +31,7 @@ import IValueFormatter = valueFormatter.IValueFormatter;
 
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 
-import { axis } from "powerbi-visuals-utils-chartutils";
+import { axis, legend } from "powerbi-visuals-utils-chartutils";
 import LabelLayoutStrategy = axis.LabelLayoutStrategy;
 
 import { manipulation, CssConstants } from "powerbi-visuals-utils-svgutils";
@@ -65,13 +65,17 @@ import { VisualWebBehavior, VisualBehaviorOptions } from "./visualWebBehavior";
 import {
     IColorArray,
     IMargin,
+    IRenderOptions,
     TableHeatMapChartData,
     TableHeatMapDataPoint,
 } from "./dataInterfaces";
 
 import {
     GeneralSettings,
+    LabelsSettings,
     SettingsModel,
+    XAxisLabelsSettings,
+    YAxisLabelsSettings,
     colorbrewer
 } from "./settings";
 
@@ -82,6 +86,7 @@ import {
     TooltipEnabledDataPoint,
     createTooltipServiceWrapper
 } from "powerbi-visuals-utils-tooltiputils";
+import { ClassAndSelector } from "powerbi-visuals-utils-svgutils/lib/cssConstants";
 
 type Selection<T> = ID3Selection<any, T, any, any>;
 type Quantile<T> = ID3ScaleQuantile<T>;
@@ -91,7 +96,6 @@ export class TableHeatMap implements IVisual {
     private host: IVisualHost;
     private colorHelper: ColorHelper;
     private localizationManager: ILocalizationManager;
-    private heatMapSelection: Selection<TableHeatMapDataPoint>;
 
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private svg: Selection<any>;
@@ -100,19 +104,20 @@ export class TableHeatMap implements IVisual {
     private dataView: DataView;
     private viewport: IViewport;
     private behavior: VisualWebBehavior;
-    private margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
+    private static Margin: IMargin = { left: 5, right: 10, bottom: 20, top: 10 };
+    private static AdditionalSpaceForColorbrewerCells: number = 2;
 
     private static YAxisAdditinalMargin: number = 5;
     private animationDuration: number = 1000;
 
     private static ClsAll: string = "*";
-    private static ClsCategoryX: string = "categoryX";
+    private static ClsCategoryX: ClassAndSelector = createClassAndSelector("categoryX");
     private static ClsMono: string = "mono";
-    public static CLsHeatMapDataLabels = "heatMapDataLabels";
-    private static ClsCategoryYLabel: string = "categoryYLabel";
-    private static ClsCategoryXLabel: string = "categoryXLabel";
+    public static CLsHeatMapDataLabels: ClassAndSelector = createClassAndSelector("heatMapDataLabels");
+    private static ClsCategoryYLabel: ClassAndSelector = createClassAndSelector("categoryYLabel");
+    private static ClsCategoryXLabel: ClassAndSelector = createClassAndSelector("categoryXLabel");
     private static ClsAxis: string = "axis";
-    private static ClsLegend: string = "legend";
+    private static ClsLegend: ClassAndSelector = createClassAndSelector("legend");
     private static ClsBordered: string = "bordered";
     private static ClsNameSvgTableHeatMap: string = "svgTableHeatMap";
     private static ClsNameDivTableHeatMap: string = "divTableHeatMap";
@@ -189,6 +194,8 @@ export class TableHeatMap implements IVisual {
                 dataPoints: null
             };
         }
+
+        this.dataView = dataView;
 
         const dataPoints: TableHeatMapDataPoint[] = [];
         const formatter = valueFormatter.create({
@@ -289,8 +296,8 @@ export class TableHeatMap implements IVisual {
             this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
-            this.div.attr("width", PixelConverter.toString(options.viewport.width + this.margin.left));
-            this.div.attr("height", PixelConverter.toString(options.viewport.height + this.margin.left));
+            this.div.attr("width", PixelConverter.toString(options.viewport.width + TableHeatMap.Margin.left));
+            this.div.attr("height", PixelConverter.toString(options.viewport.height + TableHeatMap.Margin.left));
 
             this.svg.attr("width", options.viewport.width);
             this.svg.attr("height", options.viewport.height);
@@ -299,32 +306,34 @@ export class TableHeatMap implements IVisual {
 
             this.setSize(options.viewport);
 
-            this.updateInternal(options, this.settingsModel);
+            this.render(this.converter(options.dataViews[0]), this.settingsModel);
+
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
         this.host.eventService.renderingFinished(options);
     }
 
-    private getYAxisWidth(chartData: TableHeatMapChartData): number {
+    private static getYAxisWidth(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
         let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
-        maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), this.settingsModel.yAxisLabels.maxTextSymbol.value);
-        return textMeasurementService.measureSvgTextWidth({
-            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
+        maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), settings.maxTextSymbol.value);
+
+        return settings.show.value ? textMeasurementService.measureSvgTextWidth({
+            fontSize: PixelConverter.toString(settings.fontSize.value),
             text: maxLengthText.trim(),
-            fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
-        }) + TableHeatMap.YAxisAdditinalMargin;
+            fontFamily: settings.fontFamily.value.toString()
+        }) + TableHeatMap.YAxisAdditinalMargin : 0;
     }
 
-    private getXAxisHeight(chartData: TableHeatMapChartData): number {
+    private static getXAxisHeight(chartData: TableHeatMapChartData, settings: XAxisLabelsSettings): number {
         const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
         const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
 
-        return textMeasurementService.measureSvgTextHeight({
-            fontSize: PixelConverter.toString(this.settingsModel.xAxisLabels.fontSize.value),
+        return settings.show.value ? textMeasurementService.measureSvgTextHeight({
+            fontSize: PixelConverter.toString(settings.fontSize.value),
             text: maxLengthText.toString().trim(),
-            fontFamily: this.settingsModel.xAxisLabels.fontFamily.value.toString()
-        });
+            fontFamily: settings.fontFamily.value.toString()
+        }) : 0;
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
@@ -357,400 +366,385 @@ export class TableHeatMap implements IVisual {
         return settingsModel;
     }
 
-    private adjustGridSizeHeight(gridSizeHeight: number): number {
+    private getGridSizeHeight(xAxisHeight: number, length: number): number {
+        const gridSizeHeight: number = Math.floor((this.viewport.height - TableHeatMap.Margin.top - xAxisHeight - TableHeatMap.Margin.bottom) / (length + TableHeatMap.AdditionalSpaceForColorbrewerCells));
 
-        if (gridSizeHeight > TableHeatMap.CellMaxHeightLimit) {
-            gridSizeHeight = TableHeatMap.CellMaxHeightLimit;
-        }
-
-        if (gridSizeHeight < TableHeatMap.ConstGridMinHeight) {
-            gridSizeHeight = TableHeatMap.ConstGridMinHeight;
-        }
-
-        return gridSizeHeight;
+        return Math.max(
+            TableHeatMap.ConstGridMinHeight,
+            Math.min(gridSizeHeight, TableHeatMap.CellMaxHeightLimit))
     }
 
-    private adjustGridSizeWidth(gridSizeWidth: number, gridSizeHeight: number): number {
+    private getGridSizeWidth(yAxisWidth: number, length: number, gridSizeHeight: number): number {
+        const gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (length));
 
-        if (gridSizeWidth > gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit) {
-            gridSizeWidth = gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit;
-        }
-
-        if (gridSizeWidth < TableHeatMap.ConstGridMinWidth) {
-            gridSizeWidth = TableHeatMap.ConstGridMinWidth;
-        }
-
-        return gridSizeWidth;
+        return Math.max(
+            TableHeatMap.ConstGridMinWidth,
+            Math.min(gridSizeWidth, gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit)
+        );
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private updateInternal(options: VisualUpdateOptions, settingsModel: SettingsModel): void {
-        const dataView: DataView = this.dataView = options.dataViews[0];
-        const chartData: TableHeatMapChartData = this.converter(dataView);
-        const suppressAnimations: boolean = false;
+    private render(chartData: TableHeatMapChartData, settingsModel: SettingsModel): void {
         if (chartData.dataPoints) {
-            const minDataValue: number = d3Min(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
-                return d.value as number;
-            });
-            const maxDataValue: number = d3Max(chartData.dataPoints, function (d: TableHeatMapDataPoint) {
-                return d.value as number;
-            });
-
-            const numBuckets: number = settingsModel.CurrentBucketCount;
-
-            const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
-            const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
-            let colors: Array<string>;
-            if (colorbrewerEnable) {
-                if (colorbrewerScale) {
-                    const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                    colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
-                }
-                else {
-                    colors = colorbrewer.Reds[numBuckets];	// default color scheme
-                }
-            } else {
-                const startColor: string = settingsModel.general.gradientStart.value.value;
-                const endColor: string = settingsModel.general.gradientEnd.value.value;
-                const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
-                colors = [];
-
-                for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
-                    colors.push(colorScale(bucketIndex));
-                }
-            }
-
-            const colorScale: Quantile<string> = d3ScaleQuantile<string>()
-                .domain([minDataValue, maxDataValue])
-                .range(colors);
-
-            settingsModel.general.gradientStart.value.value = colors[0];
-            settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
-
-            let xAxisHeight: number = this.getXAxisHeight(chartData);
-            let yAxisWidth: number = this.getYAxisWidth(chartData);
-            const yAxisHeight: number = this.getYAxisHeight(chartData);
-
-            if (!settingsModel.yAxisLabels.show.value) {
-                yAxisWidth = 0;
-            }
-
-            if (!settingsModel.xAxisLabels.show.value) {
-                xAxisHeight = 0;
-            }
-
-            let maxDataText: string = chartData.dataPoints[0].valueStr || "";
-            chartData.dataPoints.forEach((value: TableHeatMapDataPoint) => {
-                if ((value.valueStr || "").length > maxDataText.length) {
-                    maxDataText = value.valueStr || "";
-                }
-            });
-
-            const textProperties: TextProperties = {
-                fontSize: PixelConverter.toString(settingsModel.labels.fontSize.value),
-                fontFamily: settingsModel.labels.fontFamily.value.toString(),
-                text: maxDataText
-            };
-            
-            const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
-
-            const xOffset: number = this.margin.left + yAxisWidth;
-            const yOffset: number = this.margin.top + xAxisHeight;
-
-            const bottomMargin = 20;
-            const additionalSpaceForColorbrewerCells = 2;
-
-            let gridSizeHeight: number = Math.floor((this.viewport.height - this.margin.top - xAxisHeight - bottomMargin) / (chartData.categoryY.length + additionalSpaceForColorbrewerCells));
-            let gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (chartData.categoryX.length));
-            
-            gridSizeHeight = this.adjustGridSizeHeight(gridSizeHeight);
-            gridSizeWidth = this.adjustGridSizeWidth(gridSizeWidth, gridSizeHeight);
-
-            const legendElementHeight: number = gridSizeHeight;
-            let legendElementWidth: number = (this.viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset) / numBuckets;
-
-            if (legendElementWidth < 0) {
-                legendElementWidth = 0;
-            }
-
-            const legendOffsetCellsY: number = this.margin.top
-                + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
-                + xAxisHeight;
-            
-            const legendOffsetTextY: number = legendOffsetCellsY + legendElementHeight + this.margin.bottom;
+            const renderOptions: IRenderOptions = this.createRenderOptions(chartData, settingsModel);
 
             if (settingsModel.yAxisLabels.show.value) {
-                const categoryYElements:  ID3Selection<ID3BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel);
-                const categoryYElementsData = categoryYElements
-                    .data(chartData.categoryY);
-                
-                const categoryYElementsEntered = categoryYElementsData
-                    .enter()
-                    .append(TableHeatMap.HtmlObjText);
-
-                categoryYElementsEntered.exit().remove();
-
-                const categoryYElementsMerged = categoryYElementsEntered.merge(categoryYElements);
-
-                categoryYElementsMerged
-                    .text((d: string) => {
-                        return TableHeatMap.textLimit(d, settingsModel.yAxisLabels.maxTextSymbol.value);
-                    })
-                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
-                    .attr(TableHeatMap.AttrX, this.margin.left)
-                    .attr(TableHeatMap.AttrY, function (d, i) {
-                        return i * gridSizeHeight - (gridSizeHeight / 2) + yOffset - yAxisHeight / 3;
-                    })
-                    .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
-                    .style("font-size", settingsModel.yAxisLabels.fontSize.value)
-                    .style("font-family", settingsModel.yAxisLabels.fontFamily.value)
-                    .style("fill", settingsModel.yAxisLabels.fill.value.value)
-                    .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
-                    .classed(TableHeatMap.ClsCategoryYLabel, true)
-                    .classed(TableHeatMap.ClsMono, true)
-                    .classed(TableHeatMap.ClsAxis, true);
-
-                this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel)
-                   .call(this.wrap, gridSizeWidth + xOffset);
-
-                this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryYLabel), gridSizeWidth + xOffset);
+                this.renderYAxisLabels(renderOptions);
             }
 
             if (settingsModel.xAxisLabels.show.value) {
-                const categoryXElements: ID3Selection<ID3BaseType, any, any, any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel);
-                
-                const categoryXElementsData = categoryXElements
-                    .data(chartData.categoryX);
-                
-                categoryXElementsData.exit().remove();
-                
-                const categoryXElementsEntered = categoryXElementsData
-                    .enter()
-                    .append(TableHeatMap.HtmlObjText);
-                
-                const categoryXElementsMerged = categoryXElementsEntered.merge(categoryXElements);
-
-                categoryXElementsMerged
-                    .text(function (d: string) {
-                        return chartData.categoryValueFormatter.format(d);
-                    })
-                    .attr(TableHeatMap.AttrX, function (d: string, i: number) {
-                        return i * gridSizeWidth + xOffset;
-                    })
-                    .attr(TableHeatMap.AttrY, this.margin.top)
-                    .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
-                    .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
-                    .style("font-size", settingsModel.xAxisLabels.fontSize.value)
-                    .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
-                    .style("fill", settingsModel.xAxisLabels.fill.value.value)
-                    .classed(TableHeatMap.ClsCategoryXLabel + " " + TableHeatMap.ClsMono + " " + TableHeatMap.ClsAxis, true)
-                    .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid))
-                    .attr("role", "presentation");
-
-                this.truncateTextIfNeeded(this.mainGraphics.selectAll("." + TableHeatMap.ClsCategoryXLabel), gridSizeWidth);
+                this.renderXAxisLabels(renderOptions);
             }
 
-            const grid = this.mainGraphics.append(TableHeatMap.HtmlObjG);
-            grid
-                .attr("id", "gridTableHeatMap")
-                .attr("role", "grid")
-                .attr("aria-multiselectable", true);
-
-            const heatMapSelector = createClassAndSelector(TableHeatMap.ClsCategoryX);
-            const heatMap: Selection<TableHeatMapDataPoint> = grid.selectAll(heatMapSelector.selectorName);
-
-            const heatMapData = heatMap.data(chartData.dataPoints);
-            
-            const heatMapEntered = heatMapData
-                .enter()
-                .append(TableHeatMap.HtmlObjRect);
-
-            const heatMapMerged = heatMapEntered.merge(heatMap);
-
-            heatMapMerged
-                .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + TableHeatMap.ConstRectWidthAdjustment) + xOffset;
-                })
-                .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                    return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + TableHeatMap.ConstRectHeightAdjustment) + yOffset;
-                })
-                .attr("tabindex", 0)
-                .classed(TableHeatMap.ClsCategoryX + " " + TableHeatMap.ClsBordered, true)
-                .attr(TableHeatMap.AttrWidth, gridSizeWidth)
-                .attr(TableHeatMap.AttrHeight, gridSizeHeight)
-                .style(TableHeatMap.StFill, colors[0])
-                .style("stroke", GeneralSettings.stroke)
-            
-            // add data labels
-            const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
+            const heatMapSelection = this.renderGrid(renderOptions);
+            this.animateGrid(heatMapSelection, renderOptions);
 
             if (settingsModel.labels.show.value) {
-                const heatMapDataLablesData: Selection<TableHeatMapDataPoint> = heatMapDataLables.data(chartData.dataPoints);
-                heatMapDataLables.exit().remove();
-
-                const heatMapDataLablesEntered = heatMapDataLablesData
-                    .enter().append("text");
-
-                heatMapDataLablesEntered
-                    .classed(TableHeatMap.CLsHeatMapDataLabels, true)
-                    .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                        return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
-                    })
-                    .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                        return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + gridSizeHeight / 5;
-                    })
-                    .style("text-anchor", TableHeatMap.ConstMiddle)
-                    .style("font-size", settingsModel.labels.fontSize.value)
-                    .style("font-family", settingsModel.labels.fontFamily.value)
-                    .style("fill", settingsModel.labels.fill.value.value)
-                    .text((dataPoint: TableHeatMapDataPoint) => {
-                        let textValue: string = valueFormatter.format(dataPoint.value);
-                        textProperties.text = textValue;
-                        textValue = textMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
-
-                        if (textRect.height >= gridSizeHeight) return "..."
-
-                        return dataPoint.value === 0 ? 0 : textValue;
-                    });
+                this.renderLabels(renderOptions);
             }
 
-            const elementAnimation: Selection<D3Element> = <Selection<D3Element>>this.getAnimationMode(heatMapMerged, suppressAnimations);
-            if (!this.settingsModel.general.fillNullValuesCells.value) {
-                heatMapMerged.style(TableHeatMap.StOpacity, function (d: any) {
-                    return d.value === null || d.value === "" ? 0 : 1;
-                });
-            }
-            elementAnimation.style(TableHeatMap.StFill, function (d: any) {
-                return <string>colorScale(d.value);
-            });
+            this.renderLegend(renderOptions);
 
-            this.tooltipServiceWrapper.addTooltip(heatMapMerged, (tooltipDataPoint: TooltipEnabledDataPoint) => {
-                return tooltipDataPoint.tooltipInfo;
-            });
-
-            // legend
-            const legendDataValues = [minDataValue].concat(colorScale.quantiles());
-            const legendData = legendDataValues.concat(maxDataValue).map((value, index) => {
-                return {
-                    value: value,
-                    tooltipInfo: [{
-                        displayName: `Min value`,
-                        value: value && typeof value.toFixed === "function" ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
-                    },
-                    {
-                        displayName: `Max value`,
-                        value: legendDataValues[index + 1] && typeof legendDataValues[index + 1].toFixed === "function" ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
-                    }]
-                };
-            });
-
-            const legendSelection: Selection<any> = this.mainGraphics.selectAll("." + TableHeatMap.ClsLegend);
-            const legendSelectionData = legendSelection.data(legendData);
-
-            const legendSelectionEntered = legendSelectionData
-                .enter()
-                .append(TableHeatMap.HtmlObjG);
-
-            legendSelectionData.exit().remove();
-
-            const legendSelectionMerged = legendSelectionData.merge(legendSelection);
-            legendSelectionMerged.classed(TableHeatMap.ClsLegend, true);
-
-            legendSelectionEntered
-                .append(TableHeatMap.HtmlObjRect)
-                .attr(TableHeatMap.AttrX, function (d, i) {
-                    return legendElementWidth * i + xOffset;
-                })
-                .attr(TableHeatMap.AttrY, legendOffsetCellsY)
-                .attr(TableHeatMap.AttrWidth, legendElementWidth)
-                .attr(TableHeatMap.AttrHeight, legendElementHeight)
-                .style(TableHeatMap.StFill, function (d, i) {
-                    return colors[i];
-                })
-                .style("stroke", GeneralSettings.stroke)
-                .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
-                .classed(TableHeatMap.ClsBordered, true);
-
-            let shouldRotate = false;
-            const margin = 10;
-
-            legendSelectionEntered
-                .append(TableHeatMap.HtmlObjText)
-                .classed(TableHeatMap.ClsMono, true)
-                .classed(TableHeatMap.LegendLabel, true)
-                .attr(TableHeatMap.AttrX, function (d, i) {
-                    return legendElementWidth * i + xOffset - margin;
-                })
-                .attr(TableHeatMap.AttrY, legendOffsetTextY)
-                .attr(TableHeatMap.AttrWidth, legendElementWidth)
-                .attr(TableHeatMap.AttrHeight, legendElementHeight)
-                .text(function (d) {
-                    const formattedValue = chartData.valueFormatter.format(d.value);
-
-                    const textProperties = {
-                        fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
-                        text: formattedValue,
-                        fontFamily: TableHeatMap.LegendTextFontFamily
-                    };
-                    
-                    const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
-
-                    if (textWidth >= legendElementWidth - margin) {
-                        shouldRotate = true;
-                    }
-
-                    return formattedValue;
-                })
-                .style("font-size", TableHeatMap.LegendTextFontSize)
-                .style("font-family", TableHeatMap.LegendTextFontFamily)
-                .style("fill", settingsModel.general.textColor)
-                .attr("transform", function (d, i) {
-                    let rotationAngle = 65;
-                    
-                    if (options.viewport.width < 400 && shouldRotate) {
-                        rotationAngle = 90;
-                    }
-
-                    if (shouldRotate) {
-                        return manipulation.translateAndRotate(0, 0, legendElementWidth * i + xOffset, legendOffsetTextY, rotationAngle);
-                    }
-                });
-
-            this.tooltipServiceWrapper.addTooltip(
-                legendSelectionEntered,
-                (tooltipDataPoint: TooltipEnabledDataPoint) => {
-                    return tooltipDataPoint.tooltipInfo;
-                }
-            );
-
-            if (legendOffsetTextY + gridSizeHeight > options.viewport.height) {
-                this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
-            }
-            
-            this.heatMapSelection = this.mainGraphics.selectAll(heatMapSelector.selectorName).data(chartData.dataPoints);
-
-            this.bindBehaviorToVisual();
+            this.bindBehaviorToVisual(heatMapSelection);
         }
     }
 
-    private bindBehaviorToVisual(): void {
+    private createRenderOptions(chartData: TableHeatMapChartData, settingsModel: SettingsModel): IRenderOptions {
+        const xAxisHeight: number = TableHeatMap.getXAxisHeight(chartData, settingsModel.xAxisLabels);
+        const yAxisWidth: number = TableHeatMap.getYAxisWidth(chartData, settingsModel.yAxisLabels);
+        const yAxisHeight: number = this.getYAxisHeight(chartData);
+
+        const xOffset: number = TableHeatMap.Margin.left + yAxisWidth;
+        const yOffset: number = TableHeatMap.Margin.top + xAxisHeight;
+
+        const gridSizeHeight: number = this.getGridSizeHeight(xAxisHeight, chartData.categoryY.length);
+        const gridSizeWidth: number = this.getGridSizeWidth(yAxisWidth, chartData.categoryX.length, gridSizeHeight);
+
+        const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
+        const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
+
+        const colors: string[] = this.initColors(settingsModel);
+
+
+        const colorScale: Quantile<string> = d3ScaleQuantile<string>()
+            .domain([minDataValue, maxDataValue])
+            .range(colors);
+
+        settingsModel.general.gradientStart.value.value = colors[0];
+        settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
+
+        const renderOptions: IRenderOptions = {
+            chartData,
+            settingsModel,
+            xAxisHeight,
+            yAxisWidth,
+            yAxisHeight,
+            xOffset,
+            yOffset,
+            gridSizeHeight,
+            gridSizeWidth,
+            colors,
+            colorScale
+        }
+
+        return renderOptions;
+    }
+
+    private initColors(settingsModel: SettingsModel): string[] {
+        const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
+        const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
+        const numBuckets: number = settingsModel.CurrentBucketCount;
+
+        let colors: Array<string>;
+        if (colorbrewerEnable) {
+            if (colorbrewerScale) {
+                const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
+                colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
+            }
+            else {
+                colors = colorbrewer.Reds[numBuckets];	// default color scheme
+            }
+        } else {
+            const startColor: string = settingsModel.general.gradientStart.value.value;
+            const endColor: string = settingsModel.general.gradientEnd.value.value;
+            const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
+            colors = [];
+
+            for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
+                colors.push(colorScale(bucketIndex));
+            }
+        }
+
+        return colors;
+    }
+
+    private renderGrid(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
+        const { chartData, colors, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
+
+        const grid = this.mainGraphics
+            .append(TableHeatMap.HtmlObjG)
+            .attr("id", "gridTableHeatMap")
+            .attr("role", "grid")
+            .attr("aria-multiselectable", true);
+
+        const heatMap: Selection<TableHeatMapDataPoint> = grid
+            .selectAll(TableHeatMap.ClsCategoryX.selectorName)
+            .data(chartData.dataPoints)
+            .join(TableHeatMap.HtmlObjRect)
+            .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
+                return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + TableHeatMap.ConstRectWidthAdjustment) + xOffset;
+            })
+            .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
+                return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + TableHeatMap.ConstRectHeightAdjustment) + yOffset;
+            })
+            .attr("tabindex", 0)
+            .classed(TableHeatMap.ClsCategoryX.className, true)
+            .classed(TableHeatMap.ClsBordered, true)
+            .attr(TableHeatMap.AttrWidth, gridSizeWidth)
+            .attr(TableHeatMap.AttrHeight, gridSizeHeight)
+            .style(TableHeatMap.StFill, colors[0])
+            .style("stroke", GeneralSettings.stroke);
+
+        this.tooltipServiceWrapper.addTooltip(heatMap, (tooltipDataPoint: TooltipEnabledDataPoint) => {
+            return tooltipDataPoint.tooltipInfo;
+        });
+
+        return this.mainGraphics.selectAll(TableHeatMap.ClsCategoryX.selectorName).data(chartData.dataPoints);
+    }
+
+    private animateGrid(heatMap: Selection<TableHeatMapDataPoint>, renderOptions: IRenderOptions): void {
+        const { colorScale, settingsModel } = renderOptions;
+        const suppressAnimations: boolean = false;
+        const elementAnimation: Selection<D3Element> = <Selection<D3Element>>this.getAnimationMode(heatMap, suppressAnimations);
+        if (!settingsModel.general.fillNullValuesCells.value) {
+            heatMap.style(TableHeatMap.StOpacity, (d: TableHeatMapDataPoint) => {
+                return d.value === null || d.value === "" ? 0 : 1;
+            });
+        }
+        elementAnimation.style(TableHeatMap.StFill, function (d: any) {
+            return <string>colorScale(d.value);
+        });
+    }
+
+    private renderLabels(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
+        const { chartData, settingsModel, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
+        const maxDataText = chartData.dataPoints.reduce((max: string, dp: TableHeatMapDataPoint) => {
+            const val = dp.valueStr || "";
+            return val.length > max.length ? val : max;
+        }, "");
+
+        const textProperties: TextProperties = {
+            fontSize: PixelConverter.toString(settingsModel.labels.fontSize.value),
+            fontFamily: settingsModel.labels.fontFamily.value.toString(),
+            text: maxDataText
+        };
+
+        const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
+
+        const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
+            .selectAll(TableHeatMap.CLsHeatMapDataLabels.selectorName)
+            .data(chartData.dataPoints)
+            .join(TableHeatMap.HtmlObjText)
+            .classed(TableHeatMap.CLsHeatMapDataLabels.className, true)
+            .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
+                return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
+            })
+            .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
+                return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + gridSizeHeight / 5;
+            })
+            .style("text-anchor", TableHeatMap.ConstMiddle)
+            .style("font-size", settingsModel.labels.fontSize.value)
+            .style("font-family", settingsModel.labels.fontFamily.value)
+            .style("fill", settingsModel.labels.fill.value.value)
+            .text((dataPoint: TableHeatMapDataPoint) => {
+                let textValue: string = valueFormatter.format(dataPoint.value);
+                textProperties.text = textValue;
+                textValue = textMeasurementService.getTailoredTextOrDefault(textProperties, gridSizeWidth);
+
+                if (textRect.height >= gridSizeHeight) return "..."
+
+                return dataPoint.value === 0 ? 0 : textValue;
+            });
+
+        return heatMapDataLables;
+    }
+
+    private renderYAxisLabels(renderOptions: IRenderOptions): void {
+        const { chartData, settingsModel, yAxisHeight, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
+
+        const categoryYElements: Selection<powerbi.PrimitiveValue> = this.mainGraphics
+            .selectAll(TableHeatMap.ClsCategoryYLabel.selectorName)
+            .data(chartData.categoryY)
+            .join(TableHeatMap.HtmlObjText)
+            .text((d: string) => {
+                return TableHeatMap.textLimit(d, settingsModel.yAxisLabels.maxTextSymbol.value);
+            })
+            .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
+            .attr(TableHeatMap.AttrX, TableHeatMap.Margin.left)
+            .attr(TableHeatMap.AttrY, function (d, i) {
+                return i * gridSizeHeight - (gridSizeHeight / 2) + yOffset - yAxisHeight / 3;
+            })
+            .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
+            .style("font-size", settingsModel.yAxisLabels.fontSize.value)
+            .style("font-family", settingsModel.yAxisLabels.fontFamily.value)
+            .style("fill", settingsModel.yAxisLabels.fill.value.value)
+            .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
+            .classed(TableHeatMap.ClsCategoryYLabel.className, true)
+            .classed(TableHeatMap.ClsMono, true)
+            .classed(TableHeatMap.ClsAxis, true);
+
+        categoryYElements
+            .call(this.wrap, gridSizeWidth + xOffset);
+
+        this.truncateTextIfNeeded(categoryYElements, gridSizeWidth + xOffset);
+    }
+
+    private renderXAxisLabels(renderOptions: IRenderOptions): void {
+        const { chartData, settingsModel, xOffset, gridSizeWidth } = renderOptions;
+
+        const categoryXElements: Selection<powerbi.PrimitiveValue> = this.mainGraphics
+            .selectAll(TableHeatMap.ClsCategoryXLabel.selectorName)
+            .data(chartData.categoryX)
+            .join(TableHeatMap.HtmlObjText)
+            .text((d: string) => {
+                return chartData.categoryValueFormatter.format(d);
+            })
+            .attr(TableHeatMap.AttrX, function (d: string, i: number) {
+                return i * gridSizeWidth + xOffset;
+            })
+            .attr(TableHeatMap.AttrY, TableHeatMap.Margin.top)
+            .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
+            .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
+            .style("font-size", settingsModel.xAxisLabels.fontSize.value)
+            .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
+            .style("fill", settingsModel.xAxisLabels.fill.value.value)
+            .classed(TableHeatMap.ClsCategoryXLabel.className, true)
+            .classed(TableHeatMap.ClsMono, true)
+            .classed(TableHeatMap.ClsAxis, true)
+            .attr(TableHeatMap.AttrTransform, translate(gridSizeWidth * TableHeatMap.ConstGridHeightWidthRatio, TableHeatMap.ConstShiftLabelFromGrid))
+            .attr("role", "presentation");
+
+        this.truncateTextIfNeeded(categoryXElements, gridSizeWidth);
+    }
+
+    private renderLegend(renderOptions: IRenderOptions): void {
+        const { chartData, settingsModel, colors, colorScale, xOffset, gridSizeHeight, xAxisHeight } = renderOptions;
+        const viewport = this.viewport;
+
+        const numBuckets: number = settingsModel.CurrentBucketCount;
+
+        const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
+        const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
+
+        const availableWidth = viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset;
+        const legendElementWidth = Math.max(0, availableWidth / numBuckets);
+
+        const legendDataValues = [minDataValue].concat(colorScale.quantiles());
+        const legendData = legendDataValues.concat(maxDataValue).map((value, index) => {
+            return {
+                value: value,
+                index: index,
+                tooltipInfo: [{
+                    displayName: `Min value`,
+                    value: value && typeof value.toFixed === "function" ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
+                },
+                {
+                    displayName: `Max value`,
+                    value: legendDataValues[index + 1] && typeof legendDataValues[index + 1].toFixed === "function" ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
+                }]
+            };
+        });
+
+        let shouldRotate = false;
+        const margin = 10;
+
+        const legendOffsetCellsY: number = TableHeatMap.Margin.top
+            + gridSizeHeight * (chartData.categoryY.length + TableHeatMap.ConstLegendOffsetFromChartByY)
+            + xAxisHeight;
+
+        const legendOffsetTextY: number = legendOffsetCellsY + gridSizeHeight + TableHeatMap.Margin.bottom;
+
+        const legendSelection: Selection<any> = this.mainGraphics
+            .append(TableHeatMap.HtmlObjG)
+            .classed(TableHeatMap.ClsLegend.className, true);
+
+        const legendItems: Selection<any> = legendSelection.selectAll(TableHeatMap.HtmlObjG)
+            .data(legendData)
+            .join(TableHeatMap.HtmlObjG)
+            .attr("data-index", (d, i) => i);
+
+        legendItems.selectAll(TableHeatMap.HtmlObjRect)
+            .data(data => [data])
+            .join(TableHeatMap.HtmlObjRect)
+            .attr(TableHeatMap.AttrX, (d) => legendElementWidth * d.index + xOffset)
+            .attr(TableHeatMap.AttrY, legendOffsetCellsY)
+            .attr(TableHeatMap.AttrWidth, legendElementWidth)
+            .attr(TableHeatMap.AttrHeight, gridSizeHeight)
+            .style(TableHeatMap.StFill, (d) => colors[d.index])
+            .style("stroke", GeneralSettings.stroke)
+            .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
+            .classed(TableHeatMap.ClsBordered, true);
+
+        legendItems.selectAll(TableHeatMap.HtmlObjText)
+            .data(data => [data])
+            .join(TableHeatMap.HtmlObjText)
+            .classed(TableHeatMap.ClsMono, true)
+            .classed(TableHeatMap.LegendLabel, true)
+            .attr(TableHeatMap.AttrX, (d) => legendElementWidth * d.index + xOffset - margin)
+            .attr(TableHeatMap.AttrY, legendOffsetTextY)
+            .attr(TableHeatMap.AttrWidth, legendElementWidth)
+            .attr(TableHeatMap.AttrHeight, gridSizeHeight)
+            .text((d) => {
+                const formattedValue = chartData.valueFormatter.format(d.value);
+
+                const textProperties = {
+                    fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
+                    text: formattedValue,
+                    fontFamily: TableHeatMap.LegendTextFontFamily
+                };
+
+                const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+
+                if (textWidth >= legendElementWidth - margin) {
+                    shouldRotate = true;
+                }
+
+                return formattedValue;
+            })
+            .style("font-size", TableHeatMap.LegendTextFontSize)
+            .style("font-family", TableHeatMap.LegendTextFontFamily)
+            .style("fill", settingsModel.general.textColor)
+            .attr("transform", function (d) {
+                if (!shouldRotate) return null;
+
+                const rotationAngle = viewport.width < 400 ? 90 : 65;
+                return manipulation.translateAndRotate(0, 0, legendElementWidth * d.index + xOffset, legendOffsetTextY, rotationAngle);
+            });
+
+
+        if (legendOffsetTextY + gridSizeHeight > viewport.height) {
+            this.svg.attr("height", legendOffsetTextY + gridSizeHeight);
+        }
+
+        this.addTooltipsToLegend(legendItems);
+    }
+
+    private addTooltipsToLegend(legend: any): void {
+        this.tooltipServiceWrapper.addTooltip(
+            legend,
+            (tooltipDataPoint: TooltipEnabledDataPoint) => {
+                return tooltipDataPoint.tooltipInfo;
+            }
+        );
+    }
+
+    private bindBehaviorToVisual(heatMap: Selection<TableHeatMapDataPoint>): void {
         const behaviorOptions: VisualBehaviorOptions = {
-            selection: this.heatMapSelection,
+            selection: heatMap,
             clearCatcher: this.svg
         };
 
         this.behavior.bindEvents(behaviorOptions);
         this.behavior.renderSelection();
-    }
-
-    private isSelectionIdInArray(selectionIds: ISelectionId[], selectionId: ISelectionId): boolean {
-        if (!selectionIds || !selectionId) {
-            return false;
-        }
-
-        return selectionIds.some((currentSelectionId: ISelectionId) => {
-            return currentSelectionId.equals(selectionId);
-        });
     }
 
     private static textLimit(text: string, limit: number) {
@@ -768,13 +762,13 @@ export class TableHeatMap implements IVisual {
 
         const height: number =
             viewport.height -
-            this.margin.top -
-            this.margin.bottom;
+            TableHeatMap.Margin.top -
+            TableHeatMap.Margin.bottom;
 
         const width: number =
             viewport.width -
-            this.margin.left -
-            this.margin.right;
+            TableHeatMap.Margin.left -
+            TableHeatMap.Margin.right;
 
         this.viewport = {
             height: height,
@@ -782,10 +776,10 @@ export class TableHeatMap implements IVisual {
         };
 
         this.mainGraphics
-            .attr(TableHeatMap.AttrHeight, Math.max(this.viewport.height + this.margin.top, 0))
-            .attr(TableHeatMap.AttrWidth, Math.max(this.viewport.width + this.margin.left, 0));
+            .attr(TableHeatMap.AttrHeight, Math.max(this.viewport.height + TableHeatMap.Margin.top, 0))
+            .attr(TableHeatMap.AttrWidth, Math.max(this.viewport.width + TableHeatMap.Margin.left, 0));
 
-        this.mainGraphics.attr(TableHeatMap.AttrTransform, translate(this.margin.left, this.margin.top));
+        this.mainGraphics.attr(TableHeatMap.AttrTransform, translate(TableHeatMap.Margin.left, TableHeatMap.Margin.top));
     }
 
     private truncateTextIfNeeded(text: Selection<any>, width: number): void {
