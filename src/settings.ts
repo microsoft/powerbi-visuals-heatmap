@@ -406,7 +406,7 @@ export class GeneralSettings extends FormattingSettingsCard {
         value: true, 
     });
 
-    public stroke: string = "#E6E6E6";
+    public static stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
     public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.gradientStart, this.gradientEnd, this.fillNullValuesCells];

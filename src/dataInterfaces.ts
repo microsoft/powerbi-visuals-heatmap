@@ -27,14 +27,16 @@
 import powerbi from "powerbi-visuals-api";
 
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
+
 import IValueFormatter = valueFormatter.IValueFormatter;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-export interface TableHeatMapDataPoint {
+export interface TableHeatMapDataPoint extends ISelectableDataPoint {
     categoryX: powerbi.PrimitiveValue;
     categoryY: powerbi.PrimitiveValue;
     value: powerbi.PrimitiveValue;
     valueStr: string;
-    selectionId: powerbi.visuals.ISelectionId,
     tooltipInfo?: VisualTooltipDataItem[];
 }
 

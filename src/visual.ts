@@ -70,6 +70,7 @@ import {
 } from "./dataInterfaces";
 
 import {
+    GeneralSettings,
     SettingsModel,
     colorbrewer
 } from "./settings";
@@ -218,7 +219,8 @@ export class TableHeatMap implements IVisual {
                     categoryY: categoryY.source.displayName,
                     value: value,
                     valueStr: categoryYFormatter.format(value),
-                    selectionId: selectionId,
+                    identity: selectionId,
+                    selected: false,
                     tooltipInfo: [{
                         displayName: `Category`,
                         value: (categoryX || "").toString()
@@ -271,10 +273,6 @@ export class TableHeatMap implements IVisual {
             element);
 
         this.selectionManager = this.host.createSelectionManager();
-
-        this.selectionManager.registerOnSelectCallback(() => {
-            this.syncSelectionState(this.heatMapSelection, <ISelectionId[]>this.selectionManager.getSelectionIds());
-        });
 
         this.behavior = new VisualWebBehavior(this.selectionManager);
     }
@@ -352,7 +350,7 @@ export class TableHeatMap implements IVisual {
             settingsModel.general.enableColorbrewer.value = false;
             settingsModel.general.gradientStart.value.value = backgroundColor;
             settingsModel.general.gradientEnd.value.value = backgroundColor;
-            settingsModel.general.stroke = foregroundColor;
+            GeneralSettings.stroke = foregroundColor;
             settingsModel.general.textColor = foregroundColor;
         }
 
@@ -581,7 +579,7 @@ export class TableHeatMap implements IVisual {
                 .attr(TableHeatMap.AttrWidth, gridSizeWidth)
                 .attr(TableHeatMap.AttrHeight, gridSizeHeight)
                 .style(TableHeatMap.StFill, colors[0])
-                .style("stroke", settingsModel.general.stroke)
+                .style("stroke", GeneralSettings.stroke)
             
             // add data labels
             const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics.selectAll("." + TableHeatMap.CLsHeatMapDataLabels);
@@ -669,7 +667,7 @@ export class TableHeatMap implements IVisual {
                 .style(TableHeatMap.StFill, function (d, i) {
                     return colors[i];
                 })
-                .style("stroke", settingsModel.general.stroke)
+                .style("stroke", GeneralSettings.stroke)
                 .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
                 .classed(TableHeatMap.ClsBordered, true);
 
@@ -742,32 +740,7 @@ export class TableHeatMap implements IVisual {
         };
 
         this.behavior.bindEvents(behaviorOptions);
-    }
-
-    private syncSelectionState(
-        selection: Selection<TableHeatMapDataPoint>,
-        selectionIds: powerbi.visuals.ISelectionId[]
-    ): void {
-        if (!selection || !selectionIds) {
-            return;
-        }
-        // eslint-disable-next-line
-        const self: this = this;
-        
-        selection.each(function (barDataPoint: TableHeatMapDataPoint) {
-            let opacity: number = 1;
-            let isSelected: boolean = false;
-            if (selectionIds.length) {
-                isSelected = self.isSelectionIdInArray(selectionIds, barDataPoint.selectionId);
-                opacity = isSelected ? 1 : 0.4;
-            }
-
-            d3Select(this)
-                .classed("selected", isSelected)
-                .attr("aria-selected", isSelected)
-                .style("fill-opacity", opacity)
-                .style("stroke-opacity", opacity);
-        });
+        this.behavior.renderSelection();
     }
 
     private isSelectionIdInArray(selectionIds: ISelectionId[], selectionId: ISelectionId): boolean {

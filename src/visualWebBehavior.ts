@@ -31,10 +31,14 @@ import {
 } from "d3-selection";
 type Selection<T> = ID3Selection<any, T, any, any>;
 
+import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
+
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 import {TableHeatMapDataPoint} from "./dataInterfaces";
+import { getOpacity, getStroke } from "./heatmapUtils";
 
 export interface VisualBehaviorOptions {
     selection: Selection<TableHeatMapDataPoint>;
@@ -43,6 +47,7 @@ export interface VisualBehaviorOptions {
 
 export class VisualWebBehavior {
     private selection: Selection<TableHeatMapDataPoint>;
+    private dataPoints: TableHeatMapDataPoint[];
     private clearCatcher: Selection<any>;
     private selectionManager: ISelectionManager;
 
@@ -53,47 +58,11 @@ export class VisualWebBehavior {
     public bindEvents(options: VisualBehaviorOptions): void {
         this.selection = options.selection;
         this.clearCatcher = options.clearCatcher;
+        this.dataPoints = options.selection.data();
         
         this.addEventListeners();
 
-        this.renderSelection(
-            this.selection,
-            <ISelectionId[]>this.selectionManager.getSelectionIds()
-        );
-    }
-
-    public renderSelection(selection: Selection<TableHeatMapDataPoint>,
-            selectionIds: powerbi.visuals.ISelectionId[]): void {
-        if (!selection || !selectionIds) {
-            return;
-        }
-        // eslint-disable-next-line
-        const self: this = this;
-        
-        selection.each(function (barDataPoint: TableHeatMapDataPoint) {
-            let opacity: number = 1;
-            let isSelected: boolean = false;
-            if (selectionIds.length) {
-                isSelected = self.isSelectionIdInArray(selectionIds, barDataPoint.selectionId);
-                opacity = isSelected ? 1 : 0.4;
-            }
-
-            d3Select(this)
-                .classed("selected", isSelected)
-                .attr("aria-selected", isSelected)
-                .style("fill-opacity", opacity)
-                .style("stroke-opacity", opacity);
-        });
-    }
-
-    private isSelectionIdInArray(selectionIds: ISelectionId[], selectionId: ISelectionId): boolean {
-        if (!selectionIds || !selectionId) {
-            return false;
-        }
-
-        return selectionIds.some((currentSelectionId: ISelectionId) => {
-            return currentSelectionId.equals(selectionId);
-        });
+        this.applySelectionStateToData();
     }
 
     public addEventListeners(): void {
@@ -106,9 +75,47 @@ export class VisualWebBehavior {
         this.bindKeyboardEvent(this.selection);
     }
 
+    public renderSelection(): void {
+        const dataPointHasSelection: boolean = this.dataPoints.some((dataPoint: TableHeatMapDataPoint) => dataPoint.selected);
+
+        // eslint-disable-next-line
+        const self: this = this;
+        
+        self.selection.each(function (barDataPoint: TableHeatMapDataPoint) {
+            const isSelected: boolean = barDataPoint.selected;
+
+            d3Select(this)
+                .attr("aria-selected", isSelected && dataPointHasSelection)
+                .style("fill-opacity", getOpacity(isSelected, false, dataPointHasSelection, false))
+                .style("stroke-opacity", getOpacity(isSelected, false, dataPointHasSelection, false))
+                .style("stroke", getStroke(isSelected, dataPointHasSelection));
+        });
+    }
+
+    private onSelectCallback(selectionIds?: ISelectionId[]){
+        this.applySelectionStateToData(selectionIds);
+        this.renderSelection();
+    }
+
+    private applySelectionStateToData(selectionIds?: ISelectionId[]): void{
+        const selectedIds: ISelectionId[] = <ISelectionId[]>this.selectionManager.getSelectionIds();
+        this.setSelectedToDataPoints(this.dataPoints, selectionIds || selectedIds);
+    }
+
+    private setSelectedToDataPoints(dataPoints: ISelectableDataPoint[], ids: ISelectionId[]): void{
+        dataPoints.forEach((dataPoint: ISelectableDataPoint) => {
+            dataPoint.selected = false;
+            ids.forEach((selectedId: ISelectionId) => {
+                if (selectedId.equals(<ISelectionId>dataPoint.identity)) {
+                    dataPoint.selected = true;
+                }
+            });
+        });
+    }
+
     private bindContextMenuEvent(elements: Selection<any>): void {
-        elements.on("contextmenu", (event: PointerEvent, dataPoint: TableHeatMapDataPoint | undefined) => {
-            this.selectionManager.showContextMenu(dataPoint ? dataPoint.selectionId : {},
+        elements.on("contextmenu", (event: PointerEvent, dataPoint: ISelectableDataPoint | undefined) => {
+            this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {},
                 {
                     x: event.clientX,
                     y: event.clientY
@@ -116,41 +123,34 @@ export class VisualWebBehavior {
             );
             event.preventDefault();
             event.stopPropagation();
-        })
-    }
-
-    private bindClickEvent(elements: Selection<any>): void {
-        elements.on("click", (event: PointerEvent, dataPoint: TableHeatMapDataPoint | undefined) => {
-            const isMultiSelection: boolean = event.ctrlKey || event.metaKey || event.shiftKey;
-            if (dataPoint){
-                this.selectionManager.select(dataPoint.selectionId, isMultiSelection)
-                .then((ids: powerbi.visuals.ISelectionId[]) => {
-                    this.renderSelection(this.selection, ids);
-                });
-                event.stopPropagation();
-            }
-            else {
-                this.selectionManager.clear()
-                .then(() => {
-                    this.renderSelection(this.selection, []);
-                });
-            }
         });
     }
 
+    private bindClickEvent(elements: Selection<any>): void {
+        elements.on("click", (event: PointerEvent, dataPoint: ISelectableDataPoint | undefined) => {
+            const isMultiSelection: boolean = event.ctrlKey || event.metaKey || event.shiftKey;
+            if (dataPoint){
+                this.selectionManager.select(dataPoint.identity, isMultiSelection);
+                event.stopPropagation();
+            }
+            else {
+                this.selectionManager.clear();
+            }
+            this.onSelectCallback();
+        })
+    }
+
     private bindKeyboardEvent(elements: Selection<any>): void {
-        elements.on("keydown", (event : KeyboardEvent, dataPoint: TableHeatMapDataPoint | undefined) => {
+        elements.on("keydown", (event : KeyboardEvent, dataPoint: ISelectableDataPoint) => {
             if (event.code !== "Enter" && event.code !== "Space") {
                 return;
             }
 
             const isMultiSelection: boolean = event.ctrlKey || event.metaKey || event.shiftKey;
-            this.selectionManager.select(dataPoint.selectionId, isMultiSelection)
-            .then((ids: powerbi.visuals.ISelectionId[]) => {
-                this.renderSelection(this.selection, ids);
-            });
+            this.selectionManager.select(dataPoint.identity, isMultiSelection);
 
             event.stopPropagation();
+            this.onSelectCallback();
         });
     }
 }
