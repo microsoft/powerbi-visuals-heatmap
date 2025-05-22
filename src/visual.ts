@@ -31,7 +31,7 @@ import IValueFormatter = valueFormatter.IValueFormatter;
 
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 
-import { axis, legend } from "powerbi-visuals-utils-chartutils";
+import { axis } from "powerbi-visuals-utils-chartutils";
 import LabelLayoutStrategy = axis.LabelLayoutStrategy;
 
 import { manipulation, CssConstants } from "powerbi-visuals-utils-svgutils";
@@ -40,7 +40,7 @@ import translate = manipulation.translate;
 
 import { createLinearColorScale, LinearColorScale, ColorHelper } from "powerbi-visuals-utils-colorutils";
 
-import { select as d3Select, Selection as ID3Selection, BaseType as ID3BaseType } from "d3-selection";
+import { select as d3Select, Selection as ID3Selection } from "d3-selection";
 import { ScaleQuantile as ID3ScaleQuantile, scaleQuantile as d3ScaleQuantile } from "d3-scale";
 import { min as d3Min, max as d3Max } from "d3-array";
 
@@ -54,7 +54,6 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IViewport = powerbi.IViewport;
 import DataView = powerbi.DataView;
 import IVisual = powerbi.extensibility.visual.IVisual;
-import ISelectionId = powerbi.visuals.ISelectionId;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
@@ -64,6 +63,7 @@ import { VisualWebBehavior, VisualBehaviorOptions } from "./visualWebBehavior";
 
 import {
     IColorArray,
+    ILegendDataPoint,
     IMargin,
     IRenderOptions,
     TableHeatMapChartData,
@@ -72,7 +72,6 @@ import {
 
 import {
     GeneralSettings,
-    LabelsSettings,
     SettingsModel,
     XAxisLabelsSettings,
     YAxisLabelsSettings,
@@ -156,8 +155,8 @@ export class TableHeatMap implements IVisual {
     private static ConstGridMinWidth: number = 0;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
-    private static ConstRectWidthAdjustment: number = 0;
-    private static ConstRectHeightAdjustment: number = 0;
+    private static ConstRectWidthAdjustment: number = 1;
+    private static ConstRectHeightAdjustment: number = 1;
 
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
@@ -228,7 +227,7 @@ export class TableHeatMap implements IVisual {
 
                     dataPoints.push({
                         categoryX: categoryX,
-                        categoryY: categoryY.name || val.source.displayName, //check
+                        categoryY: categoryY.name || val.source.displayName,
                         value: value,
                         valueStr: categoryYFormatter.format(value),
                         identity: selectionId,
@@ -239,7 +238,7 @@ export class TableHeatMap implements IVisual {
                         },
                         {
                             displayName: `Y`,
-                            value: (categoryY.name || val.source.displayName || "").toString() //check
+                            value: (categoryY.name || val.source.displayName || "").toString()
                         },
                         {
                             displayName: `Value`,
@@ -265,7 +264,8 @@ export class TableHeatMap implements IVisual {
                     return n !== undefined;
                 }),
             categoryValueFormatter: categoryValueFormatter,
-            valueFormatter: formatter
+            valueFormatter: formatter,
+            isInteractivitySupported: hasSeries
         };
         return result;
     }
@@ -418,9 +418,9 @@ export class TableHeatMap implements IVisual {
                 this.renderLabels(renderOptions);
             }
 
-            this.renderLegend(renderOptions);
+            const legendSelection: Selection<ILegendDataPoint> = this.renderLegend(renderOptions);
 
-            this.bindBehaviorToVisual(heatMapSelection);
+            this.bindBehaviorToVisual(heatMapSelection, legendSelection, chartData.isInteractivitySupported);
         }
     }
 
@@ -507,16 +507,16 @@ export class TableHeatMap implements IVisual {
             .data(chartData.dataPoints)
             .join(TableHeatMap.HtmlObjRect)
             .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
-                return chartData.categoryX.indexOf(d.categoryX) * (gridSizeWidth + TableHeatMap.ConstRectWidthAdjustment) + xOffset;
+                return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset;
             })
             .attr(TableHeatMap.AttrY, function (d: TableHeatMapDataPoint) {
-                return chartData.categoryY.indexOf(d.categoryY) * (gridSizeHeight + TableHeatMap.ConstRectHeightAdjustment) + yOffset;
+                return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset;
             })
             .attr("tabindex", 0)
             .classed(TableHeatMap.ClsCategoryX.className, true)
             .classed(TableHeatMap.ClsBordered, true)
-            .attr(TableHeatMap.AttrWidth, gridSizeWidth)
-            .attr(TableHeatMap.AttrHeight, gridSizeHeight)
+            .attr(TableHeatMap.AttrWidth, gridSizeWidth - TableHeatMap.ConstRectHeightAdjustment)
+            .attr(TableHeatMap.AttrHeight, gridSizeHeight - TableHeatMap.ConstRectHeightAdjustment)
             .style(TableHeatMap.StFill, colors[0])
             .style("stroke", GeneralSettings.stroke);
 
@@ -642,7 +642,7 @@ export class TableHeatMap implements IVisual {
         this.truncateTextIfNeeded(categoryXElements, gridSizeWidth);
     }
 
-    private renderLegend(renderOptions: IRenderOptions): void {
+    private renderLegend(renderOptions: IRenderOptions): Selection<ILegendDataPoint> {
         const { chartData, settingsModel, colors, colorScale, xOffset, gridSizeHeight, xAxisHeight } = renderOptions;
         const viewport = this.viewport;
 
@@ -655,17 +655,25 @@ export class TableHeatMap implements IVisual {
         const legendElementWidth = Math.max(0, availableWidth / numBuckets);
 
         const legendDataValues = [minDataValue].concat(colorScale.quantiles());
-        const legendData = legendDataValues.concat(maxDataValue).map((value, index) => {
+        const legendData: ILegendDataPoint[] = legendDataValues.concat(maxDataValue).map((value, index) => {
+            const nextValue: number = legendDataValues[index + 1];
+            const maxValue =
+                nextValue && typeof nextValue === "number"
+                    ? nextValue.toFixed(0)
+                    : chartData.categoryValueFormatter.format(maxDataValue);
+
             return {
                 value: value,
                 index: index,
+                maxValue: +maxValue,
+                selected: false,
                 tooltipInfo: [{
                     displayName: `Min value`,
-                    value: value && typeof value.toFixed === "function" ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
+                    value: value && typeof value === "number" ? value.toFixed(0) : chartData.categoryValueFormatter.format(value)
                 },
                 {
                     displayName: `Max value`,
-                    value: legendDataValues[index + 1] && typeof legendDataValues[index + 1].toFixed === "function" ? legendDataValues[index + 1].toFixed(0) : chartData.categoryValueFormatter.format(maxDataValue)
+                    value: maxValue
                 }]
             };
         });
@@ -741,6 +749,8 @@ export class TableHeatMap implements IVisual {
         }
 
         this.addTooltipsToLegend(legendItems);
+
+        return legendItems;
     }
 
     private addTooltipsToLegend(legend: any): void {
@@ -752,10 +762,12 @@ export class TableHeatMap implements IVisual {
         );
     }
 
-    private bindBehaviorToVisual(heatMap: Selection<TableHeatMapDataPoint>): void {
+    private bindBehaviorToVisual(heatMap: Selection<TableHeatMapDataPoint>, legendItems: Selection<ILegendDataPoint>, isInteractivitySupported: boolean): void {
         const behaviorOptions: VisualBehaviorOptions = {
             selection: heatMap,
-            clearCatcher: this.svg
+            clearCatcher: this.svg,
+            legendItems: legendItems,
+            isInteractivitySupported
         };
 
         this.behavior.bindEvents(behaviorOptions);

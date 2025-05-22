@@ -31,43 +31,52 @@ import {
 } from "d3-selection";
 type Selection<T> = ID3Selection<any, T, any, any>;
 
-import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import { legend, legendInterfaces } from "powerbi-visuals-utils-chartutils";
 import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
 
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
-import {TableHeatMapDataPoint} from "./dataInterfaces";
+import {ILegendDataPoint, TableHeatMapDataPoint} from "./dataInterfaces";
 import { getOpacity, getStroke } from "./heatmapUtils";
 
 export interface VisualBehaviorOptions {
     selection: Selection<TableHeatMapDataPoint>;
+    legendItems: Selection<ILegendDataPoint>;
     clearCatcher: Selection<any>;
+    isInteractivitySupported: boolean;
 }
 
 export class VisualWebBehavior {
     private selection: Selection<TableHeatMapDataPoint>;
     private dataPoints: TableHeatMapDataPoint[];
+    private legendDataPoints: ILegendDataPoint[];
+    private legendItems: Selection<ILegendDataPoint>;
     private clearCatcher: Selection<any>;
     private selectionManager: ISelectionManager;
 
     constructor(selectionManager: ISelectionManager) {
         this.selectionManager = selectionManager;
+        this.selectionManager.registerOnSelectCallback(this.onSelectCallback.bind(this));
     }
 
     public bindEvents(options: VisualBehaviorOptions): void {
         this.selection = options.selection;
         this.clearCatcher = options.clearCatcher;
         this.dataPoints = options.selection.data();
+        this.legendItems = options.legendItems;
+        this.legendDataPoints = options.legendItems.data();
+
+        if (!options.isInteractivitySupported) return;
         
         this.addEventListeners();
-
         this.applySelectionStateToData();
     }
 
     public addEventListeners(): void {
         this.bindClickEvent(this.selection);
         this.bindClickEvent(this.clearCatcher);
+        this.bindClickEventToLegendItems();
 
         this.bindContextMenuEvent(this.selection);
         this.bindContextMenuEvent(this.clearCatcher);
@@ -77,10 +86,9 @@ export class VisualWebBehavior {
 
     public renderSelection(): void {
         const dataPointHasSelection: boolean = this.dataPoints.some((dataPoint: TableHeatMapDataPoint) => dataPoint.selected);
+        const legendHasSelection: boolean = this.legendDataPoints.some((dataPoint: ILegendDataPoint) => dataPoint.selected);
 
-        // eslint-disable-next-line
         const self: this = this;
-        
         self.selection.each(function (barDataPoint: TableHeatMapDataPoint) {
             const isSelected: boolean = barDataPoint.selected;
 
@@ -88,7 +96,26 @@ export class VisualWebBehavior {
                 .attr("aria-selected", isSelected && dataPointHasSelection)
                 .style("fill-opacity", getOpacity(isSelected, false, dataPointHasSelection, false))
                 .style("stroke-opacity", getOpacity(isSelected, false, dataPointHasSelection, false))
-                .style("stroke", getStroke(isSelected, dataPointHasSelection));
+                .classed("selected", isSelected && dataPointHasSelection);
+        });
+
+        this.legendItems.selectAll("rect").classed("selected", (dataPoint: ILegendDataPoint) => dataPoint.selected&&legendHasSelection);
+    }
+
+    private bindClickEventToLegendItems(): void {
+        this.legendItems.on("click", (event: PointerEvent, legendPoint: ILegendDataPoint) => {
+            event.stopPropagation();
+            const isMultiSelection: boolean = event.ctrlKey || event.metaKey || event.shiftKey;
+
+            const idsToSelect: ISelectionId[] = this.dataPoints.filter((dataPoint: TableHeatMapDataPoint) => {
+                const pointNumber = dataPoint.value as number;
+                return pointNumber <= legendPoint.maxValue && pointNumber >= legendPoint.value;
+            }).map((dataPoint: TableHeatMapDataPoint) => dataPoint.identity);
+
+            debugger;
+            legendPoint.selected = !legendPoint.selected;
+            this.selectionManager.select(idsToSelect, true);
+            this.onSelectCallback();
         });
     }
 
@@ -136,8 +163,9 @@ export class VisualWebBehavior {
             else {
                 this.selectionManager.clear();
             }
+            this.legendDataPoints.forEach((dataPoint: ILegendDataPoint) => dataPoint.selected = false);
             this.onSelectCallback();
-        })
+        });
     }
 
     private bindKeyboardEvent(elements: Selection<any>): void {
