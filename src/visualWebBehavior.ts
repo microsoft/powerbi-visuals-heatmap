@@ -31,14 +31,14 @@ import {
 } from "d3-selection";
 type Selection<T> = ID3Selection<any, T, any, any>;
 
-import { legend, legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
 import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
 
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 import {ILegendDataPoint, TableHeatMapDataPoint} from "./dataInterfaces";
-import { getOpacity, getStroke } from "./heatmapUtils";
+import { getOpacity } from "./heatmapUtils";
 
 export interface VisualBehaviorOptions {
     selection: Selection<TableHeatMapDataPoint>;
@@ -88,8 +88,7 @@ export class VisualWebBehavior {
         const dataPointHasSelection: boolean = this.dataPoints.some((dataPoint: TableHeatMapDataPoint) => dataPoint.selected);
         const legendHasSelection: boolean = this.legendDataPoints.some((dataPoint: ILegendDataPoint) => dataPoint.selected);
 
-        const self: this = this;
-        self.selection.each(function (barDataPoint: TableHeatMapDataPoint) {
+        this.selection.each(function (barDataPoint: TableHeatMapDataPoint) {
             const isSelected: boolean = barDataPoint.selected;
 
             d3Select(this)
@@ -105,14 +104,12 @@ export class VisualWebBehavior {
     private bindClickEventToLegendItems(): void {
         this.legendItems.on("click", (event: PointerEvent, legendPoint: ILegendDataPoint) => {
             event.stopPropagation();
-            const isMultiSelection: boolean = event.ctrlKey || event.metaKey || event.shiftKey;
 
             const idsToSelect: ISelectionId[] = this.dataPoints.filter((dataPoint: TableHeatMapDataPoint) => {
                 const pointNumber = dataPoint.value as number;
                 return pointNumber <= legendPoint.maxValue && pointNumber >= legendPoint.value;
             }).map((dataPoint: TableHeatMapDataPoint) => dataPoint.identity);
 
-            debugger;
             legendPoint.selected = !legendPoint.selected;
             this.selectionManager.select(idsToSelect, true);
             this.onSelectCallback();

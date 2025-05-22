@@ -71,9 +71,9 @@ import {
 } from "./dataInterfaces";
 
 import {
+    BaseLabelCardSettings,
     GeneralSettings,
     SettingsModel,
-    XAxisLabelsSettings,
     YAxisLabelsSettings,
     colorbrewer
 } from "./settings";
@@ -103,7 +103,7 @@ export class TableHeatMap implements IVisual {
     private dataView: DataView;
     private viewport: IViewport;
     private behavior: VisualWebBehavior;
-    private static Margin: IMargin = { left: 5, right: 10, bottom: 20, top: 10 };
+    private static Margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
     private static AdditionalSpaceForColorbrewerCells: number = 2;
 
     private static YAxisAdditinalMargin: number = 5;
@@ -163,13 +163,6 @@ export class TableHeatMap implements IVisual {
 
     public static CellMaxHeightLimit: number = 300;
     private static CellMaxWidthFactorLimit: number = 15;
-
-    public static BucketCountMaxLimit: number = 18;
-    public static BucketCountMinLimit: number = 1;
-    public static DefaultBucketCount: number = 5;
-    public static ColorbrewerMaxBucketCount: number = 14;
-
-    public static DefaultColorbrewer: string = "Reds";
 
     private selectionManager: ISelectionManager;
 
@@ -305,8 +298,8 @@ export class TableHeatMap implements IVisual {
         try {
             this.host.eventService.renderingStarted(options);
 
-            this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews);
-            this.settingsModel.initBuckets(options.dataViews[0]);
+            this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
+            this.settingsModel.initBuckets();
             this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
@@ -340,7 +333,7 @@ export class TableHeatMap implements IVisual {
         }) + TableHeatMap.YAxisAdditinalMargin : 0;
     }
 
-    private static getXAxisHeight(chartData: TableHeatMapChartData, settings: XAxisLabelsSettings): number {
+    private static getXAxisHeight(chartData: TableHeatMapChartData, settings: BaseLabelCardSettings): number {
         const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
         const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
 
@@ -383,7 +376,7 @@ export class TableHeatMap implements IVisual {
     }
 
     private getGridSizeHeight(xAxisHeight: number, length: number): number {
-        const gridSizeHeight: number = Math.floor((this.viewport.height - TableHeatMap.Margin.top - xAxisHeight - TableHeatMap.Margin.bottom) / (length + TableHeatMap.AdditionalSpaceForColorbrewerCells));
+        const gridSizeHeight: number = Math.floor((this.viewport.height - TableHeatMap.Margin.top - xAxisHeight - TableHeatMap.Margin.bottom - TableHeatMap.YAxisAdditinalMargin) / (length + TableHeatMap.AdditionalSpaceForColorbrewerCells));
 
         return Math.max(
             TableHeatMap.ConstGridMinHeight,
@@ -543,14 +536,16 @@ export class TableHeatMap implements IVisual {
 
     private renderLabels(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
         const { chartData, settingsModel, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
+        const labelSettings: BaseLabelCardSettings = settingsModel.labels;
+
         const maxDataText = chartData.dataPoints.reduce((max: string, dp: TableHeatMapDataPoint) => {
             const val = dp.valueStr || "";
             return val.length > max.length ? val : max;
         }, "");
 
         const textProperties: TextProperties = {
-            fontSize: PixelConverter.toString(settingsModel.labels.fontSize.value),
-            fontFamily: settingsModel.labels.fontFamily.value.toString(),
+            fontSize: PixelConverter.toString(labelSettings.fontSize.value),
+            fontFamily: labelSettings.fontFamily.value.toString(),
             text: maxDataText
         };
 
@@ -568,9 +563,8 @@ export class TableHeatMap implements IVisual {
                 return chartData.categoryY.indexOf(d.categoryY) * gridSizeHeight + yOffset + gridSizeHeight / 2 + gridSizeHeight / 5;
             })
             .style("text-anchor", TableHeatMap.ConstMiddle)
-            .style("font-size", settingsModel.labels.fontSize.value)
-            .style("font-family", settingsModel.labels.fontFamily.value)
-            .style("fill", settingsModel.labels.fill.value.value)
+            .call(this.applyFontStylesToLabels(labelSettings))
+            .style("fill", labelSettings.fill.value.value)
             .text((dataPoint: TableHeatMapDataPoint) => {
                 let textValue: string = valueFormatter.format(dataPoint.value);
                 textProperties.text = textValue;
@@ -587,6 +581,8 @@ export class TableHeatMap implements IVisual {
     private renderYAxisLabels(renderOptions: IRenderOptions): void {
         const { chartData, settingsModel, yAxisHeight, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
 
+        const labelSettings: BaseLabelCardSettings = settingsModel.yAxisLabels;
+
         const categoryYElements: Selection<powerbi.PrimitiveValue> = this.mainGraphics
             .selectAll(TableHeatMap.ClsCategoryYLabel.selectorName)
             .data(chartData.categoryY)
@@ -600,8 +596,7 @@ export class TableHeatMap implements IVisual {
                 return i * gridSizeHeight - (gridSizeHeight / 2) + yOffset - yAxisHeight / 3;
             })
             .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstBegin)
-            .style("font-size", settingsModel.yAxisLabels.fontSize.value)
-            .style("font-family", settingsModel.yAxisLabels.fontFamily.value)
+            .call(this.applyFontStylesToLabels(labelSettings))
             .style("fill", settingsModel.yAxisLabels.fill.value.value)
             .attr(TableHeatMap.AttrTransform, translate(TableHeatMap.ConstShiftLabelFromGrid, gridSizeHeight))
             .classed(TableHeatMap.ClsCategoryYLabel.className, true)
@@ -617,6 +612,8 @@ export class TableHeatMap implements IVisual {
     private renderXAxisLabels(renderOptions: IRenderOptions): void {
         const { chartData, settingsModel, xOffset, gridSizeWidth } = renderOptions;
 
+        const labelSettings: BaseLabelCardSettings = settingsModel.xAxisLabels;
+
         const categoryXElements: Selection<powerbi.PrimitiveValue> = this.mainGraphics
             .selectAll(TableHeatMap.ClsCategoryXLabel.selectorName)
             .data(chartData.categoryX)
@@ -630,8 +627,7 @@ export class TableHeatMap implements IVisual {
             .attr(TableHeatMap.AttrY, TableHeatMap.Margin.top)
             .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
             .style(TableHeatMap.StTextAnchor, TableHeatMap.ConstMiddle)
-            .style("font-size", settingsModel.xAxisLabels.fontSize.value)
-            .style("font-family", settingsModel.xAxisLabels.fontFamily.value)
+            .call(this.applyFontStylesToLabels(labelSettings))
             .style("fill", settingsModel.xAxisLabels.fill.value.value)
             .classed(TableHeatMap.ClsCategoryXLabel.className, true)
             .classed(TableHeatMap.ClsMono, true)
@@ -640,6 +636,17 @@ export class TableHeatMap implements IVisual {
             .attr("role", "presentation");
 
         this.truncateTextIfNeeded(categoryXElements, gridSizeWidth);
+    }
+
+    private applyFontStylesToLabels(settings: BaseLabelCardSettings) {
+        return function (selection) {
+            selection
+                .style("font-size", settings.fontSize.value)
+                .style("font-family", settings.fontFamily.value)
+                .style("font-weight", settings.fontBold.value ? "bold" : "normal")
+                .style("font-style", settings.fontItalic.value ? "italic" : "normal")
+                .style("text-decoration", settings.fontUnderline.value ? "underline" : "none");
+        }
     }
 
     private renderLegend(renderOptions: IRenderOptions): Selection<ILegendDataPoint> {
@@ -700,8 +707,8 @@ export class TableHeatMap implements IVisual {
             .join(TableHeatMap.HtmlObjRect)
             .attr(TableHeatMap.AttrX, (d) => legendElementWidth * d.index + xOffset)
             .attr(TableHeatMap.AttrY, legendOffsetCellsY)
-            .attr(TableHeatMap.AttrWidth, legendElementWidth)
-            .attr(TableHeatMap.AttrHeight, gridSizeHeight)
+            .attr(TableHeatMap.AttrWidth, legendElementWidth - TableHeatMap.ConstRectWidthAdjustment)
+            .attr(TableHeatMap.AttrHeight, gridSizeHeight - TableHeatMap.ConstRectHeightAdjustment)
             .style(TableHeatMap.StFill, (d) => colors[d.index])
             .style("stroke", GeneralSettings.stroke)
             .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
@@ -735,6 +742,7 @@ export class TableHeatMap implements IVisual {
             })
             .style("font-size", TableHeatMap.LegendTextFontSize)
             .style("font-family", TableHeatMap.LegendTextFontFamily)
+
             .style("fill", settingsModel.general.textColor)
             .attr("transform", function (d) {
                 if (!shouldRotate) return null;

@@ -271,16 +271,31 @@
                         }
                     }
                 },
-                "forceDisplay": {
-                    "type": {
-                        "bool": true
-                    }
-                },
                 "fontFamily": {
                     "type": {
                         "formatting": {
                             "fontFamily": true
                         }
+                    }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "forceDisplay": {
+                    "type": {
+                        "bool": true
                     }
                 }
             }
@@ -314,6 +329,21 @@
                             "fontFamily": true
                         }
                     }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         },
@@ -340,16 +370,31 @@
                         }
                     }
                 },
-                "maxTextSymbol": {
-                    "type": {
-                        "numeric": true
-                    }
-                },
                 "fontFamily": {
                     "type": {
                         "formatting": {
                             "fontFamily": true
                         }
+                    }
+                },
+                "fontBold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontItalic": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontUnderline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "maxTextSymbol": {
+                    "type": {
+                        "numeric": true
                     }
                 }
             }
