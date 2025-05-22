@@ -555,5 +555,8 @@
     }
   },
   "supportsKeyboardFocus": true,
-  "supportsMultiVisualSelection": true
+  "supportsMultiVisualSelection": true,
+  "sorting": {
+    "default": {}
+  }
 }
