@@ -12,6 +12,12 @@
       "kind": "Measure",
       "displayName": "Y",
       "displayNameKey": "Visual_Y"
+    },
+    {
+      "name": "Series",
+      "kind": "Grouping",
+      "displayName": "Series",
+      "displayNameKey": "Visual_Series"
     }
   ],
   "dataViewMappings": [
@@ -23,18 +29,33 @@
           }
         },
         "values": {
-          "select": [
-            {
-              "bind": {
-                "to": "Y"
-              }
+            "group": {
+                "by": "Series",
+                "select": [{
+                    "bind": {
+                        "to": "Y"
+                    }
+                }]
             }
-          ]
         }
       },
       "conditions": [
         {
           "Category": {
+            "max": 1
+          },
+          "Series": {
+              "max": 0
+          }
+        },
+        {
+          "Category": {
+            "max": 1
+          },
+          "Series": {
+            "max": 1
+          },
+          "Y":{
             "max": 1
           }
         }

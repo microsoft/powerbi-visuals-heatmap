@@ -113,7 +113,7 @@ export class TableHeatMap implements IVisual {
     private static ClsAll: string = "*";
     private static ClsCategoryX: ClassAndSelector = createClassAndSelector("categoryX");
     private static ClsMono: string = "mono";
-    public static CLsHeatMapDataLabels: ClassAndSelector = createClassAndSelector("heatMapDataLabels");
+    private static ClsHeatMapDataLabels: ClassAndSelector = createClassAndSelector("heatMapDataLabels");
     private static ClsCategoryYLabel: ClassAndSelector = createClassAndSelector("categoryYLabel");
     private static ClsCategoryXLabel: ClassAndSelector = createClassAndSelector("categoryXLabel");
     private static ClsAxis: string = "axis";
@@ -156,8 +156,8 @@ export class TableHeatMap implements IVisual {
     private static ConstGridMinWidth: number = 0;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
-    private static ConstRectWidthAdjustment: number = 1;
-    private static ConstRectHeightAdjustment: number = 1;
+    private static ConstRectWidthAdjustment: number = 0;
+    private static ConstRectHeightAdjustment: number = 0;
 
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
@@ -197,9 +197,12 @@ export class TableHeatMap implements IVisual {
 
         this.dataView = dataView;
 
+        const values = dataView.categorical.values;
+        const groupedValues = dataView.categorical.values.grouped();
+
         const dataPoints: TableHeatMapDataPoint[] = [];
         const formatter = valueFormatter.create({
-            format: valueFormatter.getFormatStringByColumn(dataView.categorical.values[0].source),
+            format: valueFormatter.getFormatStringByColumn(dataView.categorical.values.source ?? dataView.categorical.values[0].source),
             value: dataView.categorical.values[0].values[0],
             precision: 2
         });
@@ -210,50 +213,61 @@ export class TableHeatMap implements IVisual {
         });
 
         dataView.categorical.categories[0].values.forEach((categoryX, indexX) => {
-            dataView.categorical.values.forEach((categoryY) => {
-                const categoryYFormatter = valueFormatter.create({
-                    format: categoryY.source.format,
-                    value: dataView.categorical.values[0].values[0]
-                });
-                const value = categoryY.values[indexX];
-                const selectionId = this.host.createSelectionIdBuilder()
-                    .withCategory(dataView.categorical.categories[0], indexX)
-                    .withMeasure(categoryY.source.queryName)
-                    .createSelectionId();
+            groupedValues.forEach((categoryY) => {
+                categoryY.values.forEach((val) => {
+                    const categoryYFormatter = valueFormatter.create({
+                        format: val.source?.format,
+                        value: dataView.categorical.values[0].values[0]
+                    });
 
-                dataPoints.push({
-                    categoryX: categoryX,
-                    categoryY: categoryY.source.displayName,
-                    value: value,
-                    valueStr: categoryYFormatter.format(value),
-                    identity: selectionId,
-                    selected: false,
-                    tooltipInfo: [{
-                        displayName: `Category`,
-                        value: (categoryX || "").toString()
-                    },
-                    {
-                        displayName: `Y`,
-                        value: (categoryY.source.displayName || "").toString()
-                    },
-                    {
-                        displayName: `Value`,
-                        value: categoryYFormatter.format(value)
-                    }]
+                    const value: powerbi.PrimitiveValue = val.values[indexX];
+                    const selectionId = this.host.createSelectionIdBuilder()
+                        .withCategory(dataView.categorical.categories[0], indexX)
+                        .withSeries(values, categoryY)
+                        .createSelectionId();
+
+                    dataPoints.push({
+                        categoryX: categoryX,
+                        categoryY: categoryY.name || val.source.displayName, //check
+                        value: value,
+                        valueStr: categoryYFormatter.format(value),
+                        identity: selectionId,
+                        selected: false,
+                        tooltipInfo: [{
+                            displayName: `Category`,
+                            value: (categoryX || "").toString()
+                        },
+                        {
+                            displayName: `Y`,
+                            value: (categoryY.name || val.source.displayName || "").toString() //check
+                        },
+                        {
+                            displayName: `Value`,
+                            value: categoryYFormatter.format(value)
+                        }]
+                    });
+
                 });
             });
         });
-        return <TableHeatMapChartData>{
+
+        const hasSeries: boolean = dataView.metadata.columns.some((column) => column.roles["Series"]);
+        const result: TableHeatMapChartData = {
             dataPoints: dataPoints,
             categoryX: dataView.categorical.categories[0].values.filter((n) => {
                 return n !== undefined;
             }),
-            categoryY: dataView.categorical.values.map(v => v.source.displayName).filter((n) => {
-                return n !== undefined;
-            }),
+            categoryY: hasSeries
+                ? groupedValues.map(v => v.name).filter((n) => {
+                    return n !== undefined;
+                })
+                : dataView.categorical.values.map(v => v.source.displayName).filter((n) => {
+                    return n !== undefined;
+                }),
             categoryValueFormatter: categoryValueFormatter,
             valueFormatter: formatter
         };
+        return result;
     }
 
     constructor({
@@ -315,7 +329,8 @@ export class TableHeatMap implements IVisual {
     }
 
     private static getYAxisWidth(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
-        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
+        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
+
         maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), settings.maxTextSymbol.value);
 
         return settings.show.value ? textMeasurementService.measureSvgTextWidth({
@@ -337,7 +352,8 @@ export class TableHeatMap implements IVisual {
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
-        const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, "length") || "";
+        const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
+
         return textMeasurementService.measureSvgTextHeight({
             fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
             text: maxLengthText.toString().trim(),
@@ -541,10 +557,10 @@ export class TableHeatMap implements IVisual {
         const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
-            .selectAll(TableHeatMap.CLsHeatMapDataLabels.selectorName)
+            .selectAll(TableHeatMap.ClsHeatMapDataLabels.selectorName)
             .data(chartData.dataPoints)
             .join(TableHeatMap.HtmlObjText)
-            .classed(TableHeatMap.CLsHeatMapDataLabels.className, true)
+            .classed(TableHeatMap.ClsHeatMapDataLabels.className, true)
             .attr(TableHeatMap.AttrX, function (d: TableHeatMapDataPoint) {
                 return chartData.categoryX.indexOf(d.categoryX) * gridSizeWidth + xOffset + gridSizeWidth / 2;
             })
@@ -669,8 +685,7 @@ export class TableHeatMap implements IVisual {
 
         const legendItems: Selection<any> = legendSelection.selectAll(TableHeatMap.HtmlObjG)
             .data(legendData)
-            .join(TableHeatMap.HtmlObjG)
-            .attr("data-index", (d, i) => i);
+            .join(TableHeatMap.HtmlObjG);
 
         legendItems.selectAll(TableHeatMap.HtmlObjRect)
             .data(data => [data])
