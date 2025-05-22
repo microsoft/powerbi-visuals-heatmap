@@ -152,7 +152,7 @@ export class TableHeatMap implements IVisual {
     private static ConstShiftLabelFromGrid: number = -6;
     private static ConstGridHeightWidthRatio: number = 0.5;
     private static ConstGridMinHeight: number = 5;
-    private static ConstGridMinWidth: number = 0;
+    private static ConstGridMinWidth: number = 1;
     private static ConstGridLegendWidthRatio: number = 0.95;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
     private static ConstRectWidthAdjustment: number = 1;
@@ -306,14 +306,11 @@ export class TableHeatMap implements IVisual {
             this.div.attr("width", PixelConverter.toString(options.viewport.width + TableHeatMap.Margin.left));
             this.div.attr("height", PixelConverter.toString(options.viewport.height + TableHeatMap.Margin.left));
 
-            this.svg.attr("width", options.viewport.width);
-            this.svg.attr("height", options.viewport.height);
-
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
 
             this.setSize(options.viewport);
 
-            this.render(this.converter(options.dataViews[0]), this.settingsModel);
+            this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
 
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
@@ -380,7 +377,7 @@ export class TableHeatMap implements IVisual {
 
         return Math.max(
             TableHeatMap.ConstGridMinHeight,
-            Math.min(gridSizeHeight, TableHeatMap.CellMaxHeightLimit))
+            Math.min(gridSizeHeight, TableHeatMap.CellMaxHeightLimit));
     }
 
     private getGridSizeWidth(yAxisWidth: number, length: number, gridSizeHeight: number): number {
@@ -392,7 +389,7 @@ export class TableHeatMap implements IVisual {
         );
     }
 
-    private render(chartData: TableHeatMapChartData, settingsModel: SettingsModel): void {
+    private render(chartData: TableHeatMapChartData, settingsModel: SettingsModel, viewport: IViewport): void {
         if (chartData.dataPoints) {
             const renderOptions: IRenderOptions = this.createRenderOptions(chartData, settingsModel);
 
@@ -411,7 +408,7 @@ export class TableHeatMap implements IVisual {
                 this.renderLabels(renderOptions);
             }
 
-            const legendSelection: Selection<ILegendDataPoint> = this.renderLegend(renderOptions);
+            const legendSelection: Selection<ILegendDataPoint> = this.renderLegend(renderOptions, viewport);
 
             this.bindBehaviorToVisual(heatMapSelection, legendSelection, chartData.isInteractivitySupported);
         }
@@ -508,7 +505,7 @@ export class TableHeatMap implements IVisual {
             .attr("tabindex", 0)
             .classed(TableHeatMap.ClsCategoryX.className, true)
             .classed(TableHeatMap.ClsBordered, true)
-            .attr(TableHeatMap.AttrWidth, gridSizeWidth - TableHeatMap.ConstRectHeightAdjustment)
+            .attr(TableHeatMap.AttrWidth, gridSizeWidth - TableHeatMap.ConstRectWidthAdjustment)
             .attr(TableHeatMap.AttrHeight, gridSizeHeight - TableHeatMap.ConstRectHeightAdjustment)
             .style(TableHeatMap.StFill, colors[0])
             .style("stroke", GeneralSettings.stroke);
@@ -649,9 +646,8 @@ export class TableHeatMap implements IVisual {
         }
     }
 
-    private renderLegend(renderOptions: IRenderOptions): Selection<ILegendDataPoint> {
+    private renderLegend(renderOptions: IRenderOptions, viewport: IViewport): Selection<ILegendDataPoint> {
         const { chartData, settingsModel, colors, colorScale, xOffset, gridSizeHeight, xAxisHeight } = renderOptions;
-        const viewport = this.viewport;
 
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
@@ -659,7 +655,7 @@ export class TableHeatMap implements IVisual {
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
         const availableWidth = viewport.width * TableHeatMap.ConstGridLegendWidthRatio - xOffset;
-        const legendElementWidth = Math.max(0, availableWidth / numBuckets);
+        const legendElementWidth = Math.max(1, availableWidth / numBuckets);
 
         const legendDataValues = [minDataValue].concat(colorScale.quantiles());
         const legendData: ILegendDataPoint[] = legendDataValues.concat(maxDataValue).map((value, index) => {
@@ -750,7 +746,6 @@ export class TableHeatMap implements IVisual {
                 const rotationAngle = viewport.width < 400 ? 90 : 65;
                 return manipulation.translateAndRotate(0, 0, legendElementWidth * d.index + xOffset, legendOffsetTextY, rotationAngle);
             });
-
 
         if (legendOffsetTextY + gridSizeHeight > viewport.height) {
             this.svg.attr("height", legendOffsetTextY + gridSizeHeight);

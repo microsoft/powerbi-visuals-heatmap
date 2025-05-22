@@ -41,14 +41,3 @@ export function getOpacity(
 
     return DefaultOpacity;
 }
-
-export function getStroke(
-    selected: boolean,
-    hasSelection: boolean): string {
-
-    if ((hasSelection && selected)) {
-        return DimmedColor;
-    }
-
-    return GeneralSettings.stroke;
-}
