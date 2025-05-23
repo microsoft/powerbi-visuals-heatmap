@@ -24,13 +24,19 @@
  *  THE SOFTWARE.
  */
 
+.dialog {
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: left;
+}
+
 .svgTableHeatMap {
   text.mono {
     font-size: 12px;
     fill: #aaa;
   }
-  
-  .heatMapDataLabels{
+
+  .heatMapDataLabels {
     pointer-events: none;
   }
 
@@ -41,17 +47,19 @@
     &:focus {
       outline: none;
     }
+
     &:focus-visible {
       outline: auto;
       stroke-width: 3px !important;
     }
+
     &.selected {
       stroke-width: 3px !important;
       outline: auto;
     }
   }
 
-  .legend{
+  .legend {
     rect {
       &.selected {
         outline: auto;

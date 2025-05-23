@@ -53,11 +53,17 @@ import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutil
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IViewport = powerbi.IViewport;
 import DataView = powerbi.DataView;
+import ViewMode = powerbi.ViewMode;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import ILocalizationManager = powerbi.extensibility.ILocalizationManager;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+
+import { InfoDialogBox } from "./dialogBox";
+import DialogAction = powerbi.DialogAction;
+import VisualDialogPositionType = powerbi.VisualDialogPositionType;
+import DialogOpenOptions = powerbi.extensibility.visual.DialogOpenOptions;
 
 import { VisualWebBehavior, VisualBehaviorOptions } from "./visualWebBehavior";
 
@@ -169,8 +175,9 @@ export class TableHeatMap implements IVisual {
     private settingsModel: SettingsModel;
 
     private formattingSettingsService: FormattingSettingsService;
+    private viewMode: powerbi.ViewMode;
 
-    public converter(dataView: DataView): TableHeatMapChartData {
+    public converter(dataView: DataView, viewMode: ViewMode): TableHeatMapChartData {
         if (!dataView
             || !dataView.categorical
             || !dataView.categorical.categories
@@ -188,6 +195,7 @@ export class TableHeatMap implements IVisual {
         }
 
         this.dataView = dataView;
+        this.processViewMode(viewMode, dataView);
 
         const values = dataView.categorical.values;
         const groupedValues = dataView.categorical.values.grouped();
@@ -310,7 +318,7 @@ export class TableHeatMap implements IVisual {
 
             this.setSize(options.viewport);
 
-            this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
+            this.render(this.converter(options.dataViews[0], options.viewMode), this.settingsModel, options.viewport);
 
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
@@ -339,6 +347,34 @@ export class TableHeatMap implements IVisual {
             text: maxLengthText.toString().trim(),
             fontFamily: settings.fontFamily.value.toString()
         }) : 0;
+    }
+
+    private processViewMode(viewMode: ViewMode, dataView: DataView): void {
+        const hasSeries = dataView.metadata.columns.some(col => col.roles["Series"]);
+
+        if (viewMode === powerbi.ViewMode.View || hasSeries) {
+            this.viewMode = viewMode;
+            return;
+        }
+
+        const isEditMode =
+            viewMode === powerbi.ViewMode.Edit ||
+            viewMode === powerbi.ViewMode.InFocusEdit;
+
+        if (isEditMode && !this.viewMode && !hasSeries) {
+            this.viewMode = viewMode;
+            const dialogOptions: DialogOpenOptions = {
+                actionButtons: [DialogAction.OK],
+                position: {
+                    type: VisualDialogPositionType.RelativeToVisual,
+                    left: 0,
+                    top: 0
+                },
+                size: { width: 300, height: 50 },
+                title: ""
+            };
+            this.host.openModalDialog(InfoDialogBox.Id, dialogOptions);
+        }
     }
 
     private getYAxisHeight(chartData: TableHeatMapChartData): number {
