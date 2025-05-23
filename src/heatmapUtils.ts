@@ -1,5 +1,3 @@
-import { GeneralSettings } from "./settings";
-
 /*
  *  Power BI Visualizations
  *

@@ -830,7 +830,6 @@ export class TableHeatMap implements IVisual {
             const y: string = text.attr(TableHeatMap.AttrY);
             const dy: number = parseFloat(text.attr(TableHeatMap.AttrDY));
             let tspan: Selection<any> = text.text(null).append(TableHeatMap.HtmlObjTspan).attr(TableHeatMap.AttrX, x).attr(TableHeatMap.AttrY, y).attr(TableHeatMap.AttrDY, dy + "em");
-            // eslint-disable-next-line no-cond-assign
             while (word = words.pop()) {
                 line.push(word);
                 tspan.text(line.join(" "));
