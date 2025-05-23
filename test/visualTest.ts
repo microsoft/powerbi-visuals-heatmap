@@ -500,6 +500,10 @@ describe("TableHeatmap", () => {
         });
     });
     describe("Selection tests", () => {
+        beforeEach(() => {
+            dataView = defaultDataViewBuilder.getDataViewWithSeries();
+        });
+
         it("element can be selected", (done) => {
             visualBuilder.updateRenderTimeout(dataView, () => {
                 const firstRect = visualBuilder.rects![0];
@@ -565,6 +569,10 @@ describe("TableHeatmap", () => {
     });
 
     describe("Keyboard navigation and related aria-attributes tests:", () => {
+        beforeEach(() => {
+            dataView = defaultDataViewBuilder.getDataViewWithSeries();
+        });
+
         it("should have role=grid and aria-multiselectable attributes correctly set", (done) => {
             visualBuilder.updateRenderTimeout(dataView, () => {
                 const grid = visualBuilder.grid;
