@@ -52,6 +52,7 @@
     "less": "^4.3.0",
     "less-loader": "^12.3.0",
     "playwright": "^1.52.0",
+    "playwright-chromium": "^1.52.0",
     "powerbi-visuals-api": "~5.11.0",
     "powerbi-visuals-tools": "^6.1.1",
     "powerbi-visuals-utils-testutils": "^6.1.1",
