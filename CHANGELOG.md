@@ -1,3 +1,20 @@
+## 4.0.0.0
+
+### New features
+* Added series data-role
+* Added interactivity for datapoints and legend
+* Added keyboard navigation
+* Added font settings for labels
+* Added sorting options
+* Added dialog box
+* Use API 5.11.0
+
+### Other
+* Updated dependencies
+* Added new tests
+* Used new eslint
+* Split render method into smaller functions.
+
 ## 3.5.0
 * Fixed bug when X axis labels height was calculated incorrectly if labels were numeric
 
