@@ -5,7 +5,7 @@
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-![HeatMap screenshot](https://github.com/microsoft/powerbi-visuals-tornado/blob/main/assets/screenshot.png?raw=true)
+![HeatMap screenshot](https://github.com/microsoft/powerbi-visuals-heatmap/blob/main/assets/sreenshot.png?raw=true)
 
 # Overview
 Use this custom visual to build a table heat map that can be used to visualise and compare data values in an easy and intuitive way.
