@@ -8,16 +8,16 @@
             "displayNameKey": "Visual_Category"
         },
         {
-            "name": "Y",
-            "kind": "Measure",
-            "displayName": "Y",
-            "displayNameKey": "Visual_Y"
-        },
-        {
             "name": "Series",
             "kind": "Grouping",
             "displayName": "Series",
             "displayNameKey": "Visual_Series"
+        },
+        {
+            "name": "Y",
+            "kind": "Measure",
+            "displayName": "Value",
+            "displayNameKey": "Visual_Value"
         }
     ],
     "dataViewMappings": [
