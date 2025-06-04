@@ -53,7 +53,6 @@ import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutil
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import IViewport = powerbi.IViewport;
 import DataView = powerbi.DataView;
-import ViewMode = powerbi.ViewMode;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -177,7 +176,7 @@ export class TableHeatMap implements IVisual {
     private formattingSettingsService: FormattingSettingsService;
     private viewMode: powerbi.ViewMode;
 
-    public converter(dataView: DataView, viewMode: ViewMode): TableHeatMapChartData {
+    public converter(dataView: DataView): TableHeatMapChartData {
         if (!dataView
             || !dataView.categorical
             || !dataView.categorical.categories
@@ -195,7 +194,6 @@ export class TableHeatMap implements IVisual {
         }
 
         this.dataView = dataView;
-        this.processViewMode(viewMode, dataView);
 
         const values = dataView.categorical.values;
         const groupedValues = dataView.categorical.values.grouped();
@@ -305,6 +303,7 @@ export class TableHeatMap implements IVisual {
         }
         try {
             this.host.eventService.renderingStarted(options);
+            this.processViewMode(options);
 
             this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
             this.settingsModel.initBuckets();
@@ -318,7 +317,7 @@ export class TableHeatMap implements IVisual {
 
             this.setSize(options.viewport);
 
-            this.render(this.converter(options.dataViews[0], options.viewMode), this.settingsModel, options.viewport);
+            this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
 
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
@@ -349,8 +348,9 @@ export class TableHeatMap implements IVisual {
         }) : 0;
     }
 
-    private processViewMode(viewMode: ViewMode, dataView: DataView): void {
-        const hasSeries = dataView.metadata.columns.some(col => col.roles["Series"]);
+    private processViewMode(options: VisualUpdateOptions): void {
+        const { viewMode, dataViews } = options;
+        const hasSeries = dataViews[0].metadata.columns.some(col => col.roles["Series"]);
 
         if (viewMode === powerbi.ViewMode.View || hasSeries) {
             this.viewMode = viewMode;
@@ -620,8 +620,8 @@ export class TableHeatMap implements IVisual {
             .selectAll(TableHeatMap.ClsCategoryYLabel.selectorName)
             .data(chartData.categoryY)
             .join(TableHeatMap.HtmlObjText)
-            .text((d: string) => {
-                return TableHeatMap.textLimit(d, settingsModel.yAxisLabels.maxTextSymbol.value);
+            .text((d: powerbi.PrimitiveValue) => {
+                return TableHeatMap.textLimit(d.toString(), settingsModel.yAxisLabels.maxTextSymbol.value);
             })
             .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
             .attr(TableHeatMap.AttrX, TableHeatMap.Margin.left)
