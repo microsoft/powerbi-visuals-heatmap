@@ -158,7 +158,7 @@ export class TableHeatMap implements IVisual {
     private static ConstGridHeightWidthRatio: number = 0.5;
     private static ConstGridMinHeight: number = 5;
     private static ConstGridMinWidth: number = 1;
-    private static ConstGridLegendWidthRatio: number = 0.95;
+    private static ConstGridLegendWidthRatio: number = 0.925;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
     private static ConstRectWidthAdjustment: number = 1;
     private static ConstRectHeightAdjustment: number = 1;
@@ -717,7 +717,6 @@ export class TableHeatMap implements IVisual {
             };
         });
 
-        let shouldRotate = false;
         const margin = 10;
 
         const legendOffsetCellsY: number = TableHeatMap.Margin.top
@@ -755,31 +754,26 @@ export class TableHeatMap implements IVisual {
             .attr(TableHeatMap.AttrY, legendOffsetTextY)
             .attr(TableHeatMap.AttrWidth, legendElementWidth)
             .attr(TableHeatMap.AttrHeight, gridSizeHeight)
-            .text((d) => {
-                const formattedValue = chartData.valueFormatter.format(d.value);
-
+            .text((d: ILegendDataPoint) => chartData.valueFormatter.format(d.value))
+            .style("font-size", TableHeatMap.LegendTextFontSize)
+            .style("font-family", TableHeatMap.LegendTextFontFamily)
+            .style("fill", settingsModel.general.textColor)
+            .attr("transform", (d: ILegendDataPoint) => {
+                const formattedValue: string = chartData.valueFormatter.format(d.value);
                 const textProperties = {
                     fontSize: PixelConverter.toString(TableHeatMap.LegendTextFontSize),
                     text: formattedValue,
                     fontFamily: TableHeatMap.LegendTextFontFamily
                 };
-
                 const textWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+                const needsRotation: boolean = textWidth >= legendElementWidth - margin;
+                const fullRotation: boolean = textWidth >= legendElementWidth;
 
-                if (textWidth >= legendElementWidth - margin) {
-                    shouldRotate = true;
+                if (!needsRotation){
+                    return null;
                 }
 
-                return formattedValue;
-            })
-            .style("font-size", TableHeatMap.LegendTextFontSize)
-            .style("font-family", TableHeatMap.LegendTextFontFamily)
-
-            .style("fill", settingsModel.general.textColor)
-            .attr("transform", function (d) {
-                if (!shouldRotate) return null;
-
-                const rotationAngle = viewport.width < 400 ? 90 : 65;
+                const rotationAngle: number = fullRotation ? 90 : 65;
                 return manipulation.translateAndRotate(0, 0, legendElementWidth * d.index + xOffset, legendOffsetTextY, rotationAngle);
             });
 
