@@ -164,7 +164,7 @@ export class TableHeatMap implements IVisual {
     private static ConstRectHeightAdjustment: number = 1;
 
     private static LegendTextFontSize = 12;
-    private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif;";
+    private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
     public static CellMaxHeightLimit: number = 300;
     private static CellMaxWidthFactorLimit: number = 15;
@@ -809,7 +809,7 @@ export class TableHeatMap implements IVisual {
 
     private static textLimit(text: string, limit: number) {
         if (text.length > limit) {
-            return ((text || "").substring(0, limit - 3).trim()) + "…";
+            return ((text || "").substring(0, limit).trim()) + "…";
         }
 
         return text;
