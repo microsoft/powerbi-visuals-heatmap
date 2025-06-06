@@ -412,7 +412,7 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
 
     public buckets = new formattingSettings.NumUpDown({
         name: "buckets",
-        displayNameKey: "Visual_General_Buckets",
+        displayNameKey: "Visual_General_Granularity",
         value: null,
         options: {
             minValue: {

@@ -1,7 +1,7 @@
 {
 	"Visual_General": "General",
 	"Visual_General_Colorbrewer": "Colorbrewer",
-	"Visual_General_Buckets": "Buckets",
+	"Visual_General_Granularity": "Granularity",
 	"Visual_Category": "Category",
 	"Visual_Y": "Y",
 	"Visual_Value": "Value",
