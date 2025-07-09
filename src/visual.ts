@@ -351,6 +351,8 @@ export class TableHeatMap implements IVisual {
     private processViewMode(options: VisualUpdateOptions): void {
         const { viewMode, dataViews } = options;
         const hasSeries = dataViews[0].metadata.columns.some(col => col.roles["Series"]);
+        const hasCategory = dataViews[0].metadata.columns.some(col => col.roles["Category"]);
+        const hasValues = dataViews[0].metadata.columns.some(col => col.roles["Y"]);
 
         if (viewMode === powerbi.ViewMode.View || hasSeries) {
             this.viewMode = viewMode;
@@ -361,7 +363,7 @@ export class TableHeatMap implements IVisual {
             viewMode === powerbi.ViewMode.Edit ||
             viewMode === powerbi.ViewMode.InFocusEdit;
 
-        if (isEditMode && !this.viewMode && !hasSeries) {
+        if (isEditMode && !this.viewMode && !hasSeries && hasCategory && hasValues) {
             this.viewMode = viewMode;
             const dialogOptions: DialogOpenOptions = {
                 actionButtons: [DialogAction.OK],
