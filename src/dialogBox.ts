@@ -16,10 +16,11 @@ export class InfoDialogBox {
         this.text = d3Select(options.element)
             .append("div")
             .classed("dialog", true)
-            .text("Add series values if you want to make the heatmap interactive.");
+            .text(`Add "Series" data if you want to make the heatmap interactive.`);
 
-        this.text.on("keydown", (event: KeyboardEvent) => {
+        document.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.code === "Enter") {
+                event.preventDefault();
                 this.host.close(DialogAction.Close);
             }
         });
