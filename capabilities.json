@@ -402,6 +402,7 @@
     },
     "supportsKeyboardFocus": true,
     "supportsMultiVisualSelection": true,
+    "supportsEmptyDataView": true,
     "sorting": {
         "default": {}
     }

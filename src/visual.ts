@@ -301,21 +301,29 @@ export class TableHeatMap implements IVisual {
         if (!options.dataViews || !options.dataViews[0]) {
             return;
         }
+
         try {
             this.host.eventService.renderingStarted(options);
-            this.processViewMode(options);
-
-            this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
-            this.settingsModel.initBuckets();
-            this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.svg.selectAll(TableHeatMap.ClsAll).remove();
             this.div.attr("width", PixelConverter.toString(options.viewport.width + TableHeatMap.Margin.left));
             this.div.attr("height", PixelConverter.toString(options.viewport.height + TableHeatMap.Margin.left));
 
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
-
             this.setSize(options.viewport);
+
+            const isValid = this.isDataViewValid(options.dataViews[0]);
+            if (!isValid) {
+                this.renderNotEnoughDataMessage(options);
+                this.host.eventService.renderingFinished(options);
+                return;
+            }
+
+            this.processViewMode(options);
+
+            this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
+            this.settingsModel.initBuckets();
+            this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
 
@@ -323,6 +331,50 @@ export class TableHeatMap implements IVisual {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
         this.host.eventService.renderingFinished(options);
+    }
+
+    private isDataViewValid(dataView: powerbi.DataView): boolean {
+        return !!(dataView.categorical?.categories && dataView.categorical?.values);
+    }
+
+    private renderNotEnoughDataMessage(options: VisualUpdateOptions): void {
+        const createMessageGroup = (title: string, message: string, currentOffsetY: number) => {
+            const group = this.mainGraphics.append("g")
+                .attr("class", "validationMessage")
+                .attr("transform", `translate(${TableHeatMap.Margin.left}, ${TableHeatMap.Margin.top + currentOffsetY})`);
+
+            // Title
+            group.append("text")
+                .attr("class", "messageTitle")
+                .attr("y", 0)
+                .style("fill", this.colorHelper.getHighContrastColor("foreground", "#333"))
+                .text(title);
+
+            // Message
+            group.append("text")
+                .attr("class", "messageBody")
+                .attr("y", 25)
+                .style("fill", this.colorHelper.getHighContrastColor("foreground", "#666"))
+                .text(message);
+        };
+
+        let offsetY = 0;
+        if (!options.dataViews[0].categorical?.categories) {
+            createMessageGroup(
+                "Category is not defined",
+                "Please add data to the 'Category' field to visualize the heatmap.",
+                offsetY
+            );
+            offsetY += 60; // Add vertical space for the next message
+        }
+
+        if (!options.dataViews[0].categorical?.values) {
+            createMessageGroup(
+                "Value is not defined",
+                "Please add data to the 'Value' field to visualize the heatmap.",
+                offsetY
+            );
+        }
     }
 
     private static getYAxisWidth(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
@@ -771,7 +823,7 @@ export class TableHeatMap implements IVisual {
                 const needsRotation: boolean = textWidth >= legendElementWidth - margin;
                 const fullRotation: boolean = textWidth >= legendElementWidth;
 
-                if (!needsRotation){
+                if (!needsRotation) {
                     return null;
                 }
 
