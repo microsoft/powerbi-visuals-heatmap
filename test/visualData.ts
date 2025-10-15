@@ -34,6 +34,7 @@ import {
 import {
     valueType
 } from "powerbi-visuals-utils-typeutils";
+import ExtendedType = valueType.ExtendedType;
 
 import range from "lodash.range";
 import random from "lodash.random";
@@ -44,6 +45,7 @@ import ValueType = valueType.ValueType;
 export class TableHeatMapData extends TestDataViewBuilder {
     public static CategoryColumn: string = "Category";
     public static MeasureColumn: string = "Y";
+    public static SeriesColumn: string = "Series";
 
     public dataCategory: string[];
     public dataMeasure: number[];
@@ -173,6 +175,54 @@ export class TableHeatMapData extends TestDataViewBuilder {
                         type: ValueType.fromDescriptor({numeric: true})
                     },
                     values: [0, "", 10]
+                }
+            ], columnNames!).build();
+    }
+
+    public getDataViewWithSeries(columnNames?: string[]): DataView {
+        const series: string[] = ["2010", "2011", "2012", "2013", "2014", "2015"];
+        const categories: string[] = this.dataCategory;
+        const categoryValues: string[] = [];
+        const seriesValues: string[] = [];
+        const measureValues: number[] = [];
+
+        for (let s = 0; s < series.length; s++) {
+            for (let c = 0; c < categories.length; c++) {
+                categoryValues.push(categories[c]);
+                seriesValues.push(series[s]);
+                measureValues.push(random(0, 100));
+            }
+        }
+        return this.createCategoricalDataViewBuilder(
+            [
+                {
+                    source: {
+                        displayName: "Month",
+                        roles: { Category: true },
+                        type: ValueType.fromDescriptor({ extendedType: ExtendedType.Text })
+                    },
+                    values: categoryValues
+                },
+                {
+                    isGroup: true,
+                    source: {
+                        displayName: "Year",
+                        roles: { Series: true },
+                        type: ValueType.fromDescriptor({ extendedType: ExtendedType.Text })
+                    },
+                    values: series,
+                }
+            ],
+            [
+                {
+                    source: {
+                        displayName: "Y",
+                        format: "0",
+                        roles: { Y: true },
+                        isMeasure: true,
+                        type: ValueType.fromDescriptor({ extendedType: ExtendedType.Numeric })
+                    },
+                    values: measureValues
                 }
             ], columnNames!).build();
     }

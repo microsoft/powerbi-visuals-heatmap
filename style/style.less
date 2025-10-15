@@ -24,12 +24,57 @@
  *  THE SOFTWARE.
  */
 
-.svgTableHeatMap rect.bordered {
-  stroke: #E6E6E6;
-  stroke-width: 2px;
+.dialog {
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
 }
 
-.svgTableHeatMap text.mono {
-  font-size: 12px;
-  fill: #aaa;
+.svgTableHeatMap {
+  text.mono {
+    font-size: 12px;
+    fill: #aaa;
+  }
+
+  .validationMessage {
+    .messageTitle {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .messageBody {
+      font-size: 14px;
+    }
+  }
+
+  .heatMapDataLabels {
+    pointer-events: none;
+  }
+
+  rect.bordered {
+    stroke: #E6E6E6;
+    stroke-width: 1px;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: auto;
+      stroke-width: 3px !important;
+    }
+
+    &.selected {
+      stroke-width: 3px !important;
+      outline: auto;
+    }
+  }
+
+  .legend {
+    rect {
+      &.selected {
+        outline: auto;
+      }
+    }
+  }
 }

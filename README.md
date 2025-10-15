@@ -1,8 +1,12 @@
+# PowerBI-visuals-Heatmap
+[![build](https://github.com/microsoft/powerbi-visuals-heatmap/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/microsoft/powerbi-visuals-heatmap/actions/workflows/build.yml)
+
 # Contributing
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-![HeatMap screenshot](https://az158878.vo.msecnd.net/marketing/Partner_21474836617/Product_42949680662/Asset_12af7ce5-f2f7-4aad-9da8-8b00cb225b0d/TableHeatmapscreenshot2.png)
+![HeatMap screenshot](https://github.com/microsoft/powerbi-visuals-heatmap/blob/main/assets/sreenshot.png?raw=true)
+
 # Overview
 Use this custom visual to build a table heat map that can be used to visualise and compare data values in an easy and intuitive way.
 

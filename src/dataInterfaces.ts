@@ -27,14 +27,23 @@
 import powerbi from "powerbi-visuals-api";
 
 import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import ISelectableDataPoint = legendInterfaces.ISelectableDataPoint;
+
+import {
+    TooltipEnabledDataPoint
+} from "powerbi-visuals-utils-tooltiputils";
+
+import { ScaleQuantile } from "d3-scale";
+type Quantile<T> = ScaleQuantile<T>;
+
 import IValueFormatter = valueFormatter.IValueFormatter;
-import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-export interface TableHeatMapDataPoint {
+import { SettingsModel } from "./settings";
+export interface TableHeatMapDataPoint extends ISelectableDataPoint, TooltipEnabledDataPoint {
     categoryX: powerbi.PrimitiveValue;
     categoryY: powerbi.PrimitiveValue;
     value: powerbi.PrimitiveValue;
     valueStr: string;
-    tooltipInfo?: VisualTooltipDataItem[];
 }
 
 export interface TableHeatMapChartData {
@@ -43,6 +52,7 @@ export interface TableHeatMapChartData {
     categoryY: powerbi.PrimitiveValue[];
     categoryValueFormatter: IValueFormatter;
     valueFormatter: IValueFormatter;
+    isInteractivitySupported: boolean;
 }
 
 export interface IMargin {
@@ -113,4 +123,25 @@ export interface IColorBrewer {
     Set1: IColorArray;
     Set2: IColorArray;
     Set3: IColorArray;
+}
+
+export interface IRenderOptions {
+    chartData: TableHeatMapChartData;
+    settingsModel: SettingsModel;
+    xAxisHeight: number;
+    yAxisHeight: number;
+    yAxisWidth: number;
+    xOffset: number;
+    yOffset: number;
+    gridSizeHeight: number;
+    gridSizeWidth: number;
+    colors: string[];
+    colorScale: Quantile<string>;
+}
+
+export interface ILegendDataPoint extends TooltipEnabledDataPoint{
+    value: number;
+    index: number;
+    maxValue: number;
+    selected: boolean;
 }
