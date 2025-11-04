@@ -3,8 +3,9 @@
     "name": "Microsoft",
     "email": "pbicvsupport@microsoft.com"
   },
-  "name": "TableHeatmap",
+  "name": "@microsoft/TableHeatmap",
   "version": "4.0.0.0",
+  "private": true,
   "dependencies": {
     "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
