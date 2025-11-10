@@ -1,0 +1,15 @@
+{
+  "Visual_General": "[W5vUz][ÍÙGeneral !!!]",
+  "Visual_General_Colorbrewer": "[okdMk][ÚæColorbrewer !!! !]",
+  "Visual_General_Buckets": "[3AlwA][ÙøBuckets !!!]",
+  "Visual_Category": "[JLMrQ][©éCategory !!! ]",
+  "Visual_Y": "[ofXui][ÃãY !]",
+  "Visual_DataPointsLabels": "[rm70r][ØÐData labels !!! !]",
+  "Visual_Show": "[8nVYP][ôÚShow !!]",
+  "Visual_LabelsFill": "[719u3][ï¢Color !!!]",
+  "Visual_TextSize": "[4zsiN][ö©Text Size !!! ]",
+  "Visual_Force_Display": "[2EygH][ÒÙForce display !!! !!]",
+  "Visual_EnableColorbrewer": "[cZ7qu][ÕÜEnable colorbrewer !!! !!!]",
+  "Visual_FontFamily": "[vERQO][ÏõFont family !!! !]",
+  "Visual_FillNullValCell": "[vYfkR][øÊFill by color cells with null value !!! !!! !!! !]"
+}
