@@ -525,8 +525,10 @@ export class TableHeatMap implements IVisual {
             .domain([minDataValue, maxDataValue])
             .range(colors);
 
-        settingsModel.general.gradientStart.value.value = colors[0];
-        settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
+        if (!settingsModel.general.invertColorScale.value || settingsModel.general.enableColorbrewer.value) {
+            settingsModel.general.gradientStart.value.value = colors[0];
+            settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
+        }
 
         const renderOptions: IRenderOptions = {
             chartData,
@@ -568,6 +570,10 @@ export class TableHeatMap implements IVisual {
             for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
                 colors.push(colorScale(bucketIndex));
             }
+        }
+
+        if (settingsModel.general.invertColorScale.value) {
+            colors = colors.slice().reverse();
         }
 
         return colors;
