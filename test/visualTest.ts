@@ -41,6 +41,7 @@ import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/in
 import capabilities from '../capabilities.json';
 import { TableHeatMap } from "../src/visual";
 import { ClickEventType, d3Click, renderTimeout } from "powerbi-visuals-utils-testutils";
+import { getOpacity, DimmedOpacity, DefaultOpacity } from "../src/heatmapUtils";
 
 const DefaultTimeout: number = 300;
 
@@ -755,6 +756,29 @@ describe("TableHeatmap", () => {
                     done();
                 }, DefaultTimeout);
             }, DefaultTimeout);
+        });
+    });
+
+
+    describe("utils:getOpacity", () => {
+        it("returns DefaultOpacity when no selection or highlights are active", () => {
+            expect(getOpacity(false, false, false, false)).toBe(DefaultOpacity);
+        });
+
+        it("returns DefaultOpacity for a selected element when selection is active", () => {
+            expect(getOpacity(true, false, true, false)).toBe(DefaultOpacity);
+        });
+
+        it("returns DimmedOpacity for an unselected element when selection is active", () => {
+            expect(getOpacity(false, false, true, false)).toBe(DimmedOpacity);
+        });
+
+        it("returns DefaultOpacity for a highlighted element when partial highlights are active", () => {
+            expect(getOpacity(false, true, false, true)).toBe(DefaultOpacity);
+        });
+
+        it("returns DimmedOpacity for a non-highlighted element when partial highlights are active", () => {
+            expect(getOpacity(false, false, false, true)).toBe(DimmedOpacity);
         });
     });
 });
