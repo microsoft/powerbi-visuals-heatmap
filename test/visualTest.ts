@@ -687,4 +687,75 @@ describe("TableHeatmap", () => {
             });
         }
     });
+
+    describe("invertColorScale", () => {
+        beforeEach(() => {
+            dataView = defaultDataViewBuilder.getDataViewWithSeries();
+        });
+
+        it("should reverse cell fill colors when enabled with colorbrewer", (done) => {
+            dataView.metadata.objects = {
+                general: {
+                    enableColorbrewer: true,
+                    colorbrewer: "Reds",
+                    buckets: 5,
+                    invertColorScale: false }
+            };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const normalFills = Array.from(document.querySelectorAll("rect.categoryX"))
+                    .map((el: Element) => getComputedStyle(el)["fill"]);
+
+                dataView.metadata.objects = {
+                    general: {
+                        enableColorbrewer: true,
+                        colorbrewer: "Reds",
+                        buckets: 5,
+                        invertColorScale: true }
+                };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const invertedFills = Array.from(document.querySelectorAll("rect.categoryX"))
+                        .map((el: Element) => getComputedStyle(el)["fill"]);
+
+                    expect(normalFills.length).toBe(invertedFills.length);
+                    const changedCount = normalFills.filter((fill, i) => fill !== invertedFills[i]).length;
+                    expect(changedCount).toBeGreaterThan(0);
+                    done();
+                }, DefaultTimeout);
+            }, DefaultTimeout);
+        });
+
+        it("should reverse cell fill colors when enabled with custom gradient", (done) => {
+            dataView.metadata.objects = {
+                general: {
+                    enableColorbrewer: false,
+                    gradientStart: { solid: { color: "#0000FF" } },
+                    gradientEnd: { solid: { color: "#FF0000" } },
+                    invertColorScale: false
+                }
+            };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const normalFills = Array.from(document.querySelectorAll("rect.categoryX"))
+                    .map((el: Element) => getComputedStyle(el)["fill"]);
+
+                dataView.metadata.objects = {
+                    general: {
+                        enableColorbrewer: false,
+                        gradientStart: { solid: { color: "#0000FF" } },
+                        gradientEnd: { solid: { color: "#FF0000" } },
+                        invertColorScale: true
+                    }
+                };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const invertedFills = Array.from(document.querySelectorAll("rect.categoryX"))
+                        .map((el: Element) => getComputedStyle(el)["fill"]);
+
+                    expect(normalFills.length).toBe(invertedFills.length);
+                    const changedCount = normalFills.filter((fill, i) => fill !== invertedFills[i]).length;
+                    expect(changedCount).toBeGreaterThan(0);
+                    done();
+                }, DefaultTimeout);
+            }, DefaultTimeout);
+        });
+    });
 });
+
