@@ -700,7 +700,8 @@ describe("TableHeatmap", () => {
                     enableColorbrewer: true,
                     colorbrewer: "Reds",
                     buckets: 5,
-                    invertColorScale: false }
+                    invertColorScale: false
+                }
             };
             visualBuilder.updateRenderTimeout(dataView, () => {
                 const normalFills = Array.from(document.querySelectorAll("rect.categoryX"))
@@ -711,14 +712,15 @@ describe("TableHeatmap", () => {
                         enableColorbrewer: true,
                         colorbrewer: "Reds",
                         buckets: 5,
-                        invertColorScale: true }
+                        invertColorScale: true
+                    }
                 };
                 visualBuilder.updateRenderTimeout(dataView, () => {
                     const invertedFills = Array.from(document.querySelectorAll("rect.categoryX"))
                         .map((el: Element) => getComputedStyle(el)["fill"]);
 
                     expect(normalFills.length).toBe(invertedFills.length);
-                    const changedCount = normalFills.filter((fill, i) => fill !== invertedFills[i]).length;
+                    const changedCount = normalFills.filter((fill, i) => !areColorsEqual(fill, invertedFills[i])).length;
                     expect(changedCount).toBeGreaterThan(0);
                     done();
                 }, DefaultTimeout);
@@ -751,14 +753,13 @@ describe("TableHeatmap", () => {
                         .map((el: Element) => getComputedStyle(el)["fill"]);
 
                     expect(normalFills.length).toBe(invertedFills.length);
-                    const changedCount = normalFills.filter((fill, i) => fill !== invertedFills[i]).length;
+                    const changedCount = normalFills.filter((fill, i) => !areColorsEqual(fill, invertedFills[i])).length;
                     expect(changedCount).toBeGreaterThan(0);
                     done();
                 }, DefaultTimeout);
             }, DefaultTimeout);
         });
     });
-
 
     describe("utils:getOpacity", () => {
         it("returns DefaultOpacity when no selection or highlights are active", () => {
