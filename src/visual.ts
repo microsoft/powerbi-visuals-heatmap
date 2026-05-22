@@ -518,17 +518,29 @@ export class TableHeatMap implements IVisual {
         const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
-        const colors: string[] = this.initColors(settingsModel);
+        // Base palette as defined by the active source (colorbrewer or custom gradient),
+        // without invert applied. Used both for rendering and for syncing gradient pickers.
+        const baseColors: string[] = this.initColors(settingsModel);
 
+        // Sync the gradient pickers with the current colorbrewer palette so that if the
+        // user later disables colorbrewer, they inherit sensible start/end values.
+        // Done only in colorbrewer mode: in custom gradient mode the pickers ARE the source
+        // of truth, and writing back would (a) leak inverted colors when invert is on and
+        // (b) cause a slow off-by-one drift of gradientEnd toward gradientStart.
+        if (settingsModel.general.enableColorbrewer.value) {
+            settingsModel.general.gradientStart.value.value = baseColors[0];
+            settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
+        }
+
+        // Invert is a render-only transformation applied as the final step so that toggling
+        // it never mutates user-visible settings (gradient pickers stay stable).
+        const colors: string[] = settingsModel.general.invertColorScale.value
+            ? baseColors.slice().reverse()
+            : baseColors;
 
         const colorScale: Quantile<string> = d3ScaleQuantile<string>()
             .domain([minDataValue, maxDataValue])
             .range(colors);
-
-        if (!settingsModel.general.invertColorScale.value || settingsModel.general.enableColorbrewer.value) {
-            settingsModel.general.gradientStart.value.value = colors[0];
-            settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
-        }
 
         const renderOptions: IRenderOptions = {
             chartData,
@@ -552,28 +564,20 @@ export class TableHeatMap implements IVisual {
         const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
-        let colors: Array<string>;
         if (colorbrewerEnable) {
-            if (colorbrewerScale) {
-                const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
-            }
-            else {
-                colors = colorbrewer.Reds[numBuckets];	// default color scheme
-            }
-        } else {
-            const startColor: string = settingsModel.general.gradientStart.value.value;
-            const endColor: string = settingsModel.general.gradientEnd.value.value;
-            const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
-            colors = [];
-
-            for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
-                colors.push(colorScale(bucketIndex));
-            }
+            const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
+            const palette: string[] = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
+            // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
+            return palette.slice();
         }
 
-        if (settingsModel.general.invertColorScale.value) {
-            colors = colors.slice().reverse();
+        const startColor: string = settingsModel.general.gradientStart.value.value;
+        const endColor: string = settingsModel.general.gradientEnd.value.value;
+        const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
+        const colors: string[] = [];
+
+        for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
+            colors.push(colorScale(bucketIndex));
         }
 
         return colors;
