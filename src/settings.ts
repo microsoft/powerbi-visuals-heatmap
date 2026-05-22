@@ -425,7 +425,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
     public gradientMiddle = new formattingSettings.ColorPicker({
         name: "gradientMiddle",
         displayNameKey: "Visual_GradientMiddle",
-        value: { value: "#808080" },
+        value: { value: "" },
     });
 
     public gradientEnd = new formattingSettings.ColorPicker({

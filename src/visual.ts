@@ -573,7 +573,6 @@ export class TableHeatMap implements IVisual {
         let colors: Array<string>;
 
         if (activateGradientMiddle) {
-            // Determine start and end from colorbrewer palette or user settings
             let startColor: string;
             let endColor: string;
             if (colorbrewerEnable) {
@@ -586,10 +585,17 @@ export class TableHeatMap implements IVisual {
                 endColor = settingsModel.general.gradientEnd.value.value;
             }
             const middleColor: string = settingsModel.general.gradientMiddle.value.value;
-            const midIndex: number = Math.floor((numBuckets - 1) / 2);
+            const range: string[] = [startColor, endColor];
+            const domain: number[] = [0, numBuckets - 1];
+
+            if (middleColor !== '') {
+                range.splice(1, 0, middleColor);
+                domain.splice(1, 0, Math.floor((numBuckets - 1) / 2));
+            }
+            
             const colorScale: LinearColorScale = createLinearColorScale(
-                [0, midIndex, numBuckets - 1],
-                [startColor, middleColor, endColor],
+                domain,
+                range,
                 true
             );
             colors = [];
@@ -599,7 +605,7 @@ export class TableHeatMap implements IVisual {
         } else if (colorbrewerEnable) {
             if (colorbrewerScale) {
                 const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
+                colors = currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets];
             }
             else {
                 colors = colorbrewer.Reds[numBuckets];	// default color scheme
