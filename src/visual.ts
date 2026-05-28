@@ -326,11 +326,11 @@ export class TableHeatMap implements IVisual {
             this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
+            this.host.eventService.renderingFinished(options);
 
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
-        this.host.eventService.renderingFinished(options);
     }
 
     private isDataViewValid(dataView: powerbi.DataView): boolean {
