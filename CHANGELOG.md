@@ -1,4 +1,4 @@
-## 4.0.1.0
+## 4.1.0.0
 
 ### New features
 * Added "Invert Color Scale" toggle to reverse the color gradient direction

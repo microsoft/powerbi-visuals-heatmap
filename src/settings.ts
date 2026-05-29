@@ -407,6 +407,7 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
     public invertColorScale = new formattingSettings.ToggleSwitch({
         name: "invertColorScale",
         displayNameKey: "Visual_InvertColorScale",
+        descriptionKey: "Visual_Description_InvertColorScale",
         value: false,
     });
 
