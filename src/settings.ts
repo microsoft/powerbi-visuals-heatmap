@@ -404,6 +404,13 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
         value: { value: "#000000" },
     });
 
+    public invertColorScale = new formattingSettings.ToggleSwitch({
+        name: "invertColorScale",
+        displayNameKey: "Visual_InvertColorScale",
+        descriptionKey: "Visual_Description_InvertColorScale",
+        value: false,
+    });
+
     public fillNullValuesCells = new formattingSettings.ToggleSwitch({
         name: "fillNullValuesCells",
         displayNameKey: "Visual_FillNullValCell",
@@ -429,7 +436,15 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
     public static stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
-    public slices: FormattingSettingsSlice[] = [this.enableColorbrewer, this.colorbrewer, this.gradientStart, this.gradientEnd, this.fillNullValuesCells, this.buckets];
+    public slices: FormattingSettingsSlice[] = [
+        this.enableColorbrewer,
+        this.colorbrewer,
+        this.gradientStart,
+        this.gradientEnd,
+        this.invertColorScale,
+        this.fillNullValuesCells,
+        this.buckets
+    ];
 }
 
 export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {

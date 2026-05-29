@@ -4,7 +4,7 @@
     "email": "pbicvsupport@microsoft.com"
   },
   "name": "@microsoft/TableHeatmap",
-  "version": "4.0.0.0",
+  "version": "4.1.0.0",
   "private": true,
   "dependencies": {
     "d3-array": "^3.2.4",
@@ -55,7 +55,7 @@
     "playwright": "^1.52.0",
     "playwright-chromium": "^1.52.0",
     "powerbi-visuals-api": "~5.11.0",
-    "powerbi-visuals-tools": "^6.1.1",
+    "powerbi-visuals-tools": "^7.0.3",
     "powerbi-visuals-utils-testutils": "^6.1.1",
     "style-loader": "^4.0.0",
     "ts-node": "^10.9.2",

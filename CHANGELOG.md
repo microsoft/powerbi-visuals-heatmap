@@ -1,3 +1,12 @@
+## 4.1.0.0
+
+### New features
+* Added "Invert Color Scale" toggle to reverse the color gradient direction
+
+### Other
+* Upgraded powerbi-visuals-tools from ^6.1.1 to ^7.0.3
+* Added unit tests for invertColorScale and getOpacity utility
+
 ## 4.0.0.0
 
 ### New features

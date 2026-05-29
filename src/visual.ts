@@ -1,28 +1,28 @@
 /*
-*  Power BI Visualizations
-*
-*  Copyright (c) Microsoft Corporation
-*  All rights reserved.
-*  MIT License
-*
-*  Permission is hereby granted, free of charge, to any person obtaining a copy
-*  of this software and associated documentation files (the ""Software""), to deal
-*  in the Software without restriction, including without limitation the rights
-*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-*  copies of the Software, and to permit persons to whom the Software is
-*  furnished to do so, subject to the following conditions:
-*
-*  The above copyright notice and this permission notice shall be included in
-*  all copies or substantial portions of the Software.
-*
-*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-*  THE SOFTWARE.
-*/
+ *  Power BI Visualizations
+ *
+ *  Copyright (c) Microsoft Corporation
+ *  All rights reserved.
+ *  MIT License
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the ""Software""), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
 import powerbi from "powerbi-visuals-api";
 import "./../style/style.less";
 
@@ -326,11 +326,11 @@ export class TableHeatMap implements IVisual {
             this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
 
             this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
+            this.host.eventService.renderingFinished(options);
 
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
-        this.host.eventService.renderingFinished(options);
     }
 
     private isDataViewValid(dataView: powerbi.DataView): boolean {
@@ -518,15 +518,29 @@ export class TableHeatMap implements IVisual {
         const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
-        const colors: string[] = this.initColors(settingsModel);
+        // Base palette as defined by the active source (colorbrewer or custom gradient),
+        // without invert applied. Used both for rendering and for syncing gradient pickers.
+        const baseColors: string[] = this.initColors(settingsModel);
 
+        // Sync the gradient pickers with the current colorbrewer palette so that if the
+        // user later disables colorbrewer, they inherit sensible start/end values.
+        // Done only in colorbrewer mode: in custom gradient mode the pickers ARE the source
+        // of truth, and writing back would (a) leak inverted colors when invert is on and
+        // (b) cause a slow off-by-one drift of gradientEnd toward gradientStart.
+        if (settingsModel.general.enableColorbrewer.value) {
+            settingsModel.general.gradientStart.value.value = baseColors[0];
+            settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
+        }
+
+        // Invert is a render-only transformation applied as the final step so that toggling
+        // it never mutates user-visible settings (gradient pickers stay stable).
+        const colors: string[] = settingsModel.general.invertColorScale.value
+            ? baseColors.slice().reverse()
+            : baseColors;
 
         const colorScale: Quantile<string> = d3ScaleQuantile<string>()
             .domain([minDataValue, maxDataValue])
             .range(colors);
-
-        settingsModel.general.gradientStart.value.value = colors[0];
-        settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
 
         const renderOptions: IRenderOptions = {
             chartData,
@@ -550,24 +564,20 @@ export class TableHeatMap implements IVisual {
         const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
-        let colors: Array<string>;
         if (colorbrewerEnable) {
-            if (colorbrewerScale) {
-                const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
-            }
-            else {
-                colors = colorbrewer.Reds[numBuckets];	// default color scheme
-            }
-        } else {
-            const startColor: string = settingsModel.general.gradientStart.value.value;
-            const endColor: string = settingsModel.general.gradientEnd.value.value;
-            const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
-            colors = [];
+            const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
+            const palette: string[] = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
+            // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
+            return palette.slice();
+        }
 
-            for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
-                colors.push(colorScale(bucketIndex));
-            }
+        const startColor: string = settingsModel.general.gradientStart.value.value;
+        const endColor: string = settingsModel.general.gradientEnd.value.value;
+        const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);
+        const colors: string[] = [];
+
+        for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
+            colors.push(colorScale(bucketIndex));
         }
 
         return colors;
