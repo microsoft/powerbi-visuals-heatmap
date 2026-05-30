@@ -518,33 +518,14 @@ export class TableHeatMap implements IVisual {
         const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
-        if (settingsModel.general.activateGradientMiddle.value &&
-            settingsModel.general.gradientMiddle.value.value === "#808080") {
-            const cbEnable: boolean = settingsModel.general.enableColorbrewer.value;
-            const cbScale: string = settingsModel.general.colorbrewer.value.toString();
-            const numBuckets: number = settingsModel.CurrentBucketCount;
-            let autoStart: string;
-            let autoEnd: string;
-            if (cbEnable) {
-                const cbPalette: IColorArray = colorbrewer[cbScale] || colorbrewer.Reds;
-                const cbColors: string[] = cbPalette[numBuckets] || colorbrewer.Reds[numBuckets];
-                autoStart = cbColors[0];
-                autoEnd = cbColors[cbColors.length - 1];
-            } else {
-                autoStart = settingsModel.general.gradientStart.value.value;
-                autoEnd = settingsModel.general.gradientEnd.value.value;
-            }
-            const midScale: LinearColorScale = createLinearColorScale([0, 1], [autoStart, autoEnd], true);
-            settingsModel.general.gradientMiddle.value.value = midScale(0.5);
-        }
-
         const colors: string[] = this.initColors(settingsModel);
+
+
         const colorScale: Quantile<string> = d3ScaleQuantile<string>()
             .domain([minDataValue, maxDataValue])
             .range(colors);
 
         settingsModel.general.gradientStart.value.value = colors[0];
-        settingsModel.general.gradientMiddle.value.value = colors[Math.floor((colors.length - 1) / 2)];
         settingsModel.general.gradientEnd.value.value = colors[colors.length - 1];
 
         const renderOptions: IRenderOptions = {
@@ -567,45 +548,13 @@ export class TableHeatMap implements IVisual {
     private initColors(settingsModel: SettingsModel): string[] {
         const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
         const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
-        const activateGradientMiddle: boolean = settingsModel.general.activateGradientMiddle.value;
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
         let colors: Array<string>;
-
-        if (activateGradientMiddle) {
-            let startColor: string;
-            let endColor: string;
-            if (colorbrewerEnable) {
-                const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale] || colorbrewer.Reds;
-                const palette: string[] = currentColorbrewer[numBuckets] || colorbrewer.Reds[numBuckets];
-                startColor = palette[0];
-                endColor = palette[palette.length - 1];
-            } else {
-                startColor = settingsModel.general.gradientStart.value.value;
-                endColor = settingsModel.general.gradientEnd.value.value;
-            }
-            const middleColor: string = settingsModel.general.gradientMiddle.value.value;
-            const range: string[] = [startColor, endColor];
-            const domain: number[] = [0, numBuckets - 1];
-
-            if (middleColor !== '') {
-                range.splice(1, 0, middleColor);
-                domain.splice(1, 0, Math.floor((numBuckets - 1) / 2));
-            }
-            
-            const colorScale: LinearColorScale = createLinearColorScale(
-                domain,
-                range,
-                true
-            );
-            colors = [];
-            for (let bucketIndex: number = 0; bucketIndex < numBuckets; bucketIndex++) {
-                colors.push(colorScale(bucketIndex));
-            }
-        } else if (colorbrewerEnable) {
+        if (colorbrewerEnable) {
             if (colorbrewerScale) {
                 const currentColorbrewer: IColorArray = colorbrewer[colorbrewerScale];
-                colors = currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets];
+                colors = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
             }
             else {
                 colors = colorbrewer.Reds[numBuckets];	// default color scheme
