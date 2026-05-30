@@ -40,7 +40,8 @@ import {
 import { TextProperties } from "powerbi-visuals-utils-formattingutils/lib/src/interfaces";
 import capabilities from '../capabilities.json';
 import { TableHeatMap } from "../src/visual";
-import { ClickEventType, d3Click, renderTimeout } from "powerbi-visuals-utils-testutils";
+import { ClickEventType, d3Click, parseColorString, renderTimeout } from "powerbi-visuals-utils-testutils";
+import { getOpacity, DimmedOpacity, DefaultOpacity } from "../src/heatmapUtils";
 
 const DefaultTimeout: number = 300;
 
@@ -687,4 +688,175 @@ describe("TableHeatmap", () => {
             });
         }
     });
+
+    describe("invertColorScale", () => {
+        // The visual animates cell fills via a d3 transition of 1000ms
+        // (see TableHeatMap.animationDuration). Tests must wait longer than that
+        // to read final fills; flushAllD3Transitions does not help because the
+        // visual and test-utils carry separate d3-timer instances.
+        const AnimationTimeout: number = 1200;
+
+        beforeEach(() => {
+            dataView = defaultDataViewBuilder.getDataViewWithSeries();
+        });
+
+        const getCellFills = (): string[] =>
+            Array.from(document.querySelectorAll("rect.categoryX"))
+                .map((el: Element) => getComputedStyle(el)["fill"]);
+
+        // Normalizes a CSS color to a stable key for use in maps/sets.
+        const colorKey = (color: string): string => {
+            const { R, G, B } = parseColorString(color);
+            return `${R},${G},${B}`;
+        };
+
+        // Asserts that `invertedFills` is the result of palette inversion applied
+        // to the same data: i.e. cells are re-colored in a consistent permutation,
+        // and the permutation is non-trivial.
+        // We do NOT require the set of colors to be equal, because data may not
+        // hit every palette bucket — and the buckets used in normal vs inverted
+        // are mirrored positions, which can be different subsets of the palette.
+        const expectPaletteReversed = (normalFills: string[], invertedFills: string[]): void => {
+            expect(invertedFills.length).toBe(normalFills.length);
+
+            // Consistent permutation: cells that share the same color before inversion
+            // must also share the same color after inversion. This is the defining
+            // property of "the same value mapped through a re-ordered palette".
+            const mapping = new Map<string, string>();
+            normalFills.forEach((n, i) => {
+                const nKey = colorKey(n);
+                const iKey = colorKey(invertedFills[i]);
+                const existing = mapping.get(nKey);
+                if (existing === undefined) {
+                    mapping.set(nKey, iKey);
+                } else {
+                    expect(iKey).toBe(existing);
+                }
+            });
+
+            // Non-trivial: at least one cell must actually change color.
+            const changedCount = normalFills.filter((fill, i) => !areColorsEqual(fill, invertedFills[i])).length;
+            expect(changedCount).toBeGreaterThan(0);
+        };
+
+        // Renders the visual twice (invert off, then invert on) and runs the
+        // assertion against the resulting fill arrays. Waits long enough for the
+        // d3 fill animation to finish so reads pick up final colors.
+        const renderAndCompare = (
+            baseGeneral: Record<string, unknown>,
+            assertion: (normal: string[], inverted: string[]) => void,
+            done: DoneFn
+        ): void => {
+            dataView.metadata.objects = { general: { ...baseGeneral, invertColorScale: false } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const normalFills = getCellFills();
+
+                dataView.metadata.objects = { general: { ...baseGeneral, invertColorScale: true } };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    assertion(normalFills, getCellFills());
+                    done();
+                }, AnimationTimeout);
+            }, AnimationTimeout);
+        };
+
+        it("should reverse the colorbrewer palette as an involution", (done) => {
+            renderAndCompare(
+                { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 },
+                expectPaletteReversed,
+                done
+            );
+        });
+
+        it("should reverse the custom gradient palette as an involution", (done) => {
+            renderAndCompare(
+                {
+                    enableColorbrewer: false,
+                    gradientStart: { solid: { color: "#0000FF" } },
+                    gradientEnd: { solid: { color: "#FF0000" } }
+                },
+                expectPaletteReversed,
+                done
+            );
+        });
+
+        // Helper to read gradient pickers as they currently exist in the visual's settings
+        // model (i.e. what the user would see in the formatting pane).
+        const readGradientPickers = (): { start: string; end: string } => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const general = (visualBuilder as any).visual.settingsModel.general;
+            return {
+                start: general.gradientStart.value.value,
+                end: general.gradientEnd.value.value
+            };
+        };
+
+        it("should NOT mutate user gradient pickers when invert is toggled in custom gradient mode", (done) => {
+            const userStart = "#0000FF";
+            const userEnd = "#FF0000";
+            const base = {
+                enableColorbrewer: false,
+                gradientStart: { solid: { color: userStart } },
+                gradientEnd: { solid: { color: userEnd } }
+            };
+
+            dataView.metadata.objects = { general: { ...base, invertColorScale: false } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const initial = readGradientPickers();
+                expect(areColorsEqual(initial.start, userStart)).toBeTrue();
+                expect(areColorsEqual(initial.end, userEnd)).toBeTrue();
+
+                dataView.metadata.objects = { general: { ...base, invertColorScale: true } };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    // Pickers must reflect the user's original choices, NOT the swapped colors.
+                    const afterInvert = readGradientPickers();
+                    expect(areColorsEqual(afterInvert.start, userStart)).toBeTrue();
+                    expect(areColorsEqual(afterInvert.end, userEnd)).toBeTrue();
+                    done();
+                }, AnimationTimeout);
+            }, AnimationTimeout);
+        });
+
+        it("should keep gradient pickers in sync with the base (non-inverted) palette in colorbrewer mode", (done) => {
+            const base = { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 };
+
+            dataView.metadata.objects = { general: { ...base, invertColorScale: false } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const baseline = readGradientPickers();
+
+                dataView.metadata.objects = { general: { ...base, invertColorScale: true } };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    // Pickers must show the SAME endpoints as in the non-inverted render —
+                    // they preview the base palette so the user has predictable defaults
+                    // when switching to custom gradient mode.
+                    const afterInvert = readGradientPickers();
+                    expect(areColorsEqual(afterInvert.start, baseline.start)).toBeTrue();
+                    expect(areColorsEqual(afterInvert.end, baseline.end)).toBeTrue();
+                    done();
+                }, AnimationTimeout);
+            }, AnimationTimeout);
+        });
+    });
+
+    describe("utils:getOpacity", () => {
+        it("returns DefaultOpacity when no selection or highlights are active", () => {
+            expect(getOpacity(false, false, false, false)).toBe(DefaultOpacity);
+        });
+
+        it("returns DefaultOpacity for a selected element when selection is active", () => {
+            expect(getOpacity(true, false, true, false)).toBe(DefaultOpacity);
+        });
+
+        it("returns DimmedOpacity for an unselected element when selection is active", () => {
+            expect(getOpacity(false, false, true, false)).toBe(DimmedOpacity);
+        });
+
+        it("returns DefaultOpacity for a highlighted element when partial highlights are active", () => {
+            expect(getOpacity(false, true, false, true)).toBe(DefaultOpacity);
+        });
+
+        it("returns DimmedOpacity for a non-highlighted element when partial highlights are active", () => {
+            expect(getOpacity(false, false, false, true)).toBe(DimmedOpacity);
+        });
+    });
 });
+

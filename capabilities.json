@@ -236,6 +236,11 @@
                         }
                     }
                 },
+                "invertColorScale": {
+                    "type": {
+                        "bool": true
+                    }
+                },
                 "fillNullValuesCells": {
                     "type": {
                         "bool": true
