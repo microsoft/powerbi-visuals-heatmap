@@ -46,8 +46,6 @@ import { min as d3Min, max as d3Max } from "d3-array";
 
 import "d3-transition";
 
-import maxBy from "lodash.maxby";
-
 import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
 
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
@@ -79,9 +77,20 @@ import {
     BaseLabelCardSettings,
     GeneralSettings,
     SettingsModel,
-    YAxisLabelsSettings,
     colorbrewer
 } from "./settings";
+
+import {
+    calculateGridSizeHeight,
+    calculateGridSizeWidth,
+    CellMaxHeightLimit,
+    getXAxisHeight,
+    getYAxisHeight,
+    getYAxisWidth,
+    isDataViewValid,
+    parseSettings,
+    textLimit
+} from "./heatmapUtils";
 
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
@@ -109,9 +118,7 @@ export class TableHeatMap implements IVisual {
     private viewport: IViewport;
     private behavior: VisualWebBehavior;
     private static Margin: IMargin = { left: 5, right: 10, bottom: 15, top: 10 };
-    private static AdditionalSpaceForColorbrewerCells: number = 2;
 
-    private static YAxisAdditinalMargin: number = 5;
     private animationDuration: number = 1000;
 
     private static ClsAll: string = "*";
@@ -156,8 +163,6 @@ export class TableHeatMap implements IVisual {
     private static ConstGridSizeWidthLimit: number = 80;
     private static ConstShiftLabelFromGrid: number = -6;
     private static ConstGridHeightWidthRatio: number = 0.5;
-    private static ConstGridMinHeight: number = 5;
-    private static ConstGridMinWidth: number = 1;
     private static ConstGridLegendWidthRatio: number = 0.925;
     private static ConstLegendOffsetFromChartByY: number = 0.5;
     private static ConstRectWidthAdjustment: number = 1;
@@ -166,8 +171,7 @@ export class TableHeatMap implements IVisual {
     private static LegendTextFontSize = 12;
     private static LegendTextFontFamily = "'Segoe UI', wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
-    public static CellMaxHeightLimit: number = 300;
-    private static CellMaxWidthFactorLimit: number = 15;
+    public static CellMaxHeightLimit: number = CellMaxHeightLimit;
 
     private selectionManager: ISelectionManager;
 
@@ -312,7 +316,7 @@ export class TableHeatMap implements IVisual {
             this.mainGraphics = this.svg.append(TableHeatMap.HtmlObjG);
             this.setSize(options.viewport);
 
-            const isValid = this.isDataViewValid(options.dataViews[0]);
+            const isValid = isDataViewValid(options.dataViews[0]);
             if (!isValid) {
                 this.renderNotEnoughDataMessage(options);
                 this.host.eventService.renderingFinished(options);
@@ -323,7 +327,7 @@ export class TableHeatMap implements IVisual {
 
             this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
             this.settingsModel.initBuckets();
-            this.settingsModel = TableHeatMap.parseSettings(this.colorHelper, this.settingsModel);
+            this.settingsModel = parseSettings(this.colorHelper, this.settingsModel);
 
             this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
             this.host.eventService.renderingFinished(options);
@@ -331,10 +335,6 @@ export class TableHeatMap implements IVisual {
         } catch (ex) {
             this.host.eventService.renderingFailed(options, JSON.stringify(ex));
         }
-    }
-
-    private isDataViewValid(dataView: powerbi.DataView): boolean {
-        return !!(dataView.categorical?.categories && dataView.categorical?.values);
     }
 
     private renderNotEnoughDataMessage(options: VisualUpdateOptions): void {
@@ -377,29 +377,6 @@ export class TableHeatMap implements IVisual {
         }
     }
 
-    private static getYAxisWidth(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
-        let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
-
-        maxLengthText = TableHeatMap.textLimit(maxLengthText.toString(), settings.maxTextSymbol.value);
-
-        return settings.show.value ? textMeasurementService.measureSvgTextWidth({
-            fontSize: PixelConverter.toString(settings.fontSize.value),
-            text: maxLengthText.trim(),
-            fontFamily: settings.fontFamily.value.toString()
-        }) + TableHeatMap.YAxisAdditinalMargin : 0;
-    }
-
-    private static getXAxisHeight(chartData: TableHeatMapChartData, settings: BaseLabelCardSettings): number {
-        const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
-        const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
-
-        return settings.show.value ? textMeasurementService.measureSvgTextHeight({
-            fontSize: PixelConverter.toString(settings.fontSize.value),
-            text: maxLengthText.toString().trim(),
-            fontFamily: settings.fontFamily.value.toString()
-        }) : 0;
-    }
-
     private processViewMode(options: VisualUpdateOptions): void {
         const { viewMode, dataViews } = options;
         const hasSeries = dataViews[0].metadata.columns.some(col => col.roles["Series"]);
@@ -431,54 +408,6 @@ export class TableHeatMap implements IVisual {
         }
     }
 
-    private getYAxisHeight(chartData: TableHeatMapChartData): number {
-        const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
-
-        return textMeasurementService.measureSvgTextHeight({
-            fontSize: PixelConverter.toString(this.settingsModel.yAxisLabels.fontSize.value),
-            text: maxLengthText.toString().trim(),
-            fontFamily: this.settingsModel.yAxisLabels.fontFamily.value.toString()
-        });
-    }
-
-    private static parseSettings(colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {
-        if (colorHelper.isHighContrast) {
-            const foregroundColor: string = colorHelper.getThemeColor("foreground");
-            const backgroundColor: string = colorHelper.getThemeColor("background");
-
-            settingsModel.labels.show.value = true;
-            settingsModel.labels.fill.value.value = foregroundColor;
-
-            settingsModel.xAxisLabels.fill.value.value = foregroundColor;
-            settingsModel.yAxisLabels.fill.value.value = foregroundColor;
-
-            settingsModel.general.enableColorbrewer.value = false;
-            settingsModel.general.gradientStart.value.value = backgroundColor;
-            settingsModel.general.gradientEnd.value.value = backgroundColor;
-            GeneralSettings.stroke = foregroundColor;
-            settingsModel.general.textColor = foregroundColor;
-        }
-
-        return settingsModel;
-    }
-
-    private getGridSizeHeight(xAxisHeight: number, length: number): number {
-        const gridSizeHeight: number = Math.floor((this.viewport.height - TableHeatMap.Margin.top - xAxisHeight - TableHeatMap.Margin.bottom - TableHeatMap.YAxisAdditinalMargin) / (length + TableHeatMap.AdditionalSpaceForColorbrewerCells));
-
-        return Math.max(
-            TableHeatMap.ConstGridMinHeight,
-            Math.min(gridSizeHeight, TableHeatMap.CellMaxHeightLimit));
-    }
-
-    private getGridSizeWidth(yAxisWidth: number, length: number, gridSizeHeight: number): number {
-        const gridSizeWidth: number = Math.floor((this.viewport.width - yAxisWidth) / (length));
-
-        return Math.max(
-            TableHeatMap.ConstGridMinWidth,
-            Math.min(gridSizeWidth, gridSizeHeight * TableHeatMap.CellMaxWidthFactorLimit)
-        );
-    }
-
     private render(chartData: TableHeatMapChartData, settingsModel: SettingsModel, viewport: IViewport): void {
         if (chartData.dataPoints) {
             const renderOptions: IRenderOptions = this.createRenderOptions(chartData, settingsModel);
@@ -505,18 +434,42 @@ export class TableHeatMap implements IVisual {
     }
 
     private createRenderOptions(chartData: TableHeatMapChartData, settingsModel: SettingsModel): IRenderOptions {
-        const xAxisHeight: number = TableHeatMap.getXAxisHeight(chartData, settingsModel.xAxisLabels);
-        const yAxisWidth: number = TableHeatMap.getYAxisWidth(chartData, settingsModel.yAxisLabels);
-        const yAxisHeight: number = this.getYAxisHeight(chartData);
+        const xAxisHeight: number = getXAxisHeight(chartData, settingsModel.xAxisLabels);
+        const yAxisWidth: number = getYAxisWidth(chartData, settingsModel.yAxisLabels);
+        const yAxisHeight: number = getYAxisHeight(chartData, settingsModel.yAxisLabels);
 
         const xOffset: number = TableHeatMap.Margin.left + yAxisWidth;
         const yOffset: number = TableHeatMap.Margin.top + xAxisHeight;
 
-        const gridSizeHeight: number = this.getGridSizeHeight(xAxisHeight, chartData.categoryY.length);
-        const gridSizeWidth: number = this.getGridSizeWidth(yAxisWidth, chartData.categoryX.length, gridSizeHeight);
+        const gridSizeHeight: number = calculateGridSizeHeight(this.viewport.height, xAxisHeight, chartData.categoryY.length, TableHeatMap.Margin.top, TableHeatMap.Margin.bottom);
+        const gridSizeWidth: number = calculateGridSizeWidth(this.viewport.width, yAxisWidth, chartData.categoryX.length, gridSizeHeight);
 
         const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
+
+        // Auto-compute the gradient middle colour on the first activation (sentinel = "").
+        if (settingsModel.general.activateGradientMiddle.value &&
+            settingsModel.general.gradientMiddle.value.value === "") {
+            console.log({
+                activateGradientMiddle: settingsModel.general.activateGradientMiddle.value,
+                gradientMiddle: settingsModel.general.gradientMiddle.value.value,
+            })
+            const cbEnable: boolean = settingsModel.general.enableColorbrewer.value;
+            const cbScale: string = settingsModel.general.colorbrewer.value.toString();
+            const numBuckets: number = settingsModel.CurrentBucketCount;
+            let autoStart: string, autoEnd: string;
+            if (cbEnable) {
+                const cbPalette: IColorArray = colorbrewer[cbScale] || colorbrewer.Reds;
+                const cbColors: string[] = cbPalette[numBuckets] || colorbrewer.Reds[numBuckets];
+                autoStart = cbColors[0];
+                autoEnd = cbColors[cbColors.length - 1];
+            } else {
+                autoStart = settingsModel.general.gradientStart.value.value;
+                autoEnd = settingsModel.general.gradientEnd.value.value;
+            }
+            const midScale: LinearColorScale = createLinearColorScale([0, 1], [autoStart, autoEnd], true);
+            settingsModel.general.gradientMiddle.value.value = midScale(0.5);
+        }
 
         // Base palette as defined by the active source (colorbrewer or custom gradient),
         // without invert applied. Used both for rendering and for syncing gradient pickers.
@@ -530,6 +483,13 @@ export class TableHeatMap implements IVisual {
         if (settingsModel.general.enableColorbrewer.value) {
             settingsModel.general.gradientStart.value.value = baseColors[0];
             settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
+        }
+
+        // Keep the middle picker in sync with the rendered palette so the Format pane
+        // always reflects what is on screen (uses pre-invert baseColors, same as start/end).
+        if (settingsModel.general.activateGradientMiddle.value) {
+            settingsModel.general.gradientMiddle.value.value =
+                baseColors[Math.floor((baseColors.length - 1) / 2)];
         }
 
         // Invert is a render-only transformation applied as the final step so that toggling
@@ -562,7 +522,35 @@ export class TableHeatMap implements IVisual {
     private initColors(settingsModel: SettingsModel): string[] {
         const colorbrewerScale: string = settingsModel.general.colorbrewer.value.toString();
         const colorbrewerEnable: boolean = settingsModel.general.enableColorbrewer.value;
+        const activateGradientMiddle: boolean = settingsModel.general.activateGradientMiddle.value;
         const numBuckets: number = settingsModel.CurrentBucketCount;
+
+        if (activateGradientMiddle) {
+            let startColor: string, endColor: string;
+
+            if (colorbrewerEnable) {
+                const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
+                const palette: string[] = currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets];
+                startColor = palette[0];
+                endColor = palette[palette.length - 1];
+            } else {
+                startColor = settingsModel.general.gradientStart.value.value;
+                endColor = settingsModel.general.gradientEnd.value.value;
+            }
+
+            const middleColor: string = settingsModel.general.gradientMiddle.value.value;
+            const midIndex: number = Math.floor((numBuckets - 1) / 2);
+            const domain: number[] = [0, midIndex, numBuckets - 1];
+            const range: string[] = [startColor, middleColor, endColor];
+            const colorScale: LinearColorScale = createLinearColorScale(domain, range, true);
+            const colors: string[] = [];
+
+            for (let i: number = 0; i < numBuckets; i++) {
+                colors.push(colorScale(i));
+            }
+
+            return colors;
+        }
 
         if (colorbrewerEnable) {
             const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
@@ -685,7 +673,7 @@ export class TableHeatMap implements IVisual {
             .data(chartData.categoryY)
             .join(TableHeatMap.HtmlObjText)
             .text((d: powerbi.PrimitiveValue) => {
-                return TableHeatMap.textLimit(d.toString(), settingsModel.yAxisLabels.maxTextSymbol.value);
+                return textLimit(d.toString(), settingsModel.yAxisLabels.maxTextSymbol.value);
             })
             .attr(TableHeatMap.AttrDY, TableHeatMap.Const071em)
             .attr(TableHeatMap.AttrX, TableHeatMap.Margin.left)
@@ -869,14 +857,6 @@ export class TableHeatMap implements IVisual {
 
         this.behavior.bindEvents(behaviorOptions);
         this.behavior.renderSelection();
-    }
-
-    private static textLimit(text: string, limit: number) {
-        if (text.length > limit) {
-            return ((text || "").substring(0, limit).trim()) + "…";
-        }
-
-        return text;
     }
 
     private setSize(viewport: IViewport): void {

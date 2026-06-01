@@ -2,10 +2,12 @@
 
 ### New features
 * Added "Invert Color Scale" toggle to reverse the color gradient direction
+* Diverging (three-stop) gradient: new "Add gradient middle" toggle and "Gradient middle" colour picker in the Format pane → General → Gradient Colors group. When enabled, the colour scale interpolates smoothly through a user-defined or auto-computed midpoint colour.
 
 ### Other
 * Upgraded powerbi-visuals-tools from ^6.1.1 to ^7.0.3
 * Added unit tests for invertColorScale and getOpacity utility
+* Format pane General card restructured into three named groups: **Colorbrewer**, **Gradient Colors**, and **Additional settings**.
 
 ## 4.0.0.0
 

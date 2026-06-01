@@ -23,6 +23,18 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
+import powerbi from "powerbi-visuals-api";
+
+import { textMeasurementService } from "powerbi-visuals-utils-formattingutils";
+
+import { pixelConverter as PixelConverter } from "powerbi-visuals-utils-typeutils";
+import { ColorHelper } from "powerbi-visuals-utils-colorutils";
+
+import maxBy from "lodash.maxby";
+
+import { TableHeatMapChartData } from "./dataInterfaces";
+import { BaseLabelCardSettings, GeneralSettings, SettingsModel, YAxisLabelsSettings } from "./settings";
+
 export const DimmedOpacity: number = 0.4;
 export const DefaultOpacity: number = 1.0;
 export const DimmedColor: string = "black";
@@ -38,4 +50,103 @@ export function getOpacity(
     }
 
     return DefaultOpacity;
+}
+
+export const YAxisAdditionalMargin: number = 5;
+export const AdditionalSpaceForColorbrewerCells: number = 2;
+export const ConstGridMinHeight: number = 5;
+export const ConstGridMinWidth: number = 1;
+export const CellMaxHeightLimit: number = 300;
+export const CellMaxWidthFactorLimit: number = 15;
+
+export function isDataViewValid(dataView: powerbi.DataView): boolean {
+    return !!(dataView.categorical?.categories && dataView.categorical?.values);
+}
+
+export function textLimit(text: string, limit: number): string {
+    if (text.length > limit) {
+        return ((text || "").substring(0, limit).trim()) + "\u2026";
+    }
+
+    return text;
+}
+
+export function getYAxisWidth(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
+    let maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
+
+    maxLengthText = textLimit(maxLengthText.toString(), settings.maxTextSymbol.value);
+
+    return settings.show.value ? textMeasurementService.measureSvgTextWidth({
+        fontSize: PixelConverter.toString(settings.fontSize.value),
+        text: maxLengthText.trim(),
+        fontFamily: settings.fontFamily.value.toString()
+    }) + YAxisAdditionalMargin : 0;
+}
+
+export function getXAxisHeight(chartData: TableHeatMapChartData, settings: BaseLabelCardSettings): number {
+    const categoryX: string[] = chartData.categoryX.map(x => x?.toString() ?? "");
+    const maxLengthText: powerbi.PrimitiveValue = maxBy(categoryX, "length") || "";
+
+    return settings.show.value ? textMeasurementService.measureSvgTextHeight({
+        fontSize: PixelConverter.toString(settings.fontSize.value),
+        text: maxLengthText.toString().trim(),
+        fontFamily: settings.fontFamily.value.toString()
+    }) : 0;
+}
+
+export function getYAxisHeight(chartData: TableHeatMapChartData, settings: YAxisLabelsSettings): number {
+    const maxLengthText: powerbi.PrimitiveValue = maxBy(chartData.categoryY, (d) => String(d).length) || "";
+
+    return textMeasurementService.measureSvgTextHeight({
+        fontSize: PixelConverter.toString(settings.fontSize.value),
+        text: maxLengthText.toString().trim(),
+        fontFamily: settings.fontFamily.value.toString()
+    });
+}
+
+export function calculateGridSizeHeight(
+    viewportHeight: number,
+    xAxisHeight: number,
+    categoryYLength: number,
+    marginTop: number,
+    marginBottom: number
+): number {
+    const gridSizeHeight: number = Math.floor(
+        (viewportHeight - marginTop - xAxisHeight - marginBottom - YAxisAdditionalMargin) /
+        (categoryYLength + AdditionalSpaceForColorbrewerCells)
+    );
+
+    return Math.max(ConstGridMinHeight, Math.min(gridSizeHeight, CellMaxHeightLimit));
+}
+
+export function calculateGridSizeWidth(
+    viewportWidth: number,
+    yAxisWidth: number,
+    categoryXLength: number,
+    gridSizeHeight: number
+): number {
+    const gridSizeWidth: number = Math.floor((viewportWidth - yAxisWidth) / categoryXLength);
+
+    return Math.max(ConstGridMinWidth, Math.min(gridSizeWidth, gridSizeHeight * CellMaxWidthFactorLimit));
+}
+
+export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {
+    if (colorHelper.isHighContrast) {
+        const foregroundColor: string = colorHelper.getThemeColor("foreground");
+        const backgroundColor: string = colorHelper.getThemeColor("background");
+
+        settingsModel.labels.show.value = true;
+        settingsModel.labels.fill.value.value = foregroundColor;
+
+        settingsModel.xAxisLabels.fill.value.value = foregroundColor;
+        settingsModel.yAxisLabels.fill.value.value = foregroundColor;
+
+        settingsModel.general.enableColorbrewer.value = false;
+        settingsModel.general.gradientStart.value.value = backgroundColor;
+        settingsModel.general.gradientEnd.value.value = backgroundColor;
+        GeneralSettings.stroke = foregroundColor;
+        settingsModel.general.textColor = foregroundColor;
+    }
+
+    return settingsModel;
 }

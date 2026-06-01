@@ -227,6 +227,20 @@
                         }
                     }
                 },
+                "activateGradientMiddle": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "gradientMiddle": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "gradientEnd": {
                     "type": {
                         "fill": {

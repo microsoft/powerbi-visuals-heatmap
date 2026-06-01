@@ -26,6 +26,8 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsSimpleCard = formattingSettings.SimpleCard;
+import FormattingSettingsCompositeCard = formattingSettings.CompositeCard;
+import FormattingSettingsGroup = formattingSettings.Group;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
@@ -370,7 +372,7 @@ export const colorbrewer: IColorBrewer = <IColorBrewer>{
     }
 };
 
-export class GeneralSettings extends FormattingSettingsSimpleCard {
+export class GeneralSettings extends FormattingSettingsCompositeCard {
     public name: string = "general";
     public displayNameKey: string = "Visual_General";
 
@@ -402,6 +404,18 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
         name: "gradientEnd",
         displayNameKey: "Visual_GradientEnd",
         value: { value: "#000000" },
+    });
+
+    public activateGradientMiddle = new formattingSettings.ToggleSwitch({
+        name: "activateGradientMiddle",
+        displayNameKey: "Visual_Activate_GradientMiddle",
+        value: false,
+    });
+
+    public gradientMiddle = new formattingSettings.ColorPicker({
+        name: "gradientMiddle",
+        displayNameKey: "Visual_GradientMiddle",
+        value: { value: "" },
     });
 
     public invertColorScale = new formattingSettings.ToggleSwitch({
@@ -436,15 +450,33 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
     public static stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
-    public slices: FormattingSettingsSlice[] = [
-        this.enableColorbrewer,
-        this.colorbrewer,
-        this.gradientStart,
-        this.gradientEnd,
-        this.invertColorScale,
-        this.fillNullValuesCells,
-        this.buckets
-    ];
+    private paletteGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "paletteGroup",
+        displayNameKey: "Visual_General_Colorbrewer",
+        collapsible: false,
+        topLevelSlice: this.enableColorbrewer,
+        slices: [this.colorbrewer],
+    });
+
+    private gradientGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "gradientGroup",
+        displayNameKey: "Visual_General_Gradient",
+        collapsible: false,
+        slices: [this.activateGradientMiddle, this.gradientStart, this.gradientMiddle, this.gradientEnd],
+    });
+
+    private gradientScaleGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "gradientScaleGroup",
+        displayNameKey: "Visual_General_Additional",
+        collapsible: false,
+        slices: [this.invertColorScale, this.buckets, this.fillNullValuesCells],
+    });
+
+    public groups: FormattingSettingsGroup[] = [this.paletteGroup, this.gradientGroup, this.gradientScaleGroup];
+
+    public onPreProcess(): void {
+        this.gradientMiddle.visible = this.activateGradientMiddle.value;
+    }
 }
 
 export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {
