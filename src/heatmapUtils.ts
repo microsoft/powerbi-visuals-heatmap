@@ -125,6 +125,9 @@ export function calculateGridSizeWidth(
     categoryXLength: number,
     gridSizeHeight: number
 ): number {
+    if (categoryXLength <= 0) {
+        return ConstGridMinWidth;
+    }
     const gridSizeWidth: number = Math.floor((viewportWidth - yAxisWidth) / categoryXLength);
 
     return Math.max(ConstGridMinWidth, Math.min(gridSizeWidth, gridSizeHeight * CellMaxWidthFactorLimit));

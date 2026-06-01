@@ -450,10 +450,6 @@ export class TableHeatMap implements IVisual {
         // Auto-compute the gradient middle colour on the first activation (sentinel = "").
         if (settingsModel.general.activateGradientMiddle.value &&
             settingsModel.general.gradientMiddle.value.value === "") {
-            console.log({
-                activateGradientMiddle: settingsModel.general.activateGradientMiddle.value,
-                gradientMiddle: settingsModel.general.gradientMiddle.value.value,
-            })
             const cbEnable: boolean = settingsModel.general.enableColorbrewer.value;
             const cbScale: string = settingsModel.general.colorbrewer.value.toString();
             const numBuckets: number = settingsModel.CurrentBucketCount;
