@@ -32,8 +32,8 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 
 import maxBy from "lodash.maxby";
 
-import { TableHeatMapChartData } from "./dataInterfaces";
-import { BaseLabelCardSettings, GeneralSettings, SettingsModel, YAxisLabelsSettings } from "./settings";
+import { IColorArray, TableHeatMapChartData } from "./dataInterfaces";
+import { BaseLabelCardSettings, colorbrewer, GeneralSettings, SettingsModel, YAxisLabelsSettings } from "./settings";
 
 export const DimmedOpacity: number = 0.4;
 export const DefaultOpacity: number = 1.0;
@@ -131,6 +131,26 @@ export function calculateGridSizeWidth(
     const gridSizeWidth: number = Math.floor((viewportWidth - yAxisWidth) / categoryXLength);
 
     return Math.max(ConstGridMinWidth, Math.min(gridSizeWidth, gridSizeHeight * CellMaxWidthFactorLimit));
+}
+
+/**
+ * Returns the start and end colours for the active colour source (colorbrewer palette or
+ * user-defined gradient). Centralises the fallback logic so it cannot drift between
+ * `createRenderOptions` and `initColors`.
+ */
+export function resolveStartEndColors(
+    colorbrewerEnable: boolean,
+    colorbrewerScale: string,
+    numBuckets: number,
+    gradientStart: string,
+    gradientEnd: string
+): { startColor: string; endColor: string } {
+    if (colorbrewerEnable) {
+        const palette: IColorArray = colorbrewer[colorbrewerScale] || colorbrewer.Reds;
+        const colors: string[] = palette[numBuckets] || colorbrewer.Reds[numBuckets];
+        return { startColor: colors[0], endColor: colors[colors.length - 1] };
+    }
+    return { startColor: gradientStart, endColor: gradientEnd };
 }
 
 export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsModel): SettingsModel {

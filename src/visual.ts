@@ -89,6 +89,7 @@ import {
     getYAxisWidth,
     isDataViewValid,
     parseSettings,
+    resolveStartEndColors,
     textLimit
 } from "./heatmapUtils";
 
@@ -450,21 +451,20 @@ export class TableHeatMap implements IVisual {
         // Auto-compute the gradient middle colour on the first activation (sentinel = "").
         if (settingsModel.general.activateGradientMiddle.value &&
             settingsModel.general.gradientMiddle.value.value === "") {
-            const cbEnable: boolean = settingsModel.general.enableColorbrewer.value;
-            const cbScale: string = settingsModel.general.colorbrewer.value.toString();
             const numBuckets: number = settingsModel.CurrentBucketCount;
-            let autoStart: string, autoEnd: string;
-            if (cbEnable) {
-                const cbPalette: IColorArray = colorbrewer[cbScale] || colorbrewer.Reds;
-                const cbColors: string[] = cbPalette[numBuckets] || colorbrewer.Reds[numBuckets];
-                autoStart = cbColors[0];
-                autoEnd = cbColors[cbColors.length - 1];
-            } else {
-                autoStart = settingsModel.general.gradientStart.value.value;
-                autoEnd = settingsModel.general.gradientEnd.value.value;
-            }
+            const { startColor: autoStart, endColor: autoEnd } = resolveStartEndColors(
+                settingsModel.general.enableColorbrewer.value,
+                settingsModel.general.colorbrewer.value.toString(),
+                numBuckets,
+                settingsModel.general.gradientStart.value.value,
+                settingsModel.general.gradientEnd.value.value
+            );
+            // Use the same midpoint fraction as the 3-stop scale in initColors so the
+            // auto-derived colour corresponds to the bucket that will be pinned there.
+            const midIndex: number = Math.floor((numBuckets - 1) / 2);
+            const midPos: number = numBuckets > 1 ? midIndex / (numBuckets - 1) : 0;
             const midScale: LinearColorScale = createLinearColorScale([0, 1], [autoStart, autoEnd], true);
-            settingsModel.general.gradientMiddle.value.value = midScale(0.5);
+            settingsModel.general.gradientMiddle.value.value = midScale(midPos);
         }
 
         // Base palette as defined by the active source (colorbrewer or custom gradient),
@@ -522,17 +522,13 @@ export class TableHeatMap implements IVisual {
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
         if (activateGradientMiddle) {
-            let startColor: string, endColor: string;
-
-            if (colorbrewerEnable) {
-                const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
-                const palette: string[] = currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets];
-                startColor = palette[0];
-                endColor = palette[palette.length - 1];
-            } else {
-                startColor = settingsModel.general.gradientStart.value.value;
-                endColor = settingsModel.general.gradientEnd.value.value;
-            }
+            const { startColor, endColor } = resolveStartEndColors(
+                colorbrewerEnable,
+                colorbrewerScale,
+                numBuckets,
+                settingsModel.general.gradientStart.value.value,
+                settingsModel.general.gradientEnd.value.value
+            );
 
             const middleColor: string = settingsModel.general.gradientMiddle.value.value;
             const midIndex: number = Math.floor((numBuckets - 1) / 2);
