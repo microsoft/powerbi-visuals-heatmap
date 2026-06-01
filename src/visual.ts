@@ -481,9 +481,12 @@ export class TableHeatMap implements IVisual {
             settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
         }
 
-        // Keep the middle picker in sync with the rendered palette so the Format pane
-        // always reflects what is on screen (uses pre-invert baseColors, same as start/end).
-        if (settingsModel.general.activateGradientMiddle.value) {
+        // Keep the middle picker in sync with the rendered colorbrewer palette so the
+        // Format pane reflects what is on screen. Skipped in custom-gradient mode because
+        // the picker is the source of truth there — overwriting it would cause format-pane
+        // churn and corrupt the user's chosen middle colour.
+        if (settingsModel.general.activateGradientMiddle.value &&
+            settingsModel.general.enableColorbrewer.value) {
             settingsModel.general.gradientMiddle.value.value =
                 baseColors[Math.floor((baseColors.length - 1) / 2)];
         }

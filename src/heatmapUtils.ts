@@ -147,7 +147,12 @@ export function resolveStartEndColors(
 ): { startColor: string; endColor: string } {
     if (colorbrewerEnable) {
         const palette: IColorArray = colorbrewer[colorbrewerScale] || colorbrewer.Reds;
-        const colors: string[] = palette[numBuckets] || colorbrewer.Reds[numBuckets];
+        const colors: string[] | undefined = palette[numBuckets] ?? colorbrewer.Reds[numBuckets];
+        if (!colors || colors.length === 0) {
+            // numBuckets is outside the supported range for all palettes;
+            // fall back to the user gradient endpoints so we never dereference undefined.
+            return { startColor: gradientStart, endColor: gradientEnd };
+        }
         return { startColor: colors[0], endColor: colors[colors.length - 1] };
     }
     return { startColor: gradientStart, endColor: gradientEnd };

@@ -1081,20 +1081,20 @@ describe("TableHeatmap", () => {
                 expect(getXAxisHeight(chartData, settings.xAxisLabels)).toBe(0);
             });
 
-            it("returns a number when xAxisLabels show is true", () => {
+            it("returns measured height when xAxisLabels show is true", () => {
                 const settings = new SettingsModel();
                 const chartData = { categoryX: ["LongLabel"], categoryY: [] } as unknown as TableHeatMapChartData;
-                // measureSvgTextHeight may return 0 in headless environments; assert non-negative.
-                expect(getXAxisHeight(chartData, settings.xAxisLabels)).toBeGreaterThanOrEqual(0);
+                spyOn(tms, "measureSvgTextHeight").and.returnValue(42);
+                expect(getXAxisHeight(chartData, settings.xAxisLabels)).toBe(42);
             });
         });
 
         describe("getYAxisHeight", () => {
-            it("returns a number for non-empty categoryY", () => {
+            it("returns measured height for non-empty categoryY", () => {
                 const settings = new SettingsModel();
                 const chartData = { categoryY: ["LongLabel"], categoryX: [] } as unknown as TableHeatMapChartData;
-                // measureSvgTextHeight may return 0 in headless environments; assert non-negative.
-                expect(getYAxisHeight(chartData, settings.yAxisLabels)).toBeGreaterThanOrEqual(0);
+                spyOn(tms, "measureSvgTextHeight").and.returnValue(24);
+                expect(getYAxisHeight(chartData, settings.yAxisLabels)).toBe(24);
             });
         });
 
