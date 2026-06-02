@@ -548,10 +548,13 @@ export class TableHeatMap implements IVisual {
         }
 
         if (colorbrewerEnable) {
-            const currentColorbrewer: IColorArray = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
-            const palette: string[] = (currentColorbrewer ? currentColorbrewer[numBuckets] : colorbrewer.Reds[numBuckets]);
-            // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
-            return palette.slice();
+            const currentColorbrewer: IColorArray | undefined = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
+            const palette: string[] | undefined = (currentColorbrewer ? currentColorbrewer[numBuckets] : undefined)
+                ?? colorbrewer.Reds[numBuckets];
+            if (palette && palette.length > 0) {
+                // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
+                return palette.slice();
+            }
         }
 
         const startColor: string = settingsModel.general.gradientStart.value.value;

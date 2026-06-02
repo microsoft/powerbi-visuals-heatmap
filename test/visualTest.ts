@@ -867,7 +867,7 @@ describe("TableHeatmap", () => {
             }, AnimationTimeout);
         });
 
-        it("auto-computes middle color from colorbrewer palette midpoint on first activation", (done) => {
+        it("auto-computes middle color as a blend between colorbrewer endpoints on first activation", (done) => {
             dataView.metadata.objects = {
                 general: {
                     activateGradientMiddle: true,
