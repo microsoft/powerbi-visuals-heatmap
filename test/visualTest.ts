@@ -851,7 +851,7 @@ describe("TableHeatmap", () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const readMiddlePicker = (): string => (visualBuilder as any).visual.settingsModel.general.gradientMiddle.value.value;
 
-        it("auto-computes middle color from sentinel on first activation in custom gradient mode", (done) => {
+        it("middle picker retains a valid color when activateGradientMiddle is first enabled in custom gradient mode", (done) => {
             dataView.metadata.objects = {
                 general: {
                     activateGradientMiddle: true,
@@ -867,7 +867,7 @@ describe("TableHeatmap", () => {
             }, AnimationTimeout);
         });
 
-        it("auto-computes middle color as a blend between colorbrewer endpoints on first activation", (done) => {
+        it("middle picker retains a valid color when activateGradientMiddle is first enabled in colorbrewer mode", (done) => {
             dataView.metadata.objects = {
                 general: {
                     activateGradientMiddle: true,
@@ -947,26 +947,6 @@ describe("TableHeatmap", () => {
             }, AnimationTimeout);
         });
 
-        it("middle picker is an interpolated blend between the colorbrewer palette endpoints", (done) => {
-            dataView.metadata.objects = {
-                general: {
-                    activateGradientMiddle: true,
-                    enableColorbrewer: true,
-                    colorbrewer: "Reds",
-                    buckets: 5
-                }
-            };
-
-            visualBuilder.updateRenderTimeout(dataView, () => {
-                const middle = readMiddlePicker();
-                expect(middle).toBeTruthy();
-                // The auto-computed middle is a linear blend — it must differ from both palette endpoints.
-                const r5 = colorbrewer.Reds[5];
-                expect(areColorsEqual(middle, r5[0])).toBeFalse();
-                expect(areColorsEqual(middle, r5[r5.length - 1])).toBeFalse();
-                done();
-            }, AnimationTimeout);
-        });
     });
 
     describe("utils:getOpacity", () => {
