@@ -408,7 +408,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
 
     public activateGradientMiddle = new formattingSettings.ToggleSwitch({
         name: "activateGradientMiddle",
-        displayNameKey: "Visual_Activate_GradientMiddle",
+        displayNameKey: "Visual_ActivateGradientMiddle",
         value: false,
     });
 
