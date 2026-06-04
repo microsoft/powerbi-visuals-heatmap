@@ -448,25 +448,6 @@ export class TableHeatMap implements IVisual {
         const minDataValue: number = d3Min(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
-        // Auto-compute the gradient middle colour on the first activation (sentinel = "").
-        if (settingsModel.general.activateGradientMiddle.value &&
-            settingsModel.general.gradientMiddle.value.value === "") {
-            const numBuckets: number = settingsModel.CurrentBucketCount;
-            const { startColor: autoStart, endColor: autoEnd } = resolveStartEndColors(
-                settingsModel.general.enableColorbrewer.value,
-                settingsModel.general.colorbrewer.value.toString(),
-                numBuckets,
-                settingsModel.general.gradientStart.value.value,
-                settingsModel.general.gradientEnd.value.value
-            );
-            // Use the same midpoint fraction as the 3-stop scale in initColors so the
-            // auto-derived colour corresponds to the bucket that will be pinned there.
-            const midIndex: number = Math.floor((numBuckets - 1) / 2);
-            const midPos: number = numBuckets > 1 ? midIndex / (numBuckets - 1) : 0;
-            const midScale: LinearColorScale = createLinearColorScale([0, 1], [autoStart, autoEnd], true);
-            settingsModel.general.gradientMiddle.value.value = midScale(midPos);
-        }
-
         // Base palette as defined by the active source (colorbrewer or custom gradient),
         // without invert applied. Used both for rendering and for syncing gradient pickers.
         const baseColors: string[] = this.initColors(settingsModel);
@@ -479,16 +460,6 @@ export class TableHeatMap implements IVisual {
         if (settingsModel.general.enableColorbrewer.value) {
             settingsModel.general.gradientStart.value.value = baseColors[0];
             settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
-        }
-
-        // Keep the middle picker in sync with the rendered colorbrewer palette so the
-        // Format pane reflects what is on screen. Skipped in custom-gradient mode because
-        // the picker is the source of truth there — overwriting it would cause format-pane
-        // churn and corrupt the user's chosen middle colour.
-        if (settingsModel.general.activateGradientMiddle.value &&
-            settingsModel.general.enableColorbrewer.value) {
-            settingsModel.general.gradientMiddle.value.value =
-                baseColors[Math.floor((baseColors.length - 1) / 2)];
         }
 
         // Invert is a render-only transformation applied as the final step so that toggling
@@ -533,8 +504,19 @@ export class TableHeatMap implements IVisual {
                 settingsModel.general.gradientEnd.value.value
             );
 
-            const middleColor: string = settingsModel.general.gradientMiddle.value.value;
+            if (numBuckets < 3) {
+                const fallbackScale: LinearColorScale = createLinearColorScale([0, Math.max(numBuckets - 1, 1)], [startColor, endColor], true);
+                const colors: string[] = [];
+                for (let i: number = 0; i < numBuckets; i++) {
+                    colors.push(fallbackScale(i));
+                }
+                return colors;
+            }
+
+            const storedMiddle: string = settingsModel.general.gradientMiddle.value.value;
             const midIndex: number = Math.floor((numBuckets - 1) / 2);
+            const midPos: number = midIndex / (numBuckets - 1);
+            const middleColor: string = storedMiddle || createLinearColorScale([0, 1], [startColor, endColor], true)(midPos);
             const domain: number[] = [0, midIndex, numBuckets - 1];
             const range: string[] = [startColor, middleColor, endColor];
             const colorScale: LinearColorScale = createLinearColorScale(domain, range, true);

@@ -379,6 +379,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
     public static DefaultColorbrewer: string = "Reds";
     public static BucketCountMaxLimit: number = 18;
     public static BucketCountMinLimit: number = 1;
+    public static BucketCountMinLimitWithGradientMiddle: number = 3;
     public static DefaultBucketCount: number = 5;
     public static ColorbrewerMaxBucketCount: number = 14;
 
@@ -415,7 +416,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
     public gradientMiddle = new formattingSettings.ColorPicker({
         name: "gradientMiddle",
         displayNameKey: "Visual_GradientMiddle",
-        value: { value: "" },
+        value: { value: "#767676" },
     });
 
     public invertColorScale = new formattingSettings.ToggleSwitch({
@@ -619,13 +620,17 @@ export class SettingsModel extends FormattingSettingsModel {
             this.general.buckets.options.maxValue.value = maxBucketNum;
         }
         else {
+            const minLimit = this.general.activateGradientMiddle.value
+                ? GeneralSettings.BucketCountMinLimitWithGradientMiddle
+                : GeneralSettings.BucketCountMinLimit;
             const currentValue = this.general.buckets.value ?? GeneralSettings.DefaultBucketCount;
             const clampedValue = Math.min(
                 GeneralSettings.BucketCountMaxLimit,
-                Math.max(currentValue, GeneralSettings.BucketCountMinLimit)
+                Math.max(currentValue, minLimit)
             );
 
             this.CurrentBucketCount = this.general.buckets.value = clampedValue;
+            this.general.buckets.options.minValue.value = minLimit;
         }
     }
 }
