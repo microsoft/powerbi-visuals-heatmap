@@ -470,7 +470,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
         name: "gradientScaleGroup",
         displayNameKey: "Visual_General_Additional",
         collapsible: false,
-        slices: [this.invertColorScale, this.buckets, this.fillNullValuesCells],
+        slices: [this.buckets, this.fillNullValuesCells, this.invertColorScale, ],
     });
 
     public groups: FormattingSettingsGroup[] = [this.paletteGroup, this.gradientGroup, this.gradientScaleGroup];
