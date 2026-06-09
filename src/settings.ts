@@ -631,6 +631,7 @@ export class SettingsModel extends FormattingSettingsModel {
 
             this.CurrentBucketCount = this.general.buckets.value = clampedValue;
             this.general.buckets.options.minValue.value = minLimit;
+            this.general.buckets.options.maxValue.value = GeneralSettings.BucketCountMaxLimit;
         }
     }
 }

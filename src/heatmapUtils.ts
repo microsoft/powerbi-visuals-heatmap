@@ -53,7 +53,7 @@ export function getOpacity(
 }
 
 export const YAxisAdditionalMargin: number = 5;
-export const AdditionalSpaceForColorbrewerCells: number = 2;
+export const GridHeightAdjustmentFactor: number = 2;
 export const ConstGridMinHeight: number = 5;
 export const ConstGridMinWidth: number = 1;
 export const CellMaxHeightLimit: number = 300;
@@ -113,7 +113,7 @@ export function calculateGridSizeHeight(
 ): number {
     const gridSizeHeight: number = Math.floor(
         (viewportHeight - marginTop - xAxisHeight - marginBottom - YAxisAdditionalMargin) /
-        (categoryYLength + AdditionalSpaceForColorbrewerCells)
+        (categoryYLength + GridHeightAdjustmentFactor)
     );
 
     return Math.max(ConstGridMinHeight, Math.min(gridSizeHeight, CellMaxHeightLimit));
