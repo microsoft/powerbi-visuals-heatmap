@@ -175,7 +175,7 @@ describe("TableHeatmap", () => {
                 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "20px");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
@@ -196,7 +196,7 @@ describe("TableHeatmap", () => {
                 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "40px");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
@@ -217,7 +217,7 @@ describe("TableHeatmap", () => {
                 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-family"] === "Arial");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
@@ -240,7 +240,7 @@ describe("TableHeatmap", () => {
 
                 const filteredItems = items.find(i => getComputedStyle(i)["font-size"] === "12px");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItems).toBeTruthy();
 
                 done();
@@ -261,7 +261,7 @@ describe("TableHeatmap", () => {
 
                 const filteredItems = items.find(i => getComputedStyle(i)["font-size"] === "40px");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItems).toBeTruthy();
 
                 done();
@@ -282,7 +282,7 @@ describe("TableHeatmap", () => {
 
                 const filteredItems = items.find(i => getComputedStyle(i)["font-family"] === "Verdana");
                 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItems).toBeTruthy();
 
                 done();
@@ -305,7 +305,7 @@ describe("TableHeatmap", () => {
                 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "24px");
 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
@@ -326,7 +326,7 @@ describe("TableHeatmap", () => {
 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-size"] === "40px");
 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
@@ -347,7 +347,7 @@ describe("TableHeatmap", () => {
 
                 const filteredItem = items.find(i => getComputedStyle(i)["font-family"] === "Verdana");
 
-                expect(labelDOMItems).toBeTruthy();
+                expect(labelDOMItems.length).toBeGreaterThan(0);
                 expect(filteredItem).toBeTruthy();
 
                 done();
