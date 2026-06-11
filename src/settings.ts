@@ -27,6 +27,7 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsSimpleCard = formattingSettings.SimpleCard;
 import FormattingSettingsCompositeCard = formattingSettings.CompositeCard;
+import FormattingSettingsCard = formattingSettings.Cards;
 import FormattingSettingsGroup = formattingSettings.Group;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
@@ -448,7 +449,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
         }
     });
 
-    public static stroke: string = "#E6E6E6";
+    public stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
     private paletteGroup: FormattingSettingsGroup = new formattingSettings.Group({
@@ -470,7 +471,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
         name: "gradientScaleGroup",
         displayNameKey: "Visual_General_Additional",
         collapsible: false,
-        slices: [this.buckets, this.fillNullValuesCells, this.invertColorScale, ],
+        slices: [this.buckets, this.fillNullValuesCells, this.invertColorScale],
     });
 
     public groups: FormattingSettingsGroup[] = [this.paletteGroup, this.gradientGroup, this.gradientScaleGroup];
@@ -585,7 +586,7 @@ export class SettingsModel extends FormattingSettingsModel {
     public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings("yAxisLabels", "Visual_YAxis");
     public general: GeneralSettings = new GeneralSettings();
 
-    public cards: FormattingSettingsSimpleCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
+    public cards: FormattingSettingsCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
 
     public CurrentBucketCount: number = GeneralSettings.BucketCountMinLimit;
 
