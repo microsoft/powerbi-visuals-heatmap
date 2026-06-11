@@ -75,7 +75,6 @@ import {
 
 import {
     BaseLabelCardSettings,
-    GeneralSettings,
     SettingsModel,
     colorbrewer
 } from "./settings";
@@ -514,10 +513,9 @@ export class TableHeatMap implements IVisual {
             }
 
             const storedMiddle: string = settingsModel.general.gradientMiddle.value.value;
-            const midIndex: number = Math.floor((numBuckets - 1) / 2);
-            const midPos: number = midIndex / (numBuckets - 1);
-            const middleColor: string = storedMiddle || createLinearColorScale([0, 1], [startColor, endColor], true)(midPos);
-            const domain: number[] = [0, midIndex, numBuckets - 1];
+            const mid: number = (numBuckets - 1) / 2;
+            const middleColor: string = storedMiddle || createLinearColorScale([0, 1], [startColor, endColor], true)(0.5);
+            const domain: number[] = [0, mid, numBuckets - 1];
             const range: string[] = [startColor, middleColor, endColor];
             const colorScale: LinearColorScale = createLinearColorScale(domain, range, true);
             const colors: string[] = [];
@@ -552,7 +550,7 @@ export class TableHeatMap implements IVisual {
     }
 
     private renderGrid(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
-        const { chartData, colors, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
+        const { chartData, colors, xOffset, yOffset, gridSizeHeight, gridSizeWidth, settingsModel } = renderOptions;
 
         const grid = this.mainGraphics
             .append(TableHeatMap.HtmlObjG)
@@ -576,7 +574,7 @@ export class TableHeatMap implements IVisual {
             .attr(TableHeatMap.AttrWidth, gridSizeWidth - TableHeatMap.ConstRectWidthAdjustment)
             .attr(TableHeatMap.AttrHeight, gridSizeHeight - TableHeatMap.ConstRectHeightAdjustment)
             .style(TableHeatMap.StFill, colors[0])
-            .style("stroke", GeneralSettings.stroke);
+            .style("stroke", settingsModel.general.stroke);
 
         this.tooltipServiceWrapper.addTooltip(heatMap, (tooltipDataPoint: TooltipEnabledDataPoint) => {
             return tooltipDataPoint.tooltipInfo;
@@ -773,7 +771,7 @@ export class TableHeatMap implements IVisual {
             .attr(TableHeatMap.AttrWidth, legendElementWidth - TableHeatMap.ConstRectWidthAdjustment)
             .attr(TableHeatMap.AttrHeight, gridSizeHeight - TableHeatMap.ConstRectHeightAdjustment)
             .style(TableHeatMap.StFill, (d) => colors[d.index])
-            .style("stroke", GeneralSettings.stroke)
+            .style("stroke", settingsModel.general.stroke)
             .style("opacity", (d) => d.value !== maxDataValue ? 1 : 0)
             .classed(TableHeatMap.ClsBordered, true);
 
