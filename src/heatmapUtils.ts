@@ -33,7 +33,7 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import maxBy from "lodash.maxby";
 
 import { IColorArray, TableHeatMapChartData } from "./dataInterfaces";
-import { BaseLabelCardSettings, colorbrewer, GeneralSettings, SettingsModel, YAxisLabelsSettings } from "./settings";
+import { BaseLabelCardSettings, colorbrewer, SettingsModel, YAxisLabelsSettings } from "./settings";
 
 export const DimmedOpacity: number = 0.4;
 export const DefaultOpacity: number = 1.0;
@@ -135,8 +135,8 @@ export function calculateGridSizeWidth(
 
 /**
  * Returns the start and end colours for the active colour source (colorbrewer palette or
- * user-defined gradient). Centralises the fallback logic so it cannot drift between
- * `createRenderOptions` and `initColors`.
+ * user-defined gradient). Called by `initColors` to resolve the two anchor colours before
+ * building a two- or three-stop scale.
  */
 export function resolveStartEndColors(
     colorbrewerEnable: boolean,
@@ -170,10 +170,14 @@ export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsM
         settingsModel.yAxisLabels.fill.value.value = foregroundColor;
 
         settingsModel.general.enableColorbrewer.value = false;
+        settingsModel.general.activateGradientMiddle.value = false;
         settingsModel.general.gradientStart.value.value = backgroundColor;
         settingsModel.general.gradientEnd.value.value = backgroundColor;
-        GeneralSettings.stroke = foregroundColor;
+        settingsModel.general.stroke = foregroundColor;
         settingsModel.general.textColor = foregroundColor;
+    } else {
+        settingsModel.general.stroke = "#E6E6E6";
+        settingsModel.general.textColor = "#AAAAAA";
     }
 
     return settingsModel;
