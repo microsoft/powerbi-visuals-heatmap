@@ -2,7 +2,18 @@
 
 ### New features
 * Added "Invert Color Scale" toggle to reverse the color gradient direction
-* Diverging (three-stop) gradient: new "Add gradient middle" toggle and "Gradient middle" colour picker in the Format pane → General → Gradient Colors group. When enabled, the colour scale interpolates smoothly through a user-defined or auto-computed midpoint colour.
+* Diverging (three-stop) gradient: new "Add gradient middle" toggle and "Gradient middle" colour picker in the Format pane → General → Gradient Colors group. When enabled, the colour scale interpolates smoothly through the chosen midpoint colour (default: `#767676`). The midpoint uses this default until the user explicitly changes it in the Format pane.
+
+### Bug fixes
+* Fixed "Invert Color Scale" and gradient middle colour not being neutralized in high-contrast mode; both features are now automatically disabled when the Power BI high-contrast theme is active to preserve accessibility contrast requirements.
+* Fixed bucket count upper bound not being restored when switching from a Colorbrewer palette back to the custom gradient mode; the maximum was previously stuck at the palette's supported range rather than resetting to 18.
+* Fixed gradient middle anchor being skewed left-of-centre for even bucket counts; the three-stop domain now uses a fractional midpoint so both odd and even counts produce a symmetric diverging scale.
+
+### Code quality
+* Renamed internal constant `AdditionalSpaceForColorbrewerCells` → `GridHeightAdjustmentFactor` to reflect that the padding applies in all rendering modes.
+* `GeneralSettings.stroke` converted from a `static` mutable field to an instance field on `GeneralSettings`; high-contrast and non-high-contrast paths now reset it on every render, eliminating cross-render state leakage.
+* `SettingsModel.cards` type widened from `FormattingSettingsSimpleCard[]` to `FormattingSettingsCard[]` (`SimpleCard | CompositeCard`) to correctly reflect that `GeneralSettings` extends `CompositeCard`.
+* Replaced tautological `expect(querySelectorAll(…)).toBeTruthy()` assertions in unit tests with `expect(…length).toBeGreaterThan(0)`.
 
 ### Other
 * Upgraded powerbi-visuals-tools from ^6.1.1 to ^7.0.3
