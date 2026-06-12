@@ -32,6 +32,8 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 
 import maxBy from "lodash.maxby";
 
+import { color as d3Color, hsl as d3Hsl, lab as d3Lab } from "d3-color";
+
 import { IColorArray, TableHeatMapChartData } from "./dataInterfaces";
 import { BaseLabelCardSettings, colorbrewer, SettingsModel, YAxisLabelsSettings } from "./settings";
 
@@ -182,3 +184,17 @@ export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsM
 
     return settingsModel;
 }
+
+// Preserve the user's hue/saturation; clamp lightness to stay legible on `backgroundColor`.
+export function getAdaptiveLabelColor(userColor: string, backgroundColor: string): string {
+    const bg = d3Color(backgroundColor);
+    const fg = d3Hsl(userColor);
+    // Invalid/unsupported inputs -> keep the user-picked color unchanged.
+    if (bg === null || fg === null || isNaN(fg.l)) {
+        return userColor;
+    }
+    // lab(...).l is perceptual lightness in [0, 100]; high = light background.
+    fg.l = d3Lab(bg).l > 60 ? 0.2 : 0.85;
+    return fg.formatHex();
+}
+

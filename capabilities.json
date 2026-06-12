@@ -316,6 +316,11 @@
                     "type": {
                         "bool": true
                     }
+                },
+                "autoContrast": {
+                    "type": {
+                        "bool": true
+                    }
                 }
             }
         },

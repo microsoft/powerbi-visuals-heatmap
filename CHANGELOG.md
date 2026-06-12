@@ -3,6 +3,7 @@
 ### New features
 * Added "Invert Color Scale" toggle to reverse the color gradient direction
 * Diverging (three-stop) gradient: new "Add gradient middle" toggle and "Gradient middle" colour picker in the Format pane → General → Gradient Colors group. When enabled, the colour scale interpolates smoothly through the chosen midpoint colour (default: `#767676`). The midpoint uses this default until the user explicitly changes it in the Format pane.
+* Added Auto-contrast toggle to Data labels: when enabled, each label's lightness is automatically clamped to remain legible against its cell background colour while preserving the user-picked hue and saturation.
 
 ### Bug fixes
 * Fixed "Invert Color Scale" and gradient middle colour not being neutralized in high-contrast mode; both features are now automatically disabled when the Power BI high-contrast theme is active to preserve accessibility contrast requirements.

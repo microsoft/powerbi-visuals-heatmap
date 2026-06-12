@@ -75,6 +75,7 @@ import {
 
 import {
     BaseLabelCardSettings,
+    DataLabelsCardSettings,
     SettingsModel,
     colorbrewer
 } from "./settings";
@@ -83,6 +84,7 @@ import {
     calculateGridSizeHeight,
     calculateGridSizeWidth,
     CellMaxHeightLimit,
+    getAdaptiveLabelColor,
     getXAxisHeight,
     getYAxisHeight,
     getYAxisWidth,
@@ -616,7 +618,17 @@ export class TableHeatMap implements IVisual {
             })
             .style("text-anchor", TableHeatMap.ConstMiddle)
             .call(this.applyFontStylesToLabels(labelSettings))
-            .style("fill", labelSettings.fill.value.value)
+            .style("fill", (dataPoint: TableHeatMapDataPoint) => {
+                const userColor: string = labelSettings.fill.value.value;
+                if (!(labelSettings as DataLabelsCardSettings).autoContrast?.value) {
+                    return userColor;
+                }
+                const backgroundColor: string = <string>renderOptions.colorScale(<any>dataPoint.value);
+                if (!backgroundColor) {
+                    return userColor;
+                }
+                return getAdaptiveLabelColor(userColor, backgroundColor);
+            })
             .text((dataPoint: TableHeatMapDataPoint) => {
                 let textValue: string = valueFormatter.format(dataPoint.value);
                 textProperties.text = textValue;

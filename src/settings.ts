@@ -556,6 +556,19 @@ export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {
     }
 }
 
+export class DataLabelsCardSettings extends BaseLabelCardSettings {
+    public autoContrast = new formattingSettings.ToggleSwitch({
+        name: "autoContrast",
+        displayNameKey: "Visual_LabelsAutoContrast",
+        value: true
+    });
+
+    constructor(name: string, displayNameKey: string, isShown: boolean = true) {
+        super(name, displayNameKey, isShown);
+        this.slices = [this.font, this.fill, this.autoContrast];
+    }
+}
+
 export class YAxisLabelsSettings extends BaseLabelCardSettings {
     private static TextSymbolMinValue: number = 0;
     private static TextSymbolMaxValue: number = 50;
@@ -581,7 +594,7 @@ export class YAxisLabelsSettings extends BaseLabelCardSettings {
 }
 
 export class SettingsModel extends FormattingSettingsModel {
-    public labels: BaseLabelCardSettings = new BaseLabelCardSettings("labels", "Visual_DataLabels", false);
+    public labels: DataLabelsCardSettings = new DataLabelsCardSettings("labels", "Visual_DataLabels", false);
     public xAxisLabels: BaseLabelCardSettings = new BaseLabelCardSettings("xAxisLabels", "Visual_XAxis");
     public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings("yAxisLabels", "Visual_YAxis");
     public general: GeneralSettings = new GeneralSettings();

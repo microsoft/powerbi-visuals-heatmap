@@ -50,7 +50,8 @@ import {
     calculateGridSizeHeight, calculateGridSizeWidth,
     ConstGridMinHeight, CellMaxHeightLimit, ConstGridMinWidth, CellMaxWidthFactorLimit,
     getYAxisWidth, getXAxisHeight, getYAxisHeight,
-    parseSettings
+    parseSettings,
+    getAdaptiveLabelColor
 } from "../src/heatmapUtils";
 
 const DefaultTimeout: number = 300;
@@ -1115,6 +1116,155 @@ describe("TableHeatmap", () => {
         describe("DimmedColor", () => {
             it("is 'black'", () => {
                 expect(DimmedColor).toBe("black");
+            });
+        });
+    });
+
+    describe("Data labels auto-contrast", () => {
+        describe("utils:getAdaptiveLabelColor", () => {
+            it("returns a darker color for a light background", () => {
+                const result = getAdaptiveLabelColor("#ff0000", "#ffffff");
+                const { R, G, B } = parseColorString(result);
+                // Lab lightness of #ffffff ≈ 100 > 60 → clamp HSL l to 0.2 → dark label
+                expect(R + G + B).toBeLessThan(3 * 128);
+            });
+
+            it("returns a lighter color for a dark background", () => {
+                const result = getAdaptiveLabelColor("#ff0000", "#000000");
+                const { R, G, B } = parseColorString(result);
+                // Lab lightness of #000000 ≈ 0 ≤ 60 → clamp HSL l to 0.85 → light label
+                expect(R + G + B).toBeGreaterThan(3 * 128);
+            });
+
+            it("preserves the red hue of the user-picked color on a light background", () => {
+                const { R, G, B } = parseColorString(getAdaptiveLabelColor("#ff0000", "#ffffff"));
+                expect(R).toBeGreaterThan(G);
+                expect(R).toBeGreaterThan(B);
+            });
+
+            it("preserves the red hue of the user-picked color on a dark background", () => {
+                const { R, G, B } = parseColorString(getAdaptiveLabelColor("#ff0000", "#000000"));
+                expect(R).toBeGreaterThan(G);
+                expect(R).toBeGreaterThan(B);
+            });
+
+            it("returns the userColor unchanged when backgroundColor is invalid", () => {
+                expect(getAdaptiveLabelColor("#ff0000", "not-a-color")).toBe("#ff0000");
+            });
+
+            it("returns the userColor unchanged when userColor is invalid", () => {
+                expect(getAdaptiveLabelColor("not-a-color", "#ffffff")).toBe("not-a-color");
+            });
+        });
+
+        describe("toggle: autoContrast OFF", () => {
+            it("all labels use the exact user-picked fill color", (done) => {
+                const userColor = "#ff6600";
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fill: { solid: { color: userColor } },
+                        autoContrast: false
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const allMatch = labels.every(el =>
+                        areColorsEqual(getComputedStyle(el)["fill"], userColor)
+                    );
+                    expect(allMatch).toBeTrue();
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("toggle: autoContrast ON", () => {
+            it("at least one label fill differs from the static user-picked color", (done) => {
+                const userColor = "#888888";
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: false }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const staticFills = Array.from(document.querySelectorAll(".heatMapDataLabels"))
+                        .map(el => getComputedStyle(el)["fill"]);
+
+                    dataView.metadata.objects = {
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                    };
+
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const adaptedFills = Array.from(document.querySelectorAll(".heatMapDataLabels"))
+                            .map(el => getComputedStyle(el)["fill"]);
+                        const changedCount = staticFills.filter((fill, i) =>
+                            !areColorsEqual(fill, adaptedFills[i])
+                        ).length;
+                        expect(changedCount).toBeGreaterThan(0);
+                        done();
+                    }, DefaultTimeout);
+                }, DefaultTimeout);
+            });
+
+            it("no label has an empty or transparent fill", (done) => {
+                dataView.metadata.objects = {
+                    labels: { show: true, autoContrast: true }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const hasEmptyFill = labels.some(el => {
+                        const fill = getComputedStyle(el)["fill"];
+                        return !fill || fill === "none" || fill === "transparent";
+                    });
+                    expect(hasEmptyFill).toBeFalse();
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("toggling back OFF restores the user-picked fill color on all labels", (done) => {
+                const userColor = "#3399ff";
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    dataView.metadata.objects = {
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: false }
+                    };
+
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                        expect(labels.length).toBeGreaterThan(0);
+                        const allMatch = labels.every(el =>
+                            areColorsEqual(getComputedStyle(el)["fill"], userColor)
+                        );
+                        expect(allMatch).toBeTrue();
+                        done();
+                    }, DefaultTimeout);
+                }, DefaultTimeout);
+            });
+
+            it("null-value cell label falls back to user color without an empty fill", (done) => {
+                const userColor = "#ff0000";
+                dataView.metadata.objects = {
+                    general: { fillNullValuesCells: true },
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                };
+                dataView.categorical!.values![0].values![0] = null;
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const hasEmptyFill = labels.some(el => {
+                        const fill = getComputedStyle(el)["fill"];
+                        return !fill || fill === "none";
+                    });
+                    expect(hasEmptyFill).toBeFalse();
+                    done();
+                }, DefaultTimeout);
             });
         });
     });
