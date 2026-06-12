@@ -26,6 +26,9 @@
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsSimpleCard = formattingSettings.SimpleCard;
+import FormattingSettingsCompositeCard = formattingSettings.CompositeCard;
+import FormattingSettingsCard = formattingSettings.Cards;
+import FormattingSettingsGroup = formattingSettings.Group;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
@@ -370,13 +373,14 @@ export const colorbrewer: IColorBrewer = <IColorBrewer>{
     }
 };
 
-export class GeneralSettings extends FormattingSettingsSimpleCard {
+export class GeneralSettings extends FormattingSettingsCompositeCard {
     public name: string = "general";
     public displayNameKey: string = "Visual_General";
 
     public static DefaultColorbrewer: string = "Reds";
     public static BucketCountMaxLimit: number = 18;
     public static BucketCountMinLimit: number = 1;
+    public static BucketCountMinLimitWithGradientMiddle: number = 3;
     public static DefaultBucketCount: number = 5;
     public static ColorbrewerMaxBucketCount: number = 14;
 
@@ -402,6 +406,18 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
         name: "gradientEnd",
         displayNameKey: "Visual_GradientEnd",
         value: { value: "#000000" },
+    });
+
+    public activateGradientMiddle = new formattingSettings.ToggleSwitch({
+        name: "activateGradientMiddle",
+        displayNameKey: "Visual_ActivateGradientMiddle",
+        value: false,
+    });
+
+    public gradientMiddle = new formattingSettings.ColorPicker({
+        name: "gradientMiddle",
+        displayNameKey: "Visual_GradientMiddle",
+        value: { value: "#767676" },
     });
 
     public invertColorScale = new formattingSettings.ToggleSwitch({
@@ -433,18 +449,36 @@ export class GeneralSettings extends FormattingSettingsSimpleCard {
         }
     });
 
-    public static stroke: string = "#E6E6E6";
+    public stroke: string = "#E6E6E6";
     public textColor: string = "#AAAAAA";
 
-    public slices: FormattingSettingsSlice[] = [
-        this.enableColorbrewer,
-        this.colorbrewer,
-        this.gradientStart,
-        this.gradientEnd,
-        this.invertColorScale,
-        this.fillNullValuesCells,
-        this.buckets
-    ];
+    private paletteGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "paletteGroup",
+        displayNameKey: "Visual_General_Colorbrewer",
+        collapsible: false,
+        topLevelSlice: this.enableColorbrewer,
+        slices: [this.colorbrewer],
+    });
+
+    private gradientGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "gradientGroup",
+        displayNameKey: "Visual_General_Gradient",
+        collapsible: false,
+        slices: [this.activateGradientMiddle, this.gradientStart, this.gradientMiddle, this.gradientEnd],
+    });
+
+    private gradientScaleGroup: FormattingSettingsGroup = new formattingSettings.Group({
+        name: "gradientScaleGroup",
+        displayNameKey: "Visual_General_Additional",
+        collapsible: false,
+        slices: [this.buckets, this.fillNullValuesCells, this.invertColorScale],
+    });
+
+    public groups: FormattingSettingsGroup[] = [this.paletteGroup, this.gradientGroup, this.gradientScaleGroup];
+
+    public onPreProcess(): void {
+        this.gradientMiddle.visible = this.activateGradientMiddle.value;
+    }
 }
 
 export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {
@@ -552,7 +586,7 @@ export class SettingsModel extends FormattingSettingsModel {
     public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings("yAxisLabels", "Visual_YAxis");
     public general: GeneralSettings = new GeneralSettings();
 
-    public cards: FormattingSettingsSimpleCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
+    public cards: FormattingSettingsCard[] = [this.general, this.labels, this.xAxisLabels, this.yAxisLabels];
 
     public CurrentBucketCount: number = GeneralSettings.BucketCountMinLimit;
 
@@ -587,13 +621,18 @@ export class SettingsModel extends FormattingSettingsModel {
             this.general.buckets.options.maxValue.value = maxBucketNum;
         }
         else {
+            const minLimit = this.general.activateGradientMiddle.value
+                ? GeneralSettings.BucketCountMinLimitWithGradientMiddle
+                : GeneralSettings.BucketCountMinLimit;
             const currentValue = this.general.buckets.value ?? GeneralSettings.DefaultBucketCount;
             const clampedValue = Math.min(
                 GeneralSettings.BucketCountMaxLimit,
-                Math.max(currentValue, GeneralSettings.BucketCountMinLimit)
+                Math.max(currentValue, minLimit)
             );
 
             this.CurrentBucketCount = this.general.buckets.value = clampedValue;
+            this.general.buckets.options.minValue.value = minLimit;
+            this.general.buckets.options.maxValue.value = GeneralSettings.BucketCountMaxLimit;
         }
     }
 }
