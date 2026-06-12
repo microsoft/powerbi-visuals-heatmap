@@ -157,7 +157,6 @@ export class TableHeatMap implements IVisual {
     private static ConstEnd: string = "end";
     private static ConstBegin: string = "begin";
     private static ConstMiddle: string = "middle";
-    private static Const0em: string = "0em";
     private static Const071em: string = ".71em";
 
     private static ConstGridSizeWidthLimit: number = 80;
@@ -503,18 +502,8 @@ export class TableHeatMap implements IVisual {
                 settingsModel.general.gradientEnd.value.value
             );
 
-            if (numBuckets < 3) {
-                const fallbackScale: LinearColorScale = createLinearColorScale([0, Math.max(numBuckets - 1, 1)], [startColor, endColor], true);
-                const colors: string[] = [];
-                for (let i: number = 0; i < numBuckets; i++) {
-                    colors.push(fallbackScale(i));
-                }
-                return colors;
-            }
-
-            const storedMiddle: string = settingsModel.general.gradientMiddle.value.value;
+            const middleColor: string = settingsModel.general.gradientMiddle.value.value;
             const mid: number = (numBuckets - 1) / 2;
-            const middleColor: string = storedMiddle || createLinearColorScale([0, 1], [startColor, endColor], true)(0.5);
             const domain: number[] = [0, mid, numBuckets - 1];
             const range: string[] = [startColor, middleColor, endColor];
             const colorScale: LinearColorScale = createLinearColorScale(domain, range, true);
