@@ -383,6 +383,8 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
     public static BucketCountMinLimitWithGradientMiddle: number = 3;
     public static DefaultBucketCount: number = 5;
     public static ColorbrewerMaxBucketCount: number = 14;
+    public static DefaultStroke: string = "#E6E6E6";
+    public static DefaultTextColor: string = "#AAAAAA";
 
     public enableColorbrewer = new formattingSettings.ToggleSwitch({
         name: "enableColorbrewer",
@@ -449,8 +451,8 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
         }
     });
 
-    public stroke: string = "#E6E6E6";
-    public textColor: string = "#AAAAAA";
+    public stroke: string = GeneralSettings.DefaultStroke;
+    public textColor: string = GeneralSettings.DefaultTextColor;
 
     private paletteGroup: FormattingSettingsGroup = new formattingSettings.Group({
         name: "paletteGroup",
