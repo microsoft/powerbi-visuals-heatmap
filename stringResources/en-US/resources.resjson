@@ -1,5 +1,4 @@
 {
-    "Visual_ActivateGradientMiddle": "Add gradient middle",
     "Visual_Category": "Category",
     "Visual_DataLabels": "Data labels",
     "Visual_Description_DisplayAllLabelsAnyway": "Display all labels anyway",
@@ -8,12 +7,9 @@
     "Visual_Font": "Font",
     "Visual_ForceDisplay": "Force display",
     "Visual_General": "General",
-    "Visual_General_Additional": "Additional settings",
     "Visual_General_Colorbrewer": "Colorbrewer",
-    "Visual_General_Gradient": "Gradient Colors",
     "Visual_General_Granularity": "Granularity",
     "Visual_GradientEnd": "Gradient end",
-    "Visual_GradientMiddle": "Gradient middle",
     "Visual_GradientStart": "Gradient start",
     "Visual_InvertColorScale": "Invert color scale",
     "Visual_LabelsFill": "Color",
