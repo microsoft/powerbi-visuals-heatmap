@@ -412,7 +412,7 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
 
     public activateGradientMiddle = new formattingSettings.ToggleSwitch({
         name: "activateGradientMiddle",
-        displayNameKey: "Visual_ActivateGradientMiddle",
+        displayNameKey: "Visual_GradientMiddle",
         value: false,
     });
 
@@ -479,6 +479,10 @@ export class GeneralSettings extends FormattingSettingsCompositeCard {
     public groups: FormattingSettingsGroup[] = [this.paletteGroup, this.gradientGroup, this.gradientScaleGroup];
 
     public onPreProcess(): void {
+        // Colorbrewer and the custom gradient are mutually exclusive color sources. When
+        // colorbrewer is enabled the palette fully defines the colors, so the custom gradient
+        // group is disabled to make it clear those pickers have no effect in this mode.
+        this.gradientGroup.disabled = this.enableColorbrewer.value;
         this.gradientMiddle.visible = this.activateGradientMiddle.value;
     }
 }
