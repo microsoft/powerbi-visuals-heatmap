@@ -43,7 +43,7 @@ import { TableHeatMap } from "../src/visual";
 import { ClickEventType, createColorPalette, d3Click, parseColorString, renderTimeout } from "powerbi-visuals-utils-testutils";
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import { TableHeatMapChartData } from "../src/dataInterfaces";
-import { colorbrewer, SettingsModel } from "../src/settings";
+import { SettingsModel } from "../src/settings";
 import {
     getOpacity, DIMMED_OPACITY, DEFAULT_OPACITY, DIMMED_COLOR,
     isDataViewValid, textLimit,
@@ -1180,7 +1180,7 @@ describe("TableHeatmap", () => {
             });
         });
 
-        describe("toggle: autoContrast ON", () => {
+        describe("toggle: autoContrast OFF → ON", () => {
             it("at least one label fill differs from the static user-picked color", (done) => {
                 const userColor = "#888888";
                 dataView.metadata.objects = {
@@ -1216,7 +1216,8 @@ describe("TableHeatmap", () => {
                     expect(labels.length).toBeGreaterThan(0);
                     const hasEmptyFill = labels.some(el => {
                         const fill = getComputedStyle(el)["fill"];
-                        return !fill || fill === "none" || fill === "transparent";
+                        if (!fill || fill === "none" || fill === "transparent") return true;
+                        return /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(fill);
                     });
                     expect(hasEmptyFill).toBeFalse();
                     done();
@@ -1259,7 +1260,8 @@ describe("TableHeatmap", () => {
                     expect(labels.length).toBeGreaterThan(0);
                     const hasEmptyFill = labels.some(el => {
                         const fill = getComputedStyle(el)["fill"];
-                        return !fill || fill === "none";
+                        if (!fill || fill === "none" || fill === "transparent") return true;
+                        return /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(fill);
                     });
                     expect(hasEmptyFill).toBeFalse();
                     done();
