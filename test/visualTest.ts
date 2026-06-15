@@ -1198,10 +1198,9 @@ describe("TableHeatmap", () => {
                     visualBuilder.updateRenderTimeout(dataView, () => {
                         const adaptedFills = Array.from(document.querySelectorAll(".heatMapDataLabels"))
                             .map(el => getComputedStyle(el)["fill"]);
-                        const changedCount = staticFills.filter((fill, i) =>
-                            !areColorsEqual(fill, adaptedFills[i])
-                        ).length;
-                        expect(changedCount).toBeGreaterThan(0);
+                        const staticSet = new Set(staticFills.map(colorKey));
+                        const newColors = adaptedFills.map(colorKey).filter(k => !staticSet.has(k));
+                        expect(newColors.length).toBeGreaterThan(0);
                         done();
                     }, DefaultTimeout);
                 }, DefaultTimeout);

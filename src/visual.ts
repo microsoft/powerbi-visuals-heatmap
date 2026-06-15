@@ -623,7 +623,7 @@ export class TableHeatMap implements IVisual {
                 if (!labelSettings.autoContrast?.value) {
                     return userColor;
                 }
-                const backgroundColor: string = <string>renderOptions.colorScale(<any>dataPoint.value);
+                const backgroundColor: string = renderOptions.colorScale(dataPoint.value as number);
                 if (!backgroundColor) {
                     return userColor;
                 }
