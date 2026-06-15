@@ -325,8 +325,10 @@ export class TableHeatMap implements IVisual {
             this.processViewMode(options);
 
             this.settingsModel = this.formattingSettingsService.populateFormattingSettingsModel(SettingsModel, options.dataViews[0]);
-            this.settingsModel.initBuckets();
+            // parseSettings can flip enableColorbrewer/activateGradientMiddle (e.g. in high-contrast mode),
+            // so it must run before initBuckets() so bucket constraints match the final, rendered mode.
             this.settingsModel = parseSettings(this.colorHelper, this.settingsModel);
+            this.settingsModel.initBuckets();
 
             this.render(this.converter(options.dataViews[0]), this.settingsModel, options.viewport);
             this.host.eventService.renderingFinished(options);

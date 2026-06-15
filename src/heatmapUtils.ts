@@ -33,7 +33,7 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import maxBy from "lodash.maxby";
 
 import { IColorArray, TableHeatMapChartData } from "./dataInterfaces";
-import { BaseLabelCardSettings, colorbrewer, SettingsModel, YAxisLabelsSettings } from "./settings";
+import { BaseLabelCardSettings, colorbrewer, GeneralSettings, SettingsModel, YAxisLabelsSettings } from "./settings";
 
 export const DimmedOpacity: number = 0.4;
 export const DefaultOpacity: number = 1.0;
@@ -176,8 +176,8 @@ export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsM
         settingsModel.general.stroke = foregroundColor;
         settingsModel.general.textColor = foregroundColor;
     } else {
-        settingsModel.general.stroke = "#E6E6E6";
-        settingsModel.general.textColor = "#AAAAAA";
+        settingsModel.general.stroke = GeneralSettings.DefaultStroke;
+        settingsModel.general.textColor = GeneralSettings.DefaultTextColor;
     }
 
     return settingsModel;

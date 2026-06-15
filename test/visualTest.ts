@@ -43,7 +43,7 @@ import { TableHeatMap } from "../src/visual";
 import { ClickEventType, createColorPalette, d3Click, parseColorString, renderTimeout } from "powerbi-visuals-utils-testutils";
 import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import { TableHeatMapChartData } from "../src/dataInterfaces";
-import { colorbrewer, SettingsModel } from "../src/settings";
+import { colorbrewer, GeneralSettings, SettingsModel } from "../src/settings";
 import {
     getOpacity, DimmedOpacity, DefaultOpacity, DimmedColor,
     isDataViewValid, textLimit,
@@ -510,6 +510,20 @@ describe("TableHeatmap", () => {
                     visualBuilder.updateRenderTimeout(dataView, () => {
                         const rects = Array.from(visualBuilder.rects!);
                         expect(isColorAppliedToElements(rects, foregroundColor, "stroke")).toBeTrue();
+                        done();
+                    }, DefaultTimeout);
+                });
+
+                it("recomputes bucket constraints for the post-parse mode (parseSettings runs before initBuckets)", (done) => {
+                    // In high-contrast mode parseSettings forces enableColorbrewer and activateGradientMiddle off.
+                    // Because parseSettings runs before initBuckets, the bucket constraints must reflect that final
+                    // custom-gradient mode (min 1, max 18) rather than being stuck at the pre-parse colorbrewer limits.
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const general = (visualBuilder as any).visual.settingsModel.general;
+                        expect(general.enableColorbrewer.value).toBeFalse();
+                        expect(general.buckets.options.minValue.value).toBe(GeneralSettings.BucketCountMinLimit);
+                        expect(general.buckets.options.maxValue.value).toBe(GeneralSettings.BucketCountMaxLimit);
                         done();
                     }, DefaultTimeout);
                 });
