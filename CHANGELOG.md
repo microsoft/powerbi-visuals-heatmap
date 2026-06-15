@@ -19,7 +19,7 @@
 ### Other
 * Upgraded powerbi-visuals-tools from ^6.1.1 to ^7.0.3
 * Added unit tests for invertColorScale and getOpacity utility
-* Format pane General card restructured into three named groups: **Colorbrewer**, **Gradient Colors**, and **Additional settings**.
+* Format pane General card restructured into three named groups: **Colorbrewer**, **Custom gradient colors**, and **Additional settings**.
 
 ## 4.0.0.0
 
