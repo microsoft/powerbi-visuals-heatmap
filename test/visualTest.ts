@@ -45,7 +45,7 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import { TableHeatMapChartData } from "../src/dataInterfaces";
 import { colorbrewer, SettingsModel } from "../src/settings";
 import {
-    getOpacity, DimmedOpacity, DefaultOpacity, DimmedColor,
+    getOpacity, DIMMED_OPACITY, DEFAULT_OPACITY, DIMMED_COLOR,
     isDataViewValid, textLimit,
     calculateGridSizeHeight, calculateGridSizeWidth,
     ConstGridMinHeight, CellMaxHeightLimit, ConstGridMinWidth, CellMaxWidthFactorLimit,
@@ -952,23 +952,23 @@ describe("TableHeatmap", () => {
 
     describe("utils:getOpacity", () => {
         it("returns DefaultOpacity when no selection or highlights are active", () => {
-            expect(getOpacity(false, false, false, false)).toBe(DefaultOpacity);
+            expect(getOpacity(false, false, false, false)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DefaultOpacity for a selected element when selection is active", () => {
-            expect(getOpacity(true, false, true, false)).toBe(DefaultOpacity);
+            expect(getOpacity(true, false, true, false)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DimmedOpacity for an unselected element when selection is active", () => {
-            expect(getOpacity(false, false, true, false)).toBe(DimmedOpacity);
+            expect(getOpacity(false, false, true, false)).toBe(DIMMED_OPACITY);
         });
 
         it("returns DefaultOpacity for a highlighted element when partial highlights are active", () => {
-            expect(getOpacity(false, true, false, true)).toBe(DefaultOpacity);
+            expect(getOpacity(false, true, false, true)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DimmedOpacity for a non-highlighted element when partial highlights are active", () => {
-            expect(getOpacity(false, false, false, true)).toBe(DimmedOpacity);
+            expect(getOpacity(false, false, false, true)).toBe(DIMMED_OPACITY);
         });
     });
 
@@ -1115,7 +1115,7 @@ describe("TableHeatmap", () => {
 
         describe("DimmedColor", () => {
             it("is 'black'", () => {
-                expect(DimmedColor).toBe("black");
+                expect(DIMMED_COLOR).toBe("black");
             });
         });
     });

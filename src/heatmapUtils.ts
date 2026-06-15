@@ -37,9 +37,12 @@ import { color as d3Color, hsl as d3Hsl, lab as d3Lab } from "d3-color";
 import { IColorArray, TableHeatMapChartData } from "./dataInterfaces";
 import { BaseLabelCardSettings, colorbrewer, SettingsModel, YAxisLabelsSettings } from "./settings";
 
-export const DimmedOpacity: number = 0.4;
-export const DefaultOpacity: number = 1.0;
-export const DimmedColor: string = "black";
+export const DIMMED_OPACITY: number = 0.4;
+export const DEFAULT_OPACITY: number = 1.0;
+export const DIMMED_COLOR: string = "black";
+export const LAB_LIGHT_BG_THRESHOLD: number = 60;
+export const DARK_LABEL_LIGHTNESS: number = 0.2;
+export const LIGHT_LABEL_LIGHTNESS: number = 0.85;
 
 export function getOpacity(
     selected: boolean,
@@ -48,10 +51,10 @@ export function getOpacity(
     hasPartialHighlights: boolean): number {
 
     if ((hasPartialHighlights && !highlight) || (hasSelection && !selected)) {
-        return DimmedOpacity;
+        return DIMMED_OPACITY;
     }
 
-    return DefaultOpacity;
+    return DEFAULT_OPACITY;
 }
 
 export const YAxisAdditionalMargin: number = 5;
@@ -194,7 +197,7 @@ export function getAdaptiveLabelColor(userColor: string, backgroundColor: string
         return userColor;
     }
     // lab(...).l is perceptual lightness in [0, 100]; high = light background.
-    fg.l = d3Lab(bg).l > 60 ? 0.2 : 0.85;
+    fg.l = d3Lab(bg).l > LAB_LIGHT_BG_THRESHOLD ? DARK_LABEL_LIGHTNESS : LIGHT_LABEL_LIGHTNESS;
     return fg.formatHex();
 }
 

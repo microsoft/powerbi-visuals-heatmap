@@ -590,7 +590,7 @@ export class TableHeatMap implements IVisual {
 
     private renderLabels(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
         const { chartData, settingsModel, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
-        const labelSettings: BaseLabelCardSettings = settingsModel.labels;
+        const labelSettings: DataLabelsCardSettings = settingsModel.labels;
 
         const maxDataText = chartData.dataPoints.reduce((max: string, dp: TableHeatMapDataPoint) => {
             const val = dp.valueStr || "";
@@ -620,7 +620,7 @@ export class TableHeatMap implements IVisual {
             .call(this.applyFontStylesToLabels(labelSettings))
             .style("fill", (dataPoint: TableHeatMapDataPoint) => {
                 const userColor: string = labelSettings.fill.value.value;
-                if (!(labelSettings as DataLabelsCardSettings).autoContrast?.value) {
+                if (!labelSettings.autoContrast?.value) {
                     return userColor;
                 }
                 const backgroundColor: string = <string>renderOptions.colorScale(<any>dataPoint.value);
