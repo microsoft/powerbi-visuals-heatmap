@@ -88,7 +88,6 @@ import {
     getYAxisWidth,
     isDataViewValid,
     parseSettings,
-    resolveStartEndColors,
     textLimit
 } from "./heatmapUtils";
 
@@ -449,18 +448,8 @@ export class TableHeatMap implements IVisual {
         const maxDataValue: number = d3Max(chartData.dataPoints, (d: TableHeatMapDataPoint) => d.value as number);
 
         // Base palette as defined by the active source (colorbrewer or custom gradient),
-        // without invert applied. Used both for rendering and for syncing gradient pickers.
+        // without invert applied.
         const baseColors: string[] = this.initColors(settingsModel);
-
-        // Sync the gradient pickers with the current colorbrewer palette so that if the
-        // user later disables colorbrewer, they inherit sensible start/end values.
-        // Done only in colorbrewer mode: in custom gradient mode the pickers ARE the source
-        // of truth, and writing back would (a) leak inverted colors when invert is on and
-        // (b) cause a slow off-by-one drift of gradientEnd toward gradientStart.
-        if (settingsModel.general.enableColorbrewer.value) {
-            settingsModel.general.gradientStart.value.value = baseColors[0];
-            settingsModel.general.gradientEnd.value.value = baseColors[baseColors.length - 1];
-        }
 
         // Invert is a render-only transformation applied as the final step so that toggling
         // it never mutates user-visible settings (gradient pickers stay stable).
@@ -495,15 +484,22 @@ export class TableHeatMap implements IVisual {
         const activateGradientMiddle: boolean = settingsModel.general.activateGradientMiddle.value;
         const numBuckets: number = settingsModel.CurrentBucketCount;
 
-        if (activateGradientMiddle) {
-            const { startColor, endColor } = resolveStartEndColors(
-                colorbrewerEnable,
-                colorbrewerScale,
-                numBuckets,
-                settingsModel.general.gradientStart.value.value,
-                settingsModel.general.gradientEnd.value.value
-            );
+        // Colorbrewer takes precedence: when it is enabled the palette fully defines the colors,
+        // and the custom gradient pickers (start/middle/end) are disabled in the Format pane.
+        if (colorbrewerEnable) {
+            const currentColorbrewer: IColorArray | undefined = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
+            const palette: string[] | undefined = (currentColorbrewer ? currentColorbrewer[numBuckets] : undefined)
+                ?? colorbrewer.Reds[numBuckets];
+            if (palette && palette.length > 0) {
+                // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
+                return palette.slice();
+            }
+        }
 
+        // Custom three-stop (diverging) gradient.
+        if (activateGradientMiddle) {
+            const startColor: string = settingsModel.general.gradientStart.value.value;
+            const endColor: string = settingsModel.general.gradientEnd.value.value;
             const middleColor: string = settingsModel.general.gradientMiddle.value.value;
             const mid: number = (numBuckets - 1) / 2;
             const domain: number[] = [0, mid, numBuckets - 1];
@@ -518,16 +514,7 @@ export class TableHeatMap implements IVisual {
             return colors;
         }
 
-        if (colorbrewerEnable) {
-            const currentColorbrewer: IColorArray | undefined = colorbrewerScale ? colorbrewer[colorbrewerScale] : undefined;
-            const palette: string[] | undefined = (currentColorbrewer ? currentColorbrewer[numBuckets] : undefined)
-                ?? colorbrewer.Reds[numBuckets];
-            if (palette && palette.length > 0) {
-                // Copy to avoid leaking mutations into the shared colorbrewer table by reference.
-                return palette.slice();
-            }
-        }
-
+        // Custom two-stop gradient.
         const startColor: string = settingsModel.general.gradientStart.value.value;
         const endColor: string = settingsModel.general.gradientEnd.value.value;
         const colorScale: LinearColorScale = createLinearColorScale([0, numBuckets], [startColor, endColor], true);

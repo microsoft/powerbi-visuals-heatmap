@@ -835,26 +835,6 @@ describe("TableHeatmap", () => {
                 }, AnimationTimeout);
             }, AnimationTimeout);
         });
-
-        it("should keep gradient pickers in sync with the base (non-inverted) palette in colorbrewer mode", (done) => {
-            const base = { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 };
-
-            dataView.metadata.objects = { general: { ...base, invertColorScale: false } };
-            visualBuilder.updateRenderTimeout(dataView, () => {
-                const baseline = readGradientPickers();
-
-                dataView.metadata.objects = { general: { ...base, invertColorScale: true } };
-                visualBuilder.updateRenderTimeout(dataView, () => {
-                    // Pickers must show the SAME endpoints as in the non-inverted render —
-                    // they preview the base palette so the user has predictable defaults
-                    // when switching to custom gradient mode.
-                    const afterInvert = readGradientPickers();
-                    expect(areColorsEqual(afterInvert.start, baseline.start)).toBeTrue();
-                    expect(areColorsEqual(afterInvert.end, baseline.end)).toBeTrue();
-                    done();
-                }, AnimationTimeout);
-            }, AnimationTimeout);
-        });
     });
 
     describe("activateGradientMiddle", () => {
@@ -961,6 +941,105 @@ describe("TableHeatmap", () => {
             }, AnimationTimeout);
         });
 
+    });
+
+    describe("colorbrewer vs custom gradient", () => {
+        beforeEach(() => {
+            dataView = defaultDataViewBuilder.getDataViewWithSeries();
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const getCellFills = (): string[] =>
+            Array.from(visualBuilder.rects!).map((r) => getComputedStyle(r).fill);
+
+        it("does not call persistProperties (no persist-based syncing)", () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const spy = spyOn((visualBuilder as any).visualHost, "persistProperties");
+            dataView.metadata.objects = { general: { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 } };
+            visualBuilder.update(dataView);
+            dataView.metadata.objects = { general: { enableColorbrewer: true, colorbrewer: "Blues", buckets: 5 } };
+            visualBuilder.update(dataView);
+            expect(spy).not.toHaveBeenCalled();
+        });
+
+        it("disables the custom gradient group when colorbrewer is enabled", (done) => {
+            dataView.metadata.objects = { general: { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const model = (visualBuilder as any).visual.getFormattingModel();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const general = model.cards.find((c: any) => c.uid === "general-card");
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const gradientGroup = general.groups.find((g: any) => g.uid === "gradientGroup-group");
+                expect(gradientGroup.disabled).toBeTrue();
+                done();
+            }, AnimationTimeout);
+        });
+
+        it("enables the custom gradient group when colorbrewer is disabled", (done) => {
+            dataView.metadata.objects = { general: { enableColorbrewer: false } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const model = (visualBuilder as any).visual.getFormattingModel();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const general = model.cards.find((c: any) => c.uid === "general-card");
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const gradientGroup = general.groups.find((g: any) => g.uid === "gradientGroup-group");
+                expect(gradientGroup.disabled).toBeFalse();
+                done();
+            }, AnimationTimeout);
+        });
+
+        it("ignores the gradient middle and uses the colorbrewer palette when colorbrewer is enabled", (done) => {
+            // Colorbrewer palette render.
+            dataView.metadata.objects = { general: { enableColorbrewer: true, colorbrewer: "Reds", buckets: 5 } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const paletteFills = getCellFills();
+
+                // Same palette, but with the (custom) gradient middle turned on and a contrasting
+                // middle color: it must have NO effect because colorbrewer takes precedence.
+                dataView.metadata.objects = {
+                    general: {
+                        enableColorbrewer: true,
+                        colorbrewer: "Reds",
+                        buckets: 5,
+                        activateGradientMiddle: true,
+                        gradientMiddle: { solid: { color: "#00FF00" } },
+                    },
+                };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const withMiddleFills = getCellFills();
+                    withMiddleFills.forEach((fill, i) => {
+                        expect(areColorsEqual(fill, paletteFills[i])).toBeTrue();
+                    });
+                    done();
+                }, AnimationTimeout);
+            }, AnimationTimeout);
+        });
+
+        it("uses the custom three-stop gradient when colorbrewer is disabled and middle is active", (done) => {
+            const base = {
+                enableColorbrewer: false,
+                gradientStart: { solid: { color: "#FF0000" } },
+                gradientMiddle: { solid: { color: "#00FF00" } },
+                gradientEnd: { solid: { color: "#0000FF" } },
+            };
+
+            // Two-stop render (middle off).
+            dataView.metadata.objects = { general: { ...base, activateGradientMiddle: false } };
+            visualBuilder.updateRenderTimeout(dataView, () => {
+                const twoStopFills = getCellFills();
+
+                // Three-stop render (middle on) must differ — the middle color reshapes the scale.
+                dataView.metadata.objects = { general: { ...base, activateGradientMiddle: true } };
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const threeStopFills = getCellFills();
+                    const changed = threeStopFills.filter((fill, i) => !areColorsEqual(fill, twoStopFills[i])).length;
+                    expect(changed).toBeGreaterThan(0);
+                    done();
+                }, AnimationTimeout);
+            }, AnimationTimeout);
+        });
     });
 
     describe("utils:getOpacity", () => {
