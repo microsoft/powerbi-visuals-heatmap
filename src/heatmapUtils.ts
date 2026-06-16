@@ -163,7 +163,14 @@ export function parseSettings(colorHelper: ColorHelper, settingsModel: SettingsM
     return settingsModel;
 }
 
-// Preserve the user's hue/saturation; clamp lightness to stay legible on `backgroundColor`.
+/**
+ * Preserves the user's hue/saturation and alpha; clamps only lightness to stay legible on `backgroundColor`.
+ *
+ * Note: uses a fixed Lab-lightness threshold (LAB_LIGHT_BG_THRESHOLD) rather than a full WCAG
+ * luminance-contrast calculation. For highly saturated hues (e.g. yellow on white) the result
+ * may not meet WCAG AA contrast requirements; the trade-off is intentional — hue and saturation
+ * are preserved so the user's brand colour identity is retained.
+ */
 export function getAdaptiveLabelColor(userColor: string, backgroundColor: string): string {
     const bg = d3Color(backgroundColor);
     const fg = d3Hsl(userColor);
@@ -173,6 +180,7 @@ export function getAdaptiveLabelColor(userColor: string, backgroundColor: string
     }
     // lab(...).l is perceptual lightness in [0, 100]; high = light background.
     fg.l = d3Lab(bg).l > LAB_LIGHT_BG_THRESHOLD ? DARK_LABEL_LIGHTNESS : LIGHT_LABEL_LIGHTNESS;
-    return fg.formatHex();
+    // formatRgb() emits rgba(r,g,b,a) when opacity < 1, preserving any user-set transparency.
+    return fg.formatRgb();
 }
 

@@ -594,6 +594,10 @@ export class TableHeatMap implements IVisual {
 
         const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
+        // Cache adapted colors by (userColor|backgroundColor) key; avoids redundant Lab/HSL
+        // conversions for the same background bucket on every label within a single render pass.
+        const adaptiveLabelColorCache = new Map<string, string>();
+
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
             .selectAll(TableHeatMap.ClsHeatMapDataLabels.selectorName)
             .data(chartData.dataPoints)
@@ -620,7 +624,14 @@ export class TableHeatMap implements IVisual {
                 if (!backgroundColor) {
                     return userColor;
                 }
-                return getAdaptiveLabelColor(userColor, backgroundColor);
+                const cacheKey = `${userColor}|${backgroundColor}`;
+                const cached = adaptiveLabelColorCache.get(cacheKey);
+                if (cached !== undefined) {
+                    return cached;
+                }
+                const adapted = getAdaptiveLabelColor(userColor, backgroundColor);
+                adaptiveLabelColorCache.set(cacheKey, adapted);
+                return adapted;
             })
             .text((dataPoint: TableHeatMapDataPoint) => {
                 let textValue: string = valueFormatter.format(dataPoint.value);

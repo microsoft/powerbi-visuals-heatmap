@@ -1248,6 +1248,13 @@ describe("TableHeatmap", () => {
             it("returns the userColor unchanged when userColor is invalid", () => {
                 expect(getAdaptiveLabelColor("not-a-color", "#ffffff")).toBe("not-a-color");
             });
+
+            it("preserves user-specified alpha/opacity in the output color", () => {
+                // Semi-transparent red on a light background — lightness is clamped but alpha must survive.
+                const result = getAdaptiveLabelColor("rgba(136, 0, 0, 0.5)", "#ffffff");
+                // formatRgb() emits rgba(r, g, b, a) when opacity < 1
+                expect(result).toMatch(/rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\.5\s*\)/);
+            });
         });
 
         describe("toggle: autoContrast OFF", () => {
