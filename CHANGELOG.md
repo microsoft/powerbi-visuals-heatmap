@@ -2,7 +2,8 @@
 
 ### New features
 * Added "Invert Color Scale" toggle to reverse the color gradient direction
-* Diverging (three-stop) gradient: new "Add gradient middle" toggle and "Gradient middle" colour picker in the Format pane → General → Gradient Colors group. When enabled, the colour scale interpolates smoothly through the chosen midpoint colour (default: `#767676`). The midpoint uses this default until the user explicitly changes it in the Format pane.
+* Diverging (three-stop) gradient: new "Gradient middle" toggle and colour picker in the Format pane → General → Custom gradient colors group. When the custom gradient is active, the colour scale interpolates smoothly through the chosen midpoint colour (default: `#767676`). The midpoint uses this default until the user explicitly changes it in the Format pane.
+* Clearer separation between the two colour sources. Colorbrewer and the custom gradient were already mutually exclusive, but the active mode was not obvious in the UI. The custom gradient pickers (start / middle / end) are now disabled in the Format pane while Colorbrewer is enabled, and become editable again when it is turned off, so it is always clear which colour source is driving the visual. The gradient middle is a custom-gradient feature and has no effect while Colorbrewer is on. The "Gradient Colors" group was renamed to "Custom gradient colors".
 * Added Auto-contrast toggle to Data labels: when enabled, each label's lightness is automatically clamped to remain legible against its cell background colour while preserving the user-picked hue and saturation.
 
 ### Bug fixes
@@ -19,7 +20,7 @@
 ### Other
 * Upgraded powerbi-visuals-tools from ^6.1.1 to ^7.0.3
 * Added unit tests for invertColorScale and getOpacity utility
-* Format pane General card restructured into three named groups: **Colorbrewer**, **Gradient Colors**, and **Additional settings**.
+* Format pane General card restructured into three named groups: **Colorbrewer**, **Custom gradient colors**, and **Additional settings**.
 
 ## 4.0.0.0
 
