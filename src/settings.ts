@@ -566,7 +566,7 @@ export class DataLabelsCardSettings extends BaseLabelCardSettings {
     public autoContrast = new formattingSettings.ToggleSwitch({
         name: "autoContrast",
         displayNameKey: "Visual_LabelsAutoContrast",
-        value: true
+        value: false
     });
 
     constructor(name: string, displayNameKey: string, isShown: boolean = true) {
