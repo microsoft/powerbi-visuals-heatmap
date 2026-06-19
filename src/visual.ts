@@ -601,8 +601,7 @@ export class TableHeatMap implements IVisual {
         // conversions for the same background bucket on every label within a single render pass.
         const adaptiveLabelColorCache = new Map<string, string>();
         // .value → ILocalizedItemMember (selected option); .value.value → the raw EnumMemberValue string.
-        // Legacy boolean migration (false/true) is handled in update() before this point.
-        // Fall back to Soft (the configured default) if the value is somehow absent.
+        // Fall back to Soft (the configured default) if the value is absent.
         const autoContrastMode = (labelSettings.autoContrast.value?.value as AutoContrastMode | undefined) ?? AUTO_CONTRAST_MODE_SOFT;
 
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
