@@ -1396,6 +1396,24 @@ describe("TableHeatmap", () => {
                 expect(wcagContrastRatio(soft,   bg)!).toBeLessThan(WCAG_AA_CONTRAST_RATIO);
                 expect(wcagContrastRatio(strong, bg)!).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
             });
+
+            it("Strong achieves WCAG AA for semi-transparent user color (alpha-compositing test)", () => {
+                // rgba(0,0,255,0.8) on #444444: at LIGHT_LABEL_LIGHTNESS (~0.85) the opaque blue just
+                // passes AA (~5.0:1), but the alpha-composited result drops to ~3.8:1 — below AA.
+                // The fix must composite fg over bg before checking so the search settles higher.
+                const bg = "#444444";
+                const bgR = 0x44, bgG = 0x44, bgB = 0x44;
+                const result = getAdaptiveLabelColorStrong("rgba(0, 0, 255, 0.8)", bg);
+                // Parse the returned rgba(r,g,b,a) — formatRgb() emits 'rgba(...)' when opacity<1.
+                const match = result.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                expect(match).not.toBeNull();
+                const a     = match![4] !== undefined ? parseFloat(match![4]) : 1;
+                const compR = Math.round(parseInt(match![1]) * a + bgR * (1 - a));
+                const compG = Math.round(parseInt(match![2]) * a + bgG * (1 - a));
+                const compB = Math.round(parseInt(match![3]) * a + bgB * (1 - a));
+                expect(wcagContrastRatio(`rgb(${compR}, ${compG}, ${compB})`, bg))
+                    .toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
         });
 
         describe("applyAutoContrast dispatch", () => {

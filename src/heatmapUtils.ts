@@ -186,6 +186,10 @@ const WCAG_LUMINANCE_OFFSET        = 0.05;
 /** WCAG AA contrast ratio target for normal text. */
 export const WCAG_AA_CONTRAST_RATIO: number = 4.5;
 
+// formatRgb() rounds r/g/b to integers on output, which can lower the contrast by up to ~0.02.
+// The binary search targets this slightly higher value so the rounded output still clears 4.5:1.
+const WCAG_AA_BINARY_SEARCH_TARGET: number = WCAG_AA_CONTRAST_RATIO + 0.05;
+
 /**
  * WCAG crossover luminance: the background luminance at which dark and light
  * text yield equal contrast ratios. Derived from (L+0.05)/0.05 = 1.05/(L+0.05)
@@ -275,7 +279,8 @@ export function getAdaptiveLabelColorStrong(userColor: string, backgroundColor: 
     if (bgParsed === null || fg === null || isNaN(fg.l)) {
         return userColor;
     }
-    const bgLum = relativeLuminance(bgParsed.rgb());
+    const bgRgb = bgParsed.rgb();
+    const bgLum = relativeLuminance(bgRgb);
     const useDark = bgLum > WCAG_CROSSOVER_LUMINANCE; // dark text on light bg
 
     // Binary-search range:
@@ -287,8 +292,18 @@ export function getAdaptiveLabelColorStrong(userColor: string, backgroundColor: 
     for (let i = 0; i < BINARY_SEARCH_ITERATIONS; i++) {
         const mid = (lo + hi) / 2;
         fg.l = mid;
-        const fgLum = relativeLuminance(fg.rgb());
-        if (contrastRatioFromLuminances(fgLum, bgLum) >= WCAG_AA_CONTRAST_RATIO) {
+        const fgRgb = fg.rgb();
+        // If the user color has alpha < 1, the perceived text is the alpha-composite of fg over bg.
+        // Compute luminance on the composited colour so the contrast check reflects what is rendered.
+        const a = fgRgb.opacity ?? 1;
+        const compR = fgRgb.r * a + bgRgb.r * (1 - a);
+        const compG = fgRgb.g * a + bgRgb.g * (1 - a);
+        const compB = fgRgb.b * a + bgRgb.b * (1 - a);
+        const fgLum =
+            WCAG_RED_COEFF   * linearizeChannel(compR) +
+            WCAG_GREEN_COEFF * linearizeChannel(compG) +
+            WCAG_BLUE_COEFF  * linearizeChannel(compB);
+        if (contrastRatioFromLuminances(fgLum, bgLum) >= WCAG_AA_BINARY_SEARCH_TARGET) {
             // Meets the ratio — can relax toward the user's preferred direction
             if (useDark) lo = mid; else hi = mid;
         } else {
