@@ -319,7 +319,11 @@
                 },
                 "autoContrast": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "value": "Off", "displayNameKey": "Visual_LabelsAutoContrast_Off"    },
+                            { "value": "Soft", "displayNameKey": "Visual_LabelsAutoContrast_Soft"   },
+                            { "value": "Strong",  "displayNameKey": "Visual_LabelsAutoContrast_Strong" }
+                        ]
                     }
                 }
             }

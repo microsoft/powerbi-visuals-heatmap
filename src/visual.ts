@@ -84,7 +84,10 @@ import {
     calculateGridSizeHeight,
     calculateGridSizeWidth,
     CellMaxHeightLimit,
-    getAdaptiveLabelColor,
+    applyAutoContrast,
+    AUTO_CONTRAST_MODE_OFF,
+    AUTO_CONTRAST_MODE_SOFT,
+    AutoContrastMode,
     getXAxisHeight,
     getYAxisHeight,
     getYAxisWidth,
@@ -597,6 +600,10 @@ export class TableHeatMap implements IVisual {
         // Cache adapted colors by (userColor|backgroundColor) key; avoids redundant Lab/HSL
         // conversions for the same background bucket on every label within a single render pass.
         const adaptiveLabelColorCache = new Map<string, string>();
+        // .value → ILocalizedItemMember (selected option); .value.value → the raw EnumMemberValue string.
+        // Legacy boolean migration (false/true) is handled in update() before this point.
+        // Fall back to Soft (the configured default) if the value is somehow absent.
+        const autoContrastMode = (labelSettings.autoContrast.value?.value as AutoContrastMode | undefined) ?? AUTO_CONTRAST_MODE_SOFT;
 
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
             .selectAll(TableHeatMap.ClsHeatMapDataLabels.selectorName)
@@ -613,7 +620,7 @@ export class TableHeatMap implements IVisual {
             .call(this.applyFontStylesToLabels(labelSettings))
             .style("fill", (dataPoint: TableHeatMapDataPoint) => {
                 const userColor: string = labelSettings.fill.value.value;
-                if (!labelSettings.autoContrast?.value) {
+                if (autoContrastMode === AUTO_CONTRAST_MODE_OFF) {
                     return userColor;
                 }
                 const value = dataPoint.value;
@@ -629,7 +636,7 @@ export class TableHeatMap implements IVisual {
                 if (cached !== undefined) {
                     return cached;
                 }
-                const adapted = getAdaptiveLabelColor(userColor, backgroundColor);
+                const adapted = applyAutoContrast(userColor, backgroundColor, autoContrastMode);
                 adaptiveLabelColorCache.set(cacheKey, adapted);
                 return adapted;
             })

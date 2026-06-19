@@ -51,7 +51,14 @@ import {
     ConstGridMinHeight, CellMaxHeightLimit, ConstGridMinWidth, CellMaxWidthFactorLimit,
     getYAxisWidth, getXAxisHeight, getYAxisHeight,
     parseSettings,
-    getAdaptiveLabelColor
+    getAdaptiveLabelColor,
+    getAdaptiveLabelColorStrong,
+    WCAG_AA_CONTRAST_RATIO,
+    wcagContrastRatio,
+    applyAutoContrast,
+    AUTO_CONTRAST_MODE_OFF,
+    AUTO_CONTRAST_MODE_SOFT,
+    AUTO_CONTRAST_MODE_STRONG
 } from "../src/heatmapUtils";
 
 const DefaultTimeout: number = 300;
@@ -1257,14 +1264,14 @@ describe("TableHeatmap", () => {
             });
         });
 
-        describe("toggle: autoContrast OFF", () => {
+        describe("mode: Off", () => {
             it("all labels use the exact user-picked fill color", (done) => {
                 const userColor = "#ff6600";
                 dataView.metadata.objects = {
                     labels: {
                         show: true,
                         fill: { solid: { color: userColor } },
-                        autoContrast: false
+                        autoContrast: "Off"
                     }
                 };
 
@@ -1280,11 +1287,11 @@ describe("TableHeatmap", () => {
             });
         });
 
-        describe("toggle: autoContrast OFF → ON", () => {
+        describe("mode: Soft", () => {
             it("at least one label fill differs from the static user-picked color", (done) => {
                 const userColor = "#888888";
                 dataView.metadata.objects = {
-                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: false }
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Off" }
                 };
 
                 visualBuilder.updateRenderTimeout(dataView, () => {
@@ -1292,7 +1299,7 @@ describe("TableHeatmap", () => {
                         .map(el => getComputedStyle(el)["fill"]);
 
                     dataView.metadata.objects = {
-                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
                     };
 
                     visualBuilder.updateRenderTimeout(dataView, () => {
@@ -1308,7 +1315,7 @@ describe("TableHeatmap", () => {
 
             it("no label has an empty or transparent fill", (done) => {
                 dataView.metadata.objects = {
-                    labels: { show: true, autoContrast: true }
+                    labels: { show: true, autoContrast: "Soft" }
                 };
 
                 visualBuilder.updateRenderTimeout(dataView, () => {
@@ -1324,15 +1331,15 @@ describe("TableHeatmap", () => {
                 }, DefaultTimeout);
             });
 
-            it("toggling back OFF restores the user-picked fill color on all labels", (done) => {
+            it("toggling back to Off restores the user-picked fill color on all labels", (done) => {
                 const userColor = "#3399ff";
                 dataView.metadata.objects = {
-                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
                 };
 
                 visualBuilder.updateRenderTimeout(dataView, () => {
                     dataView.metadata.objects = {
-                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: false }
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Off" }
                     };
 
                     visualBuilder.updateRenderTimeout(dataView, () => {
@@ -1351,7 +1358,7 @@ describe("TableHeatmap", () => {
                 const userColor = "#ff0000";
                 dataView.metadata.objects = {
                     general: { fillNullValuesCells: true },
-                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: true }
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
                 };
                 dataView.categorical!.values![0].values![0] = null;
 
@@ -1367,6 +1374,50 @@ describe("TableHeatmap", () => {
                     done();
                 }, DefaultTimeout);
             });
+        });
+
+        describe("mode: Strong", () => {
+            it("achieves WCAG AA contrast (>=4.5:1) for red on a white background", () => {
+                const result = getAdaptiveLabelColorStrong("#ff0000", "#ffffff");
+                expect(wcagContrastRatio(result, "#ffffff")).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+
+            it("achieves WCAG AA contrast (>=4.5:1) for red on a black background", () => {
+                const result = getAdaptiveLabelColorStrong("#ff0000", "#000000");
+                expect(wcagContrastRatio(result, "#000000")).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+
+            it("Strong guarantees WCAG AA where Soft undershoots (blue on dark gray #555555)", () => {
+                // Soft clamps to HSL l=0.85 → contrast ≈3.6:1 (below AA).
+                // Strong binary-searches higher until 4.5:1 is met.
+                const bg     = "#555555";
+                const soft   = getAdaptiveLabelColor("#0000ff", bg);
+                const strong = getAdaptiveLabelColorStrong("#0000ff", bg);
+                expect(wcagContrastRatio(soft,   bg)!).toBeLessThan(WCAG_AA_CONTRAST_RATIO);
+                expect(wcagContrastRatio(strong, bg)!).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+        });
+
+        describe("applyAutoContrast dispatch", () => {
+            it("Off mode returns the user color unchanged", () => {
+                const userColor = "#e84e1e";
+                expect(applyAutoContrast(userColor, "#ffffff", AUTO_CONTRAST_MODE_OFF)).toBe(userColor);
+            });
+
+            it("Soft mode delegates to getAdaptiveLabelColor", () => {
+                const userColor = "#888888";
+                const bg = "#ffffff";
+                expect(applyAutoContrast(userColor, bg, AUTO_CONTRAST_MODE_SOFT))
+                    .toBe(getAdaptiveLabelColor(userColor, bg));
+            });
+
+            it("Strong mode delegates to getAdaptiveLabelColorStrong", () => {
+                const userColor = "#0000ff";
+                const bg = "#555555";
+                expect(applyAutoContrast(userColor, bg, AUTO_CONTRAST_MODE_STRONG))
+                    .toBe(getAdaptiveLabelColorStrong(userColor, bg));
+            });
+
         });
     });
 });
