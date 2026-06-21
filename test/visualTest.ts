@@ -1437,6 +1437,37 @@ describe("TableHeatmap", () => {
             });
 
         });
+
+        describe("high-contrast theme", () => {
+            it("forces auto-contrast Off, preserving the theme foreground color", (done) => {
+                // Simulate a high-contrast theme by mutating the builder's host palette.
+                // parseSettings will then force labels.fill to the theme foreground; the
+                // isHighContrast guard in renderLabels must prevent auto-contrast from altering it.
+                const themeColor = "#ffff00";
+                const palette = visualBuilder.visualHost.colorPalette;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).isHighContrast = true;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).foreground = { value: themeColor };
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).background = { value: "#000000" };
+
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: "#888888" } }, autoContrast: "Soft" }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    // All labels must keep the exact theme foreground colour — not an adapted variant.
+                    const allMatch = labels.every(el =>
+                        areColorsEqual(getComputedStyle(el)["fill"], themeColor)
+                    );
+                    expect(allMatch).toBeTrue();
+                    done();
+                }, DefaultTimeout);
+            });
+        });
     });
 });
 

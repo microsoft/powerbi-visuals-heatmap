@@ -563,7 +563,7 @@ export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {
     }
 }
 
-export const AUTO_CONTRAST_OPTION_OFF:    ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Off",    value: "Off"    };
+const AUTO_CONTRAST_OPTION_OFF:    ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Off",    value: "Off"    };
 const AUTO_CONTRAST_OPTION_SOFT:   ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Soft",   value: "Soft"   };
 const AUTO_CONTRAST_OPTION_STRONG: ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Strong", value: "Strong" };
 const autoContrastOptions: ILocalizedItemMember[] = [AUTO_CONTRAST_OPTION_OFF, AUTO_CONTRAST_OPTION_SOFT, AUTO_CONTRAST_OPTION_STRONG];

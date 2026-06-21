@@ -602,7 +602,9 @@ export class TableHeatMap implements IVisual {
         const adaptiveLabelColorCache = new Map<string, string>();
         // .value → ILocalizedItemMember (selected option); .value.value → the raw EnumMemberValue string.
         // Fall back to Soft (the configured default) if the value is absent.
-        const autoContrastMode = (labelSettings.autoContrast.value?.value as AutoContrastMode | undefined) ?? AUTO_CONTRAST_MODE_SOFT;
+        const autoContrastMode = this.colorHelper.isHighContrast
+            ? AUTO_CONTRAST_MODE_OFF
+            : ((labelSettings.autoContrast.value?.value as AutoContrastMode | undefined) ?? AUTO_CONTRAST_MODE_SOFT);
 
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
             .selectAll(TableHeatMap.ClsHeatMapDataLabels.selectorName)
