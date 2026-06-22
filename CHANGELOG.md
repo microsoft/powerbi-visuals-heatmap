@@ -4,7 +4,7 @@
 * Added "Invert Color Scale" toggle to reverse the color gradient direction
 * Diverging (three-stop) gradient: new "Gradient middle" toggle and colour picker in the Format pane → General → Custom gradient colors group. When the custom gradient is active, the colour scale interpolates smoothly through the chosen midpoint colour (default: `#767676`). The midpoint uses this default until the user explicitly changes it in the Format pane.
 * Clearer separation between the two colour sources. Colorbrewer and the custom gradient were already mutually exclusive, but the active mode was not obvious in the UI. The custom gradient pickers (start / middle / end) are now disabled in the Format pane while Colorbrewer is enabled, and become editable again when it is turned off, so it is always clear which colour source is driving the visual. The gradient middle is a custom-gradient feature and has no effect while Colorbrewer is on. The "Gradient Colors" group was renamed to "Custom gradient colors".
-* Added Auto-contrast mode to Data labels: when enabled, each label's lightness is automatically clamped to remain legible against its cell background colour while preserving the user-picked hue and saturation.
+* Added Auto-contrast mode to Data labels: when enabled, each label's lightness is automatically clamped to remain legible against its cell background colour while preserving the user-picked hue and saturation.
 
 ### Bug fixes
 * Fixed "Invert Color Scale" and gradient middle colour not being neutralized in high-contrast mode; both features are now automatically disabled when the Power BI high-contrast theme is active to preserve accessibility contrast requirements.
