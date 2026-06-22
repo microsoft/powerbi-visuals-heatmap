@@ -232,7 +232,7 @@ function contrastRatioFromLuminances(l1: number, l2: number): number {
 }
 
 /**
- * Returns the WCAG 2.x contrast ratio between two CSS colour strings,
+ * Returns the WCAG 2.x contrast ratio between two CSS colour strings (treated as opaque; alpha is ignored),
  * or `null` if either is invalid/unparseable.
  */
 export function wcagContrastRatio(color1: string, color2: string): number | null {
