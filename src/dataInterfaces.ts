@@ -39,6 +39,7 @@ type Quantile<T> = ScaleQuantile<T>;
 
 import IValueFormatter = valueFormatter.IValueFormatter;
 import { SettingsModel } from "./settings";
+
 export interface TableHeatMapDataPoint extends ISelectableDataPoint, TooltipEnabledDataPoint {
     categoryX: powerbi.PrimitiveValue;
     categoryY: powerbi.PrimitiveValue;

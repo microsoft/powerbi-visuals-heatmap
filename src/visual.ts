@@ -75,6 +75,7 @@ import {
 
 import {
     BaseLabelCardSettings,
+    DataLabelsCardSettings,
     SettingsModel,
     colorbrewer
 } from "./settings";
@@ -83,6 +84,10 @@ import {
     calculateGridSizeHeight,
     calculateGridSizeWidth,
     CellMaxHeightLimit,
+    applyAutoContrast,
+    AUTO_CONTRAST_MODE_OFF,
+    AUTO_CONTRAST_MODE_SOFT,
+    AutoContrastMode,
     getXAxisHeight,
     getYAxisHeight,
     getYAxisWidth,
@@ -577,7 +582,7 @@ export class TableHeatMap implements IVisual {
 
     private renderLabels(renderOptions: IRenderOptions): Selection<TableHeatMapDataPoint> {
         const { chartData, settingsModel, xOffset, yOffset, gridSizeHeight, gridSizeWidth } = renderOptions;
-        const labelSettings: BaseLabelCardSettings = settingsModel.labels;
+        const labelSettings: DataLabelsCardSettings = settingsModel.labels;
 
         const maxDataText = chartData.dataPoints.reduce((max: string, dp: TableHeatMapDataPoint) => {
             const val = dp.valueStr || "";
@@ -592,6 +597,15 @@ export class TableHeatMap implements IVisual {
 
         const textRect: SVGRect = textMeasurementService.measureSvgTextRect(textProperties);
 
+        // Cache adapted colors by (userColor|backgroundColor) key; avoids redundant Lab/HSL
+        // conversions for the same background bucket on every label within a single render pass.
+        const adaptiveLabelColorCache = new Map<string, string>();
+        // .value → ILocalizedItemMember (selected option); .value.value → the raw EnumMemberValue string.
+        // Fall back to Soft (the configured default) if the value is absent.
+        const autoContrastMode = this.colorHelper.isHighContrast
+            ? AUTO_CONTRAST_MODE_OFF
+            : ((labelSettings.autoContrast.value?.value as AutoContrastMode | undefined) ?? AUTO_CONTRAST_MODE_SOFT);
+
         const heatMapDataLables: Selection<TableHeatMapDataPoint> = this.mainGraphics
             .selectAll(TableHeatMap.ClsHeatMapDataLabels.selectorName)
             .data(chartData.dataPoints)
@@ -605,7 +619,28 @@ export class TableHeatMap implements IVisual {
             })
             .style("text-anchor", TableHeatMap.ConstMiddle)
             .call(this.applyFontStylesToLabels(labelSettings))
-            .style("fill", labelSettings.fill.value.value)
+            .style("fill", (dataPoint: TableHeatMapDataPoint) => {
+                const userColor: string = labelSettings.fill.value.value;
+                if (autoContrastMode === AUTO_CONTRAST_MODE_OFF) {
+                    return userColor;
+                }
+                const value = dataPoint.value;
+                if (typeof value !== "number" || !isFinite(value)) {
+                    return userColor;
+                }
+                const backgroundColor: string = renderOptions.colorScale(value);
+                if (!backgroundColor) {
+                    return userColor;
+                }
+                const cacheKey = `${userColor}|${backgroundColor}`;
+                const cached = adaptiveLabelColorCache.get(cacheKey);
+                if (cached !== undefined) {
+                    return cached;
+                }
+                const adapted = applyAutoContrast(userColor, backgroundColor, autoContrastMode);
+                adaptiveLabelColorCache.set(cacheKey, adapted);
+                return adapted;
+            })
             .text((dataPoint: TableHeatMapDataPoint) => {
                 let textValue: string = valueFormatter.format(dataPoint.value);
                 textProperties.text = textValue;

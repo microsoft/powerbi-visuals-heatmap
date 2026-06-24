@@ -45,12 +45,20 @@ import { ColorHelper } from "powerbi-visuals-utils-colorutils";
 import { TableHeatMapChartData } from "../src/dataInterfaces";
 import { colorbrewer, GeneralSettings, SettingsModel } from "../src/settings";
 import {
-    getOpacity, DimmedOpacity, DefaultOpacity, DimmedColor,
+    getOpacity, DIMMED_OPACITY, DEFAULT_OPACITY, DIMMED_COLOR,
     isDataViewValid, textLimit,
     calculateGridSizeHeight, calculateGridSizeWidth,
     ConstGridMinHeight, CellMaxHeightLimit, ConstGridMinWidth, CellMaxWidthFactorLimit,
     getYAxisWidth, getXAxisHeight, getYAxisHeight,
-    parseSettings
+    parseSettings,
+    getAdaptiveLabelColor,
+    getAdaptiveLabelColorStrong,
+    WCAG_AA_CONTRAST_RATIO,
+    wcagContrastRatio,
+    applyAutoContrast,
+    AUTO_CONTRAST_MODE_OFF,
+    AUTO_CONTRAST_MODE_SOFT,
+    AUTO_CONTRAST_MODE_STRONG
 } from "../src/heatmapUtils";
 
 const DefaultTimeout: number = 300;
@@ -1044,23 +1052,23 @@ describe("TableHeatmap", () => {
 
     describe("utils:getOpacity", () => {
         it("returns DefaultOpacity when no selection or highlights are active", () => {
-            expect(getOpacity(false, false, false, false)).toBe(DefaultOpacity);
+            expect(getOpacity(false, false, false, false)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DefaultOpacity for a selected element when selection is active", () => {
-            expect(getOpacity(true, false, true, false)).toBe(DefaultOpacity);
+            expect(getOpacity(true, false, true, false)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DimmedOpacity for an unselected element when selection is active", () => {
-            expect(getOpacity(false, false, true, false)).toBe(DimmedOpacity);
+            expect(getOpacity(false, false, true, false)).toBe(DIMMED_OPACITY);
         });
 
         it("returns DefaultOpacity for a highlighted element when partial highlights are active", () => {
-            expect(getOpacity(false, true, false, true)).toBe(DefaultOpacity);
+            expect(getOpacity(false, true, false, true)).toBe(DEFAULT_OPACITY);
         });
 
         it("returns DimmedOpacity for a non-highlighted element when partial highlights are active", () => {
-            expect(getOpacity(false, false, false, true)).toBe(DimmedOpacity);
+            expect(getOpacity(false, false, false, true)).toBe(DIMMED_OPACITY);
         });
     });
 
@@ -1207,7 +1215,257 @@ describe("TableHeatmap", () => {
 
         describe("DimmedColor", () => {
             it("is 'black'", () => {
-                expect(DimmedColor).toBe("black");
+                expect(DIMMED_COLOR).toBe("black");
+            });
+        });
+    });
+
+    describe("Data labels auto-contrast", () => {
+        describe("utils:getAdaptiveLabelColor", () => {
+            it("returns a darker color for a light background", () => {
+                const result = getAdaptiveLabelColor("#ff0000", "#ffffff");
+                const { R, G, B } = parseColorString(result);
+                // Lab lightness of #ffffff ≈ 100 > 60 → clamp HSL l to 0.2 → dark label
+                expect(R + G + B).toBeLessThan(3 * 128);
+            });
+
+            it("returns a lighter color for a dark background", () => {
+                const result = getAdaptiveLabelColor("#ff0000", "#000000");
+                const { R, G, B } = parseColorString(result);
+                // Lab lightness of #000000 ≈ 0 ≤ 60 → clamp HSL l to 0.85 → light label
+                expect(R + G + B).toBeGreaterThan(3 * 128);
+            });
+
+            it("preserves the red hue of the user-picked color on a light background", () => {
+                const { R, G, B } = parseColorString(getAdaptiveLabelColor("#ff0000", "#ffffff"));
+                expect(R).toBeGreaterThan(G);
+                expect(R).toBeGreaterThan(B);
+            });
+
+            it("preserves the red hue of the user-picked color on a dark background", () => {
+                const { R, G, B } = parseColorString(getAdaptiveLabelColor("#ff0000", "#000000"));
+                expect(R).toBeGreaterThan(G);
+                expect(R).toBeGreaterThan(B);
+            });
+
+            it("returns the userColor unchanged when backgroundColor is invalid", () => {
+                expect(getAdaptiveLabelColor("#ff0000", "not-a-color")).toBe("#ff0000");
+            });
+
+            it("returns the userColor unchanged when userColor is invalid", () => {
+                expect(getAdaptiveLabelColor("not-a-color", "#ffffff")).toBe("not-a-color");
+            });
+
+            it("preserves user-specified alpha/opacity in the output color", () => {
+                // Semi-transparent red on a light background — lightness is clamped but alpha must survive.
+                const result = getAdaptiveLabelColor("rgba(136, 0, 0, 0.5)", "#ffffff");
+                // formatRgb() emits rgba(r, g, b, a) when opacity < 1
+                expect(result).toMatch(/rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\.5\s*\)/);
+            });
+        });
+
+        describe("mode: Off", () => {
+            it("all labels use the exact user-picked fill color", (done) => {
+                const userColor = "#ff6600";
+                dataView.metadata.objects = {
+                    labels: {
+                        show: true,
+                        fill: { solid: { color: userColor } },
+                        autoContrast: "Off"
+                    }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const allMatch = labels.every(el =>
+                        areColorsEqual(getComputedStyle(el)["fill"], userColor)
+                    );
+                    expect(allMatch).toBeTrue();
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("mode: Soft", () => {
+            it("at least one label fill differs from the static user-picked color", (done) => {
+                const userColor = "#888888";
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Off" }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const staticFills = Array.from(document.querySelectorAll(".heatMapDataLabels"))
+                        .map(el => getComputedStyle(el)["fill"]);
+
+                    dataView.metadata.objects = {
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
+                    };
+
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const adaptedFills = Array.from(document.querySelectorAll(".heatMapDataLabels"))
+                            .map(el => getComputedStyle(el)["fill"]);
+                        const staticSet = new Set(staticFills.map(colorKey));
+                        const newColors = adaptedFills.map(colorKey).filter(k => !staticSet.has(k));
+                        expect(newColors.length).toBeGreaterThan(0);
+                        done();
+                    }, DefaultTimeout);
+                }, DefaultTimeout);
+            });
+
+            it("no label has an empty or transparent fill", (done) => {
+                dataView.metadata.objects = {
+                    labels: { show: true, autoContrast: "Soft" }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const hasEmptyFill = labels.some(el => {
+                        const fill = getComputedStyle(el)["fill"];
+                        if (!fill || fill === "none" || fill === "transparent") return true;
+                        return /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(fill);
+                    });
+                    expect(hasEmptyFill).toBeFalse();
+                    done();
+                }, DefaultTimeout);
+            });
+
+            it("toggling back to Off restores the user-picked fill color on all labels", (done) => {
+                const userColor = "#3399ff";
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    dataView.metadata.objects = {
+                        labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Off" }
+                    };
+
+                    visualBuilder.updateRenderTimeout(dataView, () => {
+                        const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                        expect(labels.length).toBeGreaterThan(0);
+                        const allMatch = labels.every(el =>
+                            areColorsEqual(getComputedStyle(el)["fill"], userColor)
+                        );
+                        expect(allMatch).toBeTrue();
+                        done();
+                    }, DefaultTimeout);
+                }, DefaultTimeout);
+            });
+
+            it("null-value cell label falls back to user color without an empty fill", (done) => {
+                const userColor = "#ff0000";
+                dataView.metadata.objects = {
+                    general: { fillNullValuesCells: true },
+                    labels: { show: true, fill: { solid: { color: userColor } }, autoContrast: "Soft" }
+                };
+                dataView.categorical!.values![0].values![0] = null;
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    const hasEmptyFill = labels.some(el => {
+                        const fill = getComputedStyle(el)["fill"];
+                        if (!fill || fill === "none" || fill === "transparent") return true;
+                        return /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)/.test(fill);
+                    });
+                    expect(hasEmptyFill).toBeFalse();
+                    done();
+                }, DefaultTimeout);
+            });
+        });
+
+        describe("mode: Strong", () => {
+            it("achieves WCAG AA contrast (>=4.5:1) for red on a white background", () => {
+                const result = getAdaptiveLabelColorStrong("#ff0000", "#ffffff");
+                expect(wcagContrastRatio(result, "#ffffff")).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+
+            it("achieves WCAG AA contrast (>=4.5:1) for red on a black background", () => {
+                const result = getAdaptiveLabelColorStrong("#ff0000", "#000000");
+                expect(wcagContrastRatio(result, "#000000")).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+
+            it("Strong guarantees WCAG AA where Soft undershoots (blue on dark gray #555555)", () => {
+                // Soft clamps to HSL l=0.85 → contrast ≈3.6:1 (below AA).
+                // Strong binary-searches higher until 4.5:1 is met.
+                const bg     = "#555555";
+                const soft   = getAdaptiveLabelColor("#0000ff", bg);
+                const strong = getAdaptiveLabelColorStrong("#0000ff", bg);
+                expect(wcagContrastRatio(soft,   bg)!).toBeLessThan(WCAG_AA_CONTRAST_RATIO);
+                expect(wcagContrastRatio(strong, bg)!).toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+
+            it("Strong achieves WCAG AA for semi-transparent user color (alpha-compositing test)", () => {
+                // rgba(0,0,255,0.8) on #444444: at LIGHT_LABEL_LIGHTNESS (~0.85) the opaque blue just
+                // passes AA (~5.0:1), but the alpha-composited result drops to ~3.8:1 — below AA.
+                // The fix must composite fg over bg before checking so the search settles higher.
+                const bg = "#444444";
+                const bgR = 0x44, bgG = 0x44, bgB = 0x44;
+                const result = getAdaptiveLabelColorStrong("rgba(0, 0, 255, 0.8)", bg);
+                // Parse the returned rgba(r,g,b,a) — formatRgb() emits 'rgba(...)' when opacity<1.
+                const match = result.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                expect(match).not.toBeNull();
+                const a     = match![4] !== undefined ? parseFloat(match![4]) : 1;
+                const compR = Math.round(parseInt(match![1]) * a + bgR * (1 - a));
+                const compG = Math.round(parseInt(match![2]) * a + bgG * (1 - a));
+                const compB = Math.round(parseInt(match![3]) * a + bgB * (1 - a));
+                expect(wcagContrastRatio(`rgb(${compR}, ${compG}, ${compB})`, bg))
+                    .toBeGreaterThanOrEqual(WCAG_AA_CONTRAST_RATIO);
+            });
+        });
+
+        describe("applyAutoContrast dispatch", () => {
+            it("Off mode returns the user color unchanged", () => {
+                const userColor = "#e84e1e";
+                expect(applyAutoContrast(userColor, "#ffffff", AUTO_CONTRAST_MODE_OFF)).toBe(userColor);
+            });
+
+            it("Soft mode delegates to getAdaptiveLabelColor", () => {
+                const userColor = "#888888";
+                const bg = "#ffffff";
+                expect(applyAutoContrast(userColor, bg, AUTO_CONTRAST_MODE_SOFT))
+                    .toBe(getAdaptiveLabelColor(userColor, bg));
+            });
+
+            it("Strong mode delegates to getAdaptiveLabelColorStrong", () => {
+                const userColor = "#0000ff";
+                const bg = "#555555";
+                expect(applyAutoContrast(userColor, bg, AUTO_CONTRAST_MODE_STRONG))
+                    .toBe(getAdaptiveLabelColorStrong(userColor, bg));
+            });
+
+        });
+
+        describe("high-contrast theme", () => {
+            it("forces auto-contrast Off, preserving the theme foreground color", (done) => {
+                // Simulate a high-contrast theme by mutating the builder's host palette.
+                // parseSettings will then force labels.fill to the theme foreground; the
+                // isHighContrast guard in renderLabels must prevent auto-contrast from altering it.
+                const themeColor = "#ffff00";
+                const palette = visualBuilder.visualHost.colorPalette;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).isHighContrast = true;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).foreground = { value: themeColor };
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (palette as any).background = { value: "#000000" };
+
+                dataView.metadata.objects = {
+                    labels: { show: true, fill: { solid: { color: "#888888" } }, autoContrast: "Soft" }
+                };
+
+                visualBuilder.updateRenderTimeout(dataView, () => {
+                    const labels = Array.from(document.querySelectorAll(".heatMapDataLabels"));
+                    expect(labels.length).toBeGreaterThan(0);
+                    // All labels must keep the exact theme foreground colour — not an adapted variant.
+                    const allMatch = labels.every(el =>
+                        areColorsEqual(getComputedStyle(el)["fill"], themeColor)
+                    );
+                    expect(allMatch).toBeTrue();
+                    done();
+                }, DefaultTimeout);
             });
         });
     });

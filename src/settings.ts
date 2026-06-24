@@ -23,7 +23,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
-import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
+import { formattingSettings, formattingSettingsInterfaces } from "powerbi-visuals-utils-formattingmodel";
+type ILocalizedItemMember = formattingSettingsInterfaces.ILocalizedItemMember;
 
 import FormattingSettingsSimpleCard = formattingSettings.SimpleCard;
 import FormattingSettingsCompositeCard = formattingSettings.CompositeCard;
@@ -562,6 +563,25 @@ export class BaseLabelCardSettings extends FormattingSettingsSimpleCard {
     }
 }
 
+const AUTO_CONTRAST_OPTION_OFF:    ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Off",    value: "Off"    };
+const AUTO_CONTRAST_OPTION_SOFT:   ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Soft",   value: "Soft"   };
+const AUTO_CONTRAST_OPTION_STRONG: ILocalizedItemMember = { displayNameKey: "Visual_LabelsAutoContrast_Strong", value: "Strong" };
+const autoContrastOptions: ILocalizedItemMember[] = [AUTO_CONTRAST_OPTION_OFF, AUTO_CONTRAST_OPTION_SOFT, AUTO_CONTRAST_OPTION_STRONG];
+
+export class DataLabelsCardSettings extends BaseLabelCardSettings {
+    public autoContrast = new formattingSettings.ItemDropdown({
+        name: "autoContrast",
+        displayNameKey: "Visual_LabelsAutoContrast",
+        items: autoContrastOptions,
+        value: AUTO_CONTRAST_OPTION_SOFT, // default: Soft
+    });
+
+    constructor(name: string, displayNameKey: string, isShown: boolean = true) {
+        super(name, displayNameKey, isShown);
+        this.slices = [this.font, this.fill, this.autoContrast];
+    }
+}
+
 export class YAxisLabelsSettings extends BaseLabelCardSettings {
     private static TextSymbolMinValue: number = 0;
     private static TextSymbolMaxValue: number = 50;
@@ -587,7 +607,7 @@ export class YAxisLabelsSettings extends BaseLabelCardSettings {
 }
 
 export class SettingsModel extends FormattingSettingsModel {
-    public labels: BaseLabelCardSettings = new BaseLabelCardSettings("labels", "Visual_DataLabels", false);
+    public labels: DataLabelsCardSettings = new DataLabelsCardSettings("labels", "Visual_DataLabels", false);
     public xAxisLabels: BaseLabelCardSettings = new BaseLabelCardSettings("xAxisLabels", "Visual_XAxis");
     public yAxisLabels: YAxisLabelsSettings = new YAxisLabelsSettings("yAxisLabels", "Visual_YAxis");
     public general: GeneralSettings = new GeneralSettings();
