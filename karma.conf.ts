@@ -92,19 +92,6 @@ module.exports = (config: import("karma").Config) => {
                 }
             }
         },
-        coverageReporter: {
-            dir: path.join(__dirname, coverageFolder),
-            reporters: [
-                // reporters not supporting the `file` property
-                { type: 'html', subdir: 'html-report' },
-                { type: 'lcov', subdir: 'lcov' },
-                // reporters supporting the `file` property, use `subdir` to directly
-                // output them in the `dir` directory
-                { type: 'cobertura', subdir: '.', file: 'cobertura-coverage.xml' },
-                { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
-                { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
-            ]
-        },
         mime: {
             "text/x-typescript": ["ts", "tsx"]
         },
