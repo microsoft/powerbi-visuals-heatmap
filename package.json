@@ -25,6 +25,7 @@
     "powerbi-visuals-utils-typeutils": "^6.0.3"
   },
   "devDependencies": {
+    "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "@types/d3-array": "^3.2.1",
     "@types/d3-color": "^3.1.0",
     "@types/d3-scale": "^4.0.9",

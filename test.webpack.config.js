@@ -16,6 +16,16 @@ module.exports = {
                 exclude: /node_modules/
             },
             {
+                test: /\.tsx?$/,
+                use: {
+                    loader: '@jsdevtools/coverage-istanbul-loader',
+                    options: { esModules: true }
+                },
+                enforce: 'post',
+                include: /src/,
+                exclude: /node_modules/
+            },
+            {
                 test: /\.less$/,
                 use: [
                     {
