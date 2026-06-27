@@ -27,7 +27,6 @@
 "use strict";
 
 const webpackConfig = require("./test.webpack.config.js");
-const tsconfig = require("./test.tsconfig.json");
 const path = require("path");
 
 const testRecursivePath = "test/visualTest.ts";
@@ -36,9 +35,10 @@ const coverageFolder = "coverage";
 
 process.env.CHROME_BIN = require("playwright-chromium").chromium.executablePath();
 
-module.exports = (config) => {
-    config.set({
-        mode: "development",
+module.exports = (config: import("karma").Config) => {
+    // Plugin-specific keys (junitReporter, coverageIstanbulReporter, webpackMiddleware, etc.)
+    // are not part of @types/karma ConfigOptions, so we use a typed extension.
+    const options: import("karma").ConfigOptions & Record<string, unknown> = {
         browserNoActivityTimeout: 100000,
         browsers: ["ChromeHeadless"],
         colors: true,
@@ -71,9 +71,6 @@ module.exports = (config) => {
         preprocessors: {
             [testRecursivePath]: ["webpack"]
         },
-        typescriptPreprocessor: {
-            options: tsconfig.compilerOptions
-        },
         coverageIstanbulReporter: {
             reports: ["html", "lcovonly", "text-summary", "cobertura"],
             dir: path.join(__dirname, coverageFolder),
@@ -84,20 +81,15 @@ module.exports = (config) => {
             },
             combineBrowserReports: true,
             fixWebpackSourcePaths: true,
-            verbose: false
-        },
-        coverageReporter: {
-            dir: path.join(__dirname, coverageFolder),
-            reporters: [
-                // reporters not supporting the `file` property
-                { type: 'html', subdir: 'html-report' },
-                { type: 'lcov', subdir: 'lcov' },
-                // reporters supporting the `file` property, use `subdir` to directly
-                // output them in the `dir` directory
-                { type: 'cobertura', subdir: '.', file: 'cobertura-coverage.xml' },
-                { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
-                { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
-            ]
+            verbose: false,
+            thresholds: {
+                global: {
+                    statements: 85,
+                    branches: 75,
+                    functions: 85,
+                    lines: 85
+                }
+            }
         },
         mime: {
             "text/x-typescript": ["ts", "tsx"]
@@ -106,5 +98,6 @@ module.exports = (config) => {
         webpackMiddleware: {
             stats: "errors-only"
         }
-    });
+    };
+    config.set(options as import("karma").ConfigOptions);
 };
